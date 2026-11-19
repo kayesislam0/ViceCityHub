@@ -319,8 +319,7 @@
     });
     $('alias-copy').addEventListener('click', function () {
       var a = alias();
-      var when = fmtTime(myUnlock());
-      copy('My Leonida street name: ' + a.name + '. ' + a.known + ' My unlock: ' + when + ', my time. Get yours: ' + SITE).then(
+      copy('My Leonida street name: ' + a.name + '. ' + a.known + ' Get yours: ' + SITE).then(
         function () { toast('Street name copied. Drop it in the group chat.'); },
         function () { toast('Copy is blocked here. Select the name to copy it.'); });
     });
