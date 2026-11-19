@@ -11,18 +11,57 @@
   }
 
   // Our own sketch. Rockstar places Mount Kalaga on the northern border and Ambrosia in the heart of Leonida; the
-  // other positions (Port Gellhorn west, Vice City southeast, Grassrivers southwest, the Keys south) follow fan maps. viewBox 600 x 740. Order matches the list in index.html.
+  // other positions (Port Gellhorn west, Vice City southeast, Grassrivers southwest, the Keys south) follow fan maps.
+  // viewBox 600 x 740. Every border is drawn once as an edge, smoothed into curves, and shared by the regions on both
+  // sides, so neighbours always meet exactly. Coast edges carry more points so the shoreline wanders a little.
+  var EDGES = {
+    kWest:  [[150, 150], [100, 150], [62, 140], [44, 104], [30, 62]],
+    kNorth: [[30, 62], [190, 50], [360, 56], [562, 50]],
+    kEast:  [[562, 50], [566, 150]],
+    kV:     [[566, 150], [470, 166], [360, 176]],
+    kA:     [[360, 176], [305, 166], [250, 170]],
+    kG:     [[250, 170], [200, 166], [150, 150]],
+    gA:     [[250, 170], [296, 236], [290, 330]],
+    gGr:    [[290, 330], [268, 352], [250, 360]],
+    gCoast: [[250, 360], [234, 334], [214, 298], [196, 258], [176, 228], [140, 196], [128, 174], [150, 150]],
+    aV:     [[360, 176], [418, 232], [430, 340]],
+    aGr:    [[430, 340], [376, 398], [290, 330]],
+    vGr:    [[430, 340], [452, 450], [486, 556], [544, 556]],
+    vCoast: [[566, 150], [580, 222], [570, 300], [582, 372], [562, 440], [558, 500], [544, 556]],
+    grCoast:[[544, 556], [506, 604], [458, 626], [410, 620], [368, 612], [332, 590], [304, 558], [290, 520], [276, 482], [264, 440], [250, 360]]
+  };
+  // Catmull-Rom through an edge's points, as cubic Bezier segments [start, c1, c2, end]; the ends stay fixed.
+  function curve(pts) {
+    var segs = [];
+    for (var i = 0; i < pts.length - 1; i++) {
+      var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || pts[i + 1];
+      segs.push([p1, [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6], p2]);
+    }
+    return segs;
+  }
+  function r1(n) { return Math.round(n * 10) / 10; }
+  // A region is a loop of edges; a leading "-" walks that edge backwards.
+  function outline(names) {
+    var d = '';
+    names.forEach(function (nm, k) {
+      var back = nm.charAt(0) === '-', segs = curve(EDGES[back ? nm.slice(1) : nm]);
+      if (back) segs = segs.reverse().map(function (s) { return [s[3], s[2], s[1], s[0]]; });
+      if (!k) d += 'M' + r1(segs[0][0][0]) + ' ' + r1(segs[0][0][1]);
+      segs.forEach(function (s) { d += 'C' + [s[1], s[2], s[3]].map(function (p) { return r1(p[0]) + ' ' + r1(p[1]); }).join(' '); });
+    });
+    return d + 'Z';
+  }
   var REGIONS = [
     { id: 'kalaga', name: 'Mount Kalaga', full: 'Mount Kalaga National Park', label: [300, 104],
-      d: 'M30 62L190 48L360 56L562 50L566 150L470 168L360 176L250 170L150 150L60 142Z' },
+      d: outline(['kWest', 'kNorth', 'kEast', 'kV', 'kA', 'kG']) },
     { id: 'gellhorn', name: 'Port Gellhorn', full: 'Port Gellhorn', label: [212, 238], two: true,
-      d: 'M150 150L250 170L300 230L290 330L250 360L218 300L184 236L128 178Z' },
+      d: outline(['-kG', 'gA', 'gGr', 'gCoast']) },
     { id: 'ambrosia', name: 'Ambrosia', full: 'Ambrosia', label: [345, 228],
-      d: 'M250 170L360 176L420 230L430 340L370 400L290 330L300 230Z' },
+      d: outline(['-kA', 'aV', 'aGr', '-gA']) },
     { id: 'vice', name: 'Vice City', full: 'Vice City', label: [505, 318],
-      d: 'M360 176L470 168L566 150L572 300L562 440L544 556L482 560L452 450L430 340L420 230Z' },
+      d: outline(['-kV', 'vCoast', '-vGr', '-aV']) },
     { id: 'grass', name: 'Grassrivers', full: 'Grassrivers', label: [384, 506],
-      d: 'M250 360L290 330L370 400L430 340L452 450L482 560L544 556L502 608L412 622L332 592L292 522L266 440Z' },
+      d: outline(['-gGr', '-aGr', 'vGr', 'grCoast']) },
     { id: 'keys', name: 'Leonida Keys', full: 'Leonida Keys', label: [190, 690],
       hit: 'M112 642L512 628L516 724L112 724Z',
       d: ellipse(474, 652, 28, 10) + ellipse(424, 672, 24, 9) + ellipse(376, 688, 22, 9) + ellipse(328, 699, 20, 8) + ellipse(282, 707, 18, 8) }
@@ -31,11 +70,11 @@
 
   var THEMES = {
     night:   { bg: '#0E1311', bg2: '#0E1311', sea: '#10232A', grid: 'rgba(244,241,234,.06)', ink: '#F4F1EA', ink2: '#B4BDB8', accent: '#FF5FA2', edge: '#0E1311',
-               fill: ['#26302B', '#3E2B40', '#5E2F55', '#7D3B62'], onFull: '#0E1311', lake: '#10232A', darkFrom: 4, done: '#FFC35A' },
+               fill: ['#26302B', '#3E2B40', '#5E2F55', '#7D3B62'], onFull: '#0E1311', lake: '#10232A', darkFrom: 4, done: '#FFC35A', line: 'rgba(244,241,234,.14)' },
     sunset:  { bg: '#2A0F22', bg2: '#5E1F2C', sea: '#3A1630', grid: 'rgba(255,214,170,.07)', ink: '#FFF3E4', ink2: '#F2C9B0', accent: '#FFC35A', edge: '#2A0F22',
-               fill: ['#47243A', '#8A3A3E', '#D46A3C', '#FFC35A'], onFull: '#2A0F22', lake: '#3A1630', darkFrom: 3, done: '#FFF3E4' },
+               fill: ['#47243A', '#8A3A3E', '#D46A3C', '#FFC35A'], onFull: '#2A0F22', lake: '#3A1630', darkFrom: 3, done: '#FFF3E4', line: 'rgba(255,243,228,.16)' },
     highway: { bg: '#0B6B3A', bg2: '#0B6B3A', sea: '#095A31', grid: 'rgba(255,255,255,.07)', ink: '#FFFFFF', ink2: '#D6EEDF', accent: '#FFFFFF', edge: '#0B6B3A',
-               fill: ['#0F7F46', '#3E9A68', '#9FCDB2', '#FFFFFF'], onFull: '#0B6B3A', lake: '#095A31', darkFrom: 2, done: '#FFC35A' }
+               fill: ['#0F7F46', '#3E9A68', '#9FCDB2', '#FFFFFF'], onFull: '#0B6B3A', lake: '#095A31', darkFrom: 2, done: '#FFC35A', line: 'rgba(255,255,255,.2)' }
   };
   // Dusk to deep berry: each step reads as progress, and a finished region is calm to look at, with a gold edge as the reward.
   var MAP_FILL = ['#26302B', '#3E2B40', '#5E2F55', '#7D3B62'];
@@ -58,7 +97,50 @@
   function score() { return pctOf(steps()); }
   function visited() { return levels.filter(function (l) { return l > 0; }).length; }
   function rankIndex(n) { var r = 0; RANKS.forEach(function (x, i) { if (n >= x[0]) r = i; }); return r; }
-  function rank(n) { return RANKS[rankIndex(n === undefined ? steps() : n)][1]; }
+  function rank(n) { return tr(RANKS[rankIndex(n === undefined ? steps() : n)][1]); }
+
+  // ---- language: English by default; Spanish and Portuguese from ?lang=, a saved choice, or the browser ----
+  var DICT = window.VCH_I18N || {};
+  var LANG = (function () {
+    var q = '';
+    try { q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase(); } catch (e) { /* old browser */ }
+    var saved = load('vch.lang', '');
+    var nav = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').slice(0, 2).toLowerCase();
+    var pick = [q, saved, nav].filter(function (l) { return l === 'en' || DICT[l]; })[0] || 'en';
+    if (q && (q === 'en' || DICT[q])) save('vch.lang', q);
+    return pick;
+  })();
+  function tr(en, vars) {
+    var out = (LANG !== 'en' && DICT[LANG] && DICT[LANG][en]) || en;
+    if (vars) for (var k in vars) out = out.split('{' + k + '}').join(vars[k]);
+    return out;
+  }
+  // Swap the page's own English text for the chosen language: text nodes, then labels and placeholders.
+  // A label like "Vice City: Explored" is translated part by part.
+  function translatePage() {
+    document.documentElement.lang = LANG;
+    if (LANG === 'en') return;
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), n, todo = [];
+    while ((n = w.nextNode())) todo.push(n);
+    todo.forEach(function (node) {
+      var raw = node.textContent, key = raw.replace(/\s+/g, ' ').trim();
+      if (!key || !DICT[LANG][key]) return;
+      node.textContent = raw.replace(raw.trim(), DICT[LANG][key]);
+    });
+    ['aria-label', 'placeholder', 'alt'].forEach(function (attr) {
+      document.querySelectorAll('[' + attr + ']').forEach(function (e) {
+        var v = e.getAttribute(attr);
+        e.setAttribute(attr, v.split(': ').map(function (part) { return tr(part); }).join(': '));
+      });
+    });
+    var tt = DICT[LANG]['@title']; if (tt) document.title = tt;
+  }
+  function bindLang() {
+    document.querySelectorAll('[data-lang]').forEach(function (a) {
+      if (a.getAttribute('data-lang') === LANG) a.setAttribute('aria-current', 'true');
+      a.addEventListener('click', function () { save('vch.lang', a.getAttribute('data-lang')); });
+    });
+  }
 
   var $ = function (id) { return document.getElementById(id); };
   var SVGNS = 'http://www.w3.org/2000/svg';
@@ -111,12 +193,17 @@
       if (r.hit) el('path', { d: r.hit, class: 'hit' }, g);
       g.addEventListener('click', function () { deeper(i); });
       g.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); deeper(i); }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); deeper(i); return; }
+        // Arrow keys walk the regions in list order; Home and End jump to the first and last. Tab order is unchanged.
+        var to = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: REGIONS.length - 1 }[e.key];
+        if (to === undefined) return;
+        e.preventDefault();
+        groups[(to + REGIONS.length) % REGIONS.length].focus();
       });
       groups.push(g);
     });
     lakeEl = el('path', { d: LAKE, fill: '#0F1F25', stroke: '#0E1311', 'stroke-width': 3, 'pointer-events': 'none' }, svg);
-    el('text', { x: 368, y: 300, 'text-anchor': 'middle', fill: '#8FB3BF', 'font-size': 12, 'font-family': 'DM Sans, sans-serif', 'font-weight': 600, 'pointer-events': 'none' }, svg).textContent = 'Lake';
+    el('text', { x: 368, y: 300, 'text-anchor': 'middle', fill: '#8FB3BF', 'font-size': 12, 'font-family': 'DM Sans, sans-serif', 'font-weight': 600, 'pointer-events': 'none' }, svg).textContent = tr('Lake');
     routeG = el('g', { 'pointer-events': 'none' }, svg);
     // Names sit above the route, so the dotted line never runs through a label.
     REGIONS.forEach(function (r) {
@@ -161,7 +248,7 @@
 
   // A map tap goes one step deeper and stops at 100%, so a stray tap never wipes a finished region.
   function deeper(i) {
-    if (levels[i] === 3) { toast(REGIONS[i].full + ' is already 100%. To lower it, use the list.'); return; }
+    if (levels[i] === 3) { toast(tr('{name} is already 100%. To lower it, use the list.', { name: REGIONS[i].full })); return; }
     setLevel(i, levels[i] + 1);
   }
 
@@ -175,7 +262,7 @@
     var after = steps();
     if (rankIndex(after) > rankIndex(before)) {
       buzz();
-      toast(after === 18 ? 'Rank up: Leonida legend. You have seen it all.' : 'Rank up: ' + rank(after) + '. ' + score() + '% of Leonida seen.');
+      toast(after === 18 ? tr('Rank up: Leonida legend. You have seen it all.') : tr('Rank up: {rank}. {n}% of Leonida seen.', { rank: rank(after), n: score() }));
       var m = $('meter'); m.classList.remove('flash'); void m.offsetWidth; m.classList.add('flash');
     }
   }
@@ -189,10 +276,10 @@
       g.querySelector('.shape').setAttribute('fill', MAP_FILL[lvl]);
       labels[i].dataset.level = lvl;
       labels[i].classList.toggle('start', start);
-      labels[i].querySelector('.lvl').textContent = lvl ? LEVELS[lvl] : (start ? 'Tap to start' : '');
+      labels[i].querySelector('.lvl').textContent = lvl ? tr(LEVELS[lvl]) : (start ? tr('Tap to start') : '');
       g.classList.toggle('start', start);
       if (start && g.nextSibling !== lakeEl) g.parentNode.insertBefore(g, lakeEl); // dashed outline drawn above its neighbours
-      g.setAttribute('aria-label', REGIONS[i].full + ', ' + LEVELS[lvl] + '. Select to raise the level.');
+      g.setAttribute('aria-label', tr('{name}, {level}. Select to raise the level.', { name: REGIONS[i].full, level: tr(LEVELS[lvl]) }));
     });
     var rows = $('region-list').children;
     for (var i = 0; i < rows.length; i++) {
@@ -205,14 +292,14 @@
       }
     }
     $('pct').textContent = p;
-    pctEl.textContent = p + '% seen';
+    pctEl.textContent = tr('{n}% seen', { n: p });
     drawRoute();
-    $('rank').textContent = RANKS[ri][1];
-    $('meter-sub').textContent = visited() + ' of 6 regions · ' + n + ' of 18 steps';
+    $('rank').textContent = tr(RANKS[ri][1]);
+    $('meter-sub').textContent = tr('{v} of 6 regions · {n} of 18 steps', { v: visited(), n: n });
     var next = RANKS[ri + 1];
     var from = RANKS[ri][0];
     $('xp').style.transform = 'scaleX(' + (next ? (n - from) / (next[0] - from) : 1) + ')';
-    $('next-rank').textContent = next ? (next[0] - n) + (next[0] - n === 1 ? ' step' : ' steps') + ' to ' + next[1] : 'Every region done. Respect.';
+    $('next-rank').textContent = next ? tr(next[0] - n === 1 ? '1 step to {rank}' : '{n} steps to {rank}', { n: next[0] - n, rank: tr(next[1]) }) : tr('Every region done. Respect.');
     updateChallenge();
     drawSoon();
   }
@@ -224,7 +311,7 @@
     var c = q.get('c');
     if (!c || !/^[0-3]{6}$/.test(c)) return;
     var t = 0; c.split('').forEach(function (d) { t += Number(d); });
-    var n = (q.get('n') || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 24) || 'Your friend';
+    var n = (q.get('n') || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 24) || tr('Your friend');
     rival = { name: n, pct: pctOf(t) };
     $('challenge-name').textContent = n;
     $('challenge-score').textContent = rival.pct + '%';
@@ -234,10 +321,10 @@
     if (!rival) return;
     var mine = score();
     $('challenge-you').textContent = mine + '%';
-    $('challenge-msg').textContent = mine === 0 ? 'Mark your regions and beat their score.'
-      : mine < rival.pct ? (rival.pct - mine) + ' points behind ' + rival.name + '. Keep going.'
-      : mine === rival.pct ? 'Dead even with ' + rival.name + '. One more step wins it.'
-      : 'You beat ' + rival.name + '. Make your card and send it back.';
+    $('challenge-msg').textContent = mine === 0 ? tr('Mark your regions and beat their score.')
+      : mine < rival.pct ? tr('{n} points behind {name}. Keep going.', { n: rival.pct - mine, name: rival.name })
+      : mine === rival.pct ? tr('Dead even with {name}. One more step wins it.', { name: rival.name })
+      : tr('You beat {name}. Make your card and send it back.', { name: rival.name });
     $('challenge').classList.toggle('is-winning', mine > rival.pct);
   }
 
@@ -248,8 +335,11 @@
     theme: load('vch.theme', 'night'),
     dayone: load('vch.dayone', Date.now() < Date.UTC(2026, 10, 22) ? '1' : '0') === '1',
     useAlias: load('vch.useAlias', '0') === '1',
-    aliasRoll: Number(load('vch.aliasRoll', '0')) || 0
+    aliasRoll: Number(load('vch.aliasRoll', '0')) || 0,
+    // From 7 December the card opens on Wrapped, unless the visitor picked a card themselves.
+    kind: load('vch.kind', Date.now() >= new Date(2026, 11, 7).getTime() ? 'wrapped' : 'map')
   };
+  if (settings.kind !== 'wrapped') settings.kind = 'map';
   if (!THEMES[settings.theme]) settings.theme = 'night';
   if (settings.platform !== 'PS5' && settings.platform !== 'Xbox Series') settings.platform = 'PS5';
 
@@ -274,6 +364,10 @@
     document.querySelectorAll('input[name="theme"]').forEach(function (r) {
       r.checked = r.value === settings.theme;
       r.addEventListener('change', function () { settings.theme = r.value; save('vch.theme', r.value); drawSoon(); });
+    });
+    document.querySelectorAll('input[name="kind"]').forEach(function (r) {
+      r.checked = r.value === settings.kind;
+      r.addEventListener('change', function () { settings.kind = r.value; save('vch.kind', r.value); drawSoon(); });
     });
     var d = $('dayone');
     d.checked = settings.dayone;
@@ -303,7 +397,7 @@
     var h = hash(name.toLowerCase() + '#' + settings.aliasRoll);
     return {
       name: ALIAS_FIRST[h % 16] + ' ' + name + ', the ' + ALIAS_TITLE[(h >>> 4) % 16],
-      known: 'Known for ' + ALIAS_KNOWN[(h >>> 8) % 16] + '.'
+      known: tr('Known for {x}.', { x: tr(ALIAS_KNOWN[(h >>> 8) % 16]) })
     };
   }
   function renderAlias() {
@@ -319,9 +413,9 @@
     });
     $('alias-copy').addEventListener('click', function () {
       var a = alias();
-      copy('My Leonida street name: ' + a.name + '. ' + a.known + ' Get yours: ' + SITE).then(
-        function () { toast('Street name copied. Drop it in the group chat.'); },
-        function () { toast('Copy is blocked here. Select the name to copy it.'); });
+      copy(tr('My Leonida street name: {name}. {known} Get yours:', { name: a.name, known: a.known }) + ' ' + SITE).then(
+        function () { toast(tr('Street name copied. Drop it in the group chat.')); },
+        function () { toast(tr('Copy is blocked here. Select the name to copy it.')); });
     });
   }
 
@@ -361,7 +455,7 @@
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'cell' + (i === 4 ? ' cell--free' : '');
-      b.textContent = text;
+      b.textContent = tr(text);
       b.setAttribute('aria-pressed', String(Boolean(bingo.marks[i])));
       if (i === 4) b.setAttribute('aria-disabled', 'true');
       b.addEventListener('click', function () {
@@ -374,7 +468,7 @@
         renderBingoScore();
         if (after > before) {
           buzz();
-          toast(after === 8 ? 'Blackout. You did it all on night one.' : 'BINGO! ' + after + (after === 1 ? ' line' : ' lines') + '. Copy your board for the chat.');
+          toast(after === 8 ? tr('Blackout. You did it all on night one.') : tr(after === 1 ? 'BINGO! 1 line. Copy your board for the chat.' : 'BINGO! {n} lines. Copy your board for the chat.', { n: after }));
           box.classList.remove('win'); void box.offsetWidth; box.classList.add('win');
         }
         drawSoon();
@@ -385,7 +479,7 @@
   }
   function renderBingoScore() {
     var n = bingoLines(), ticked = bingo.marks.reduce(function (a, b) { return a + b; }, 0) - 1;
-    $('bingo-score').textContent = n ? 'Bingo ×' + n + ' · ' + ticked + ' of 8 ticked' : ticked + ' of 8 ticked · no line yet';
+    $('bingo-score').textContent = n ? tr('Bingo ×{n} · {k} of 8 ticked', { n: n, k: ticked }) : tr('{k} of 8 ticked · no line yet', { k: ticked });
   }
   function bingoText() {
     var rows = [0, 3, 6].map(function (r) {
@@ -393,14 +487,13 @@
     });
     var n = bingoLines(), ticked = bingo.marks.reduce(function (a, b) { return a + b; }, 0) - 1;
     var who = (settings.tag || '').trim();
-    var head = (who ? who + '\'s ' : 'My ') + 'Leonida day-one bingo · ' + settings.platform + ' · ' + (n ? 'Bingo ×' + n : 'no line yet') + ' · ' + ticked + ' of 8 ticked';
+    var head = (who ? tr('{name}\'s Leonida day-one bingo', { name: who }) : tr('My Leonida day-one bingo')) + ' · ' + settings.platform + ' · ' + (n ? 'Bingo ×' + n : tr('no line yet')) + ' · ' + tr('{k} of 8 ticked', { k: ticked });
     return head + '\n' + rows.join('\n') + '\n' + SITE;
   }
   function bingoStatus(msg) { var s = $('bingo-status'); s.textContent = ''; setTimeout(function () { s.textContent = msg; }, 30); }
   function bindBingo() {
     $('bingo-copy').addEventListener('click', function () {
-      copy(bingoText()).then(function () { bingoStatus('Board copied. Paste it in the group chat.'); },
-        function () { bingoStatus('Copy is blocked in this browser.'); });
+      shareOrCopy(bingoText(), bingoStatus, tr('Board copied. Paste it in the group chat.'));
     });
     $('bingo-new').addEventListener('click', function () {
       var undo = { seed: bingo.seed, marks: bingo.marks.slice() };
@@ -409,13 +502,13 @@
       save('vch.bingoSeed', String(bingo.seed)); save('vch.bingoMarks', bingo.marks.join(''));
       buildBingo(); drawSoon();
       var st = $('bingo-status');
-      st.textContent = 'New board. ';
+      st.textContent = tr('New board.') + ' ';
       var u = document.createElement('button');
-      u.type = 'button'; u.className = 'linklike'; u.textContent = 'Undo';
+      u.type = 'button'; u.className = 'linklike'; u.textContent = tr('Undo');
       u.addEventListener('click', function () {
         bingo.seed = undo.seed; bingo.marks = undo.marks;
         save('vch.bingoSeed', String(bingo.seed)); save('vch.bingoMarks', bingo.marks.join(''));
-        buildBingo(); drawSoon(); st.textContent = 'Old board back.';
+        buildBingo(); drawSoon(); st.textContent = tr('Old board back.');
       });
       st.appendChild(u);
     });
@@ -444,31 +537,29 @@
   }
   function renderDaily() {
     var d = dayIndex(), done = dailyDone.indexOf(d) >= 0, st = streak();
-    $('daily-day').textContent = 'Day ' + (d + 1) + ' in Leonida';
-    $('daily-task').textContent = DAILY[d % DAILY.length];
-    $('daily-streak').textContent = (st ? st + '-day streak' : 'No streak yet') + ' · ' + dailyDone.length + ' done in total';
+    $('daily-day').textContent = tr('Day {n} in Leonida', { n: d + 1 });
+    $('daily-task').textContent = tr(DAILY[d % DAILY.length]);
+    $('daily-streak').textContent = (st ? tr('{n}-day streak', { n: st }) : tr('No streak yet')) + ' · ' + tr('{n} done in total', { n: dailyDone.length });
     var b = $('daily-done');
     b.setAttribute('aria-pressed', String(done));
-    b.querySelector('span').textContent = done ? 'Done today' : 'I did it';
+    b.querySelector('span').textContent = done ? tr('Done today') : tr('I did it');
     b.closest('.daily').classList.toggle('is-done', done);
   }
   function dailyText() {
     var d = dayIndex(), cells = '';
     for (var i = Math.max(0, d - 6); i <= d; i++) cells += dailyDone.indexOf(i) >= 0 ? '🟪' : '⬛';
     var st = streak();
-    return 'Leonida Daily · Day ' + (d + 1) + ' · ' + (st ? st + '-day streak' : 'starting my streak') + '\n' + cells + '\n' + SITE;
+    return 'Leonida Daily · ' + tr('Day {n}', { n: d + 1 }) + ' · ' + (st ? tr('{n}-day streak', { n: st }) : tr('starting my streak')) + '\n' + cells + '\n' + SITE;
   }
   function bindDaily() {
     $('daily-done').addEventListener('click', function () {
       var d = dayIndex(), k = dailyDone.indexOf(d);
-      if (k >= 0) dailyDone.splice(k, 1); else { dailyDone.push(d); buzz(); toast(streak() > 1 ? streak() + '-day streak. Copy it for the chat.' : 'Done. Come back tomorrow for the next one.'); }
+      if (k >= 0) dailyDone.splice(k, 1); else { dailyDone.push(d); buzz(); toast(streak() > 1 ? tr('{n}-day streak. Copy it for the chat.', { n: streak() }) : tr('Done. Come back tomorrow for the next one.')); }
       save('vch.daily', dailyDone.join(','));
       renderDaily();
     });
     $('daily-copy').addEventListener('click', function () {
-      var s = $('daily-status');
-      copy(dailyText()).then(function () { s.textContent = 'Streak copied. Paste it in the group chat.'; },
-        function () { s.textContent = 'Copy is blocked in this browser.'; });
+      shareOrCopy(dailyText(), function (m) { $('daily-status').textContent = m; }, tr('Streak copied. Paste it in the group chat.'));
     });
   }
 
@@ -477,15 +568,15 @@
   function renderTipped() {
     var b = $('tipped-btn');
     b.setAttribute('aria-pressed', String(tipped));
-    b.querySelector('span').textContent = tipped ? 'Thank you!' : 'I sent a tip';
+    b.querySelector('span').textContent = tipped ? tr('Thank you!') : tr('I sent a tip');
     $('tipped-msg').textContent = tipped
-      ? 'You kept the hub running. Your map card now says "Backed the hub" in gold. Tap again to remove it.'
-      : 'Sent one? Tap this and your map card gets a gold "Backed the hub" line. We don\'t check, we trust you.';
+      ? tr('You kept the hub running. Your map card now says "Backed the hub" in gold. Tap again to remove it.')
+      : tr('Sent one? Tap this and your map card gets a gold "Backed the hub" line. We don\'t check, we trust you.');
   }
   function bindTipped() {
     $('tipped-btn').addEventListener('click', function () {
       tipped = !tipped; save('vch.tipped', tipped ? '1' : '');
-      if (tipped) { buzz(); toast('Thank you. That keeps the lights on in Leonida.'); }
+      if (tipped) { buzz(); toast(tr('Thank you. That keeps the lights on in Leonida.')); }
       renderTipped(); drawSoon();
     });
   }
@@ -518,17 +609,72 @@
     bg.addColorStop(0, T.bg); bg.addColorStop(1, T.bg2);
     ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    if (settings.kind === 'wrapped') { drawWrapped(ctx, T, W, H); return; }
 
     ctx.fillStyle = T.ink2;
     ctx.font = '600 38px "DM Sans", sans-serif';
-    ctx.fillText('Greetings from', 64, 112);
+    ctx.fillText(tr('Greetings from'), 64, 112);
     ctx.fillStyle = T.ink;
     ctx.font = '400 196px Anton, sans-serif';
     ctx.fillText('LEONIDA', 56, 304);
 
+    drawMap(ctx, T, 44, 344, 0.96);
+
+    var cx = 640, n = steps(), p = pctOf(n);
+    ctx.fillStyle = T.accent;
+    ctx.font = '400 230px Anton, sans-serif';
+    var num = String(p);
+    ctx.fillText(num, cx, 600);
+    var nw = ctx.measureText(num).width;
+    ctx.font = '400 110px Anton, sans-serif';
+    ctx.fillText('%', cx + nw + 6, 600);
+    ctx.fillStyle = T.ink2;
+    ctx.font = '600 32px "DM Sans", sans-serif';
+    ctx.fillText(tr('of Leonida seen'), cx + 4, 650);
+    ctx.fillStyle = T.ink;
+    fitText(ctx, rank(n), 400, 66, '400 {s}px Anton, sans-serif');
+    ctx.fillText(rank(n), cx, 744);
+
+    var ty = 812;
+    REGIONS.forEach(function (r, i) {
+      for (var k = 0; k < 3; k++) {
+        ctx.beginPath();
+        ctx.arc(cx + 12 + k * 30, ty - 10, 10, 0, Math.PI * 2);
+        if (k < levels[i]) { ctx.fillStyle = levels[i] === 3 ? T.done : T.accent; ctx.fill(); }
+        else { ctx.strokeStyle = T.ink2; ctx.lineWidth = 2.5; ctx.stroke(); }
+      }
+      ctx.fillStyle = levels[i] ? T.ink : T.ink2;
+      ctx.font = '600 28px "DM Sans", sans-serif';
+      ctx.fillText(r.name, cx + 110, ty);
+      ty += 52;
+    });
+
+    var tag = (settings.tag || '').trim() || tr('Player one');
+    var title = settings.useAlias ? alias().name : tag;
+    ctx.fillStyle = T.ink;
+    fitText(ctx, title, W - 128, 84, '400 {s}px Anton, sans-serif');
+    ctx.fillText(title, 64, 1196);
+    ctx.fillStyle = T.ink2;
+    ctx.font = '600 32px "DM Sans", sans-serif';
+    var lines = bingoLines();
+    var meta = tr('Plays on {p}', { p: settings.platform }) + ' · GTA VI' + (lines ? ' · Bingo ×' + lines : '');
+    ctx.fillText(meta, 64, 1246);
+    if (tipped) { var fs = ctx.fillStyle; ctx.fillStyle = '#FFC35A'; ctx.fillText(' · ' + tr('Backed the hub'), 64 + ctx.measureText(meta).width, 1246); ctx.fillStyle = fs; }
+
+    ctx.fillStyle = T.accent;
+    ctx.fillRect(0, H - 64, W, 64);
+    ctx.fillStyle = T.onFull;
+    ctx.font = '600 30px "DM Sans", sans-serif';
+    ctx.fillText(tr('How much have you seen?') + ' vicecityhub.okenshop.com', 64, H - 22);
+
+    if (settings.dayone) stamp(ctx, 940, 170, T);
+  }
+
+  // The map as drawn on both cards, at (x, y) and scale sc of its 600 x 740 layout.
+  function drawMap(ctx, T, x, y, sc) {
     // The card map uses the same layers as the page map: sea, stipple, grid, coastal shelf, fog of war, route, compass.
     ctx.save();
-    ctx.translate(44, 344); ctx.scale(0.96, 0.96);
+    ctx.translate(x, y); ctx.scale(sc, sc);
     roundRect(ctx, 0, 0, 600, 740, 22); ctx.fillStyle = T.sea; ctx.fill();
     ctx.save(); roundRect(ctx, 0, 0, 600, 740, 22); ctx.clip();
     var stip = patternTile(14, function (p) { p.fillStyle = 'rgba(143,179,191,.22)'; p.beginPath(); p.arc(3, 3, 1.2, 0, Math.PI * 2); p.fill(); });
@@ -585,54 +731,64 @@
     ctx.restore();
     ctx.restore();
     ctx.textAlign = 'left';
+  }
 
-    var cx = 640, n = steps(), p = pctOf(n);
+  // Leonida Wrapped: the whole launch run on one card. Same drawing, same device, nothing uploaded.
+  function longestStreak() {
+    var days = dailyDone.slice().sort(function (a, b) { return a - b; }), best = 0, run = 0;
+    days.forEach(function (d, k) { run = k && d === days[k - 1] + 1 ? run + 1 : (k && d === days[k - 1] ? run : 1); best = Math.max(best, run); });
+    return best;
+  }
+  function drawWrapped(ctx, T, W, H) {
+    ctx.fillStyle = T.ink2; ctx.font = '600 38px "DM Sans", sans-serif';
+    ctx.fillText(tr('My launch run in'), 64, 112);
+    ctx.fillStyle = T.ink; ctx.font = '400 172px Anton, sans-serif';
+    ctx.fillText(tr('LEONIDA'), 56, 284);
     ctx.fillStyle = T.accent;
-    ctx.font = '400 230px Anton, sans-serif';
-    var num = String(p);
-    ctx.fillText(num, cx, 600);
-    var nw = ctx.measureText(num).width;
-    ctx.font = '400 110px Anton, sans-serif';
-    ctx.fillText('%', cx + nw + 6, 600);
-    ctx.fillStyle = T.ink2;
-    ctx.font = '600 32px "DM Sans", sans-serif';
-    ctx.fillText('of Leonida seen', cx + 4, 650);
-    ctx.fillStyle = T.ink;
-    fitText(ctx, rank(n), 400, 66, '400 {s}px Anton, sans-serif');
-    ctx.fillText(rank(n), cx, 744);
+    ctx.fillText(tr('WRAPPED'), 56, 452);
+    ctx.fillStyle = T.ink2; ctx.font = '600 30px "DM Sans", sans-serif';
+    ctx.fillText(tr('19 Nov – 10 Dec 2026'), 64, 512);
 
-    var ty = 812;
-    REGIONS.forEach(function (r, i) {
-      for (var k = 0; k < 3; k++) {
-        ctx.beginPath();
-        ctx.arc(cx + 12 + k * 30, ty - 10, 10, 0, Math.PI * 2);
-        if (k < levels[i]) { ctx.fillStyle = levels[i] === 3 ? T.done : T.accent; ctx.fill(); }
-        else { ctx.strokeStyle = T.ink2; ctx.lineWidth = 2.5; ctx.stroke(); }
-      }
-      ctx.fillStyle = levels[i] ? T.ink : T.ink2;
-      ctx.font = '600 28px "DM Sans", sans-serif';
-      ctx.fillText(r.name, cx + 110, ty);
-      ty += 52;
+    drawMap(ctx, T, 636, 572, 0.6);
+
+    var n = steps(), done100 = levels.filter(function (l) { return l === 3; }).length, best = longestStreak();
+    ctx.fillStyle = T.accent;
+    fitText(ctx, pctOf(n) + '%', 560, 168, '400 {s}px Anton, sans-serif');
+    ctx.fillText(pctOf(n) + '%', 58, 742);
+    ctx.fillStyle = T.ink2; ctx.font = '600 30px "DM Sans", sans-serif';
+    ctx.fillText(tr('of Leonida seen'), 64, 792);
+    ctx.fillStyle = T.ink;
+    fitText(ctx, rank(n), 540, 88, '400 {s}px Anton, sans-serif');
+    ctx.fillText(rank(n), 62, 910);
+    ctx.fillStyle = T.ink2; ctx.font = '600 30px "DM Sans", sans-serif';
+    ctx.fillText(tr('final rank'), 64, 956);
+
+    ctx.fillStyle = T.line; ctx.fillRect(64, 1030, W - 128, 2);
+    var stats = [
+      [best === 1 ? tr('1 day') : tr('{n} days').replace('{n}', best), tr('best daily streak'), T.ink],
+      [String(dailyDone.length), tr('daily tasks done'), T.ink],
+      [done100 + '/6', tr('regions at 100%'), done100 ? T.done : T.ink]
+    ];
+    stats.forEach(function (st, k) {
+      var x = 64 + k * 330;
+      ctx.fillStyle = st[2];
+      fitText(ctx, st[0], 300, 76, '400 {s}px Anton, sans-serif');
+      ctx.fillText(st[0], x, 1124);
+      ctx.fillStyle = T.ink2; ctx.font = '600 26px "DM Sans", sans-serif';
+      ctx.fillText(st[1], x + 2, 1162);
     });
 
-    var tag = (settings.tag || '').trim() || 'Player one';
+    var tag = (settings.tag || '').trim() || tr('Player one');
     var title = settings.useAlias ? alias().name : tag;
     ctx.fillStyle = T.ink;
-    fitText(ctx, title, W - 128, 84, '400 {s}px Anton, sans-serif');
-    ctx.fillText(title, 64, 1196);
-    ctx.fillStyle = T.ink2;
-    ctx.font = '600 32px "DM Sans", sans-serif';
-    var lines = bingoLines();
-    ctx.fillText('Plays on ' + settings.platform + ' · GTA VI' + (lines ? ' · Bingo ×' + lines : ''), 64, 1246);
-    if (tipped) { var pw = ctx.measureText('Plays on ' + settings.platform + ' · GTA VI' + (lines ? ' · Bingo ×' + lines : '') + ' · ').width; var fs = ctx.fillStyle; ctx.fillStyle = '#FFC35A'; ctx.fillText(' · Backed the hub', 64 + pw - ctx.measureText(' · ').width, 1246); ctx.fillStyle = fs; }
+    fitText(ctx, title, W - 128, 64, '400 {s}px Anton, sans-serif');
+    ctx.fillText(title, 64, 1250);
 
     ctx.fillStyle = T.accent;
     ctx.fillRect(0, H - 64, W, 64);
     ctx.fillStyle = T.onFull;
     ctx.font = '600 30px "DM Sans", sans-serif';
-    ctx.fillText('How much have you seen? vicecityhub.okenshop.com', 64, H - 22);
-
-    if (settings.dayone) stamp(ctx, 940, 170, T);
+    ctx.fillText(tr('Make yours:') + ' vicecityhub.okenshop.com', 64, H - 22);
   }
 
   function stamp(ctx, x, y, T) {
@@ -642,7 +798,7 @@
     ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, 0, 92, 0, Math.PI * 2); ctx.stroke();
     ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 80, 0, Math.PI * 2); ctx.stroke();
     ctx.textAlign = 'center';
-    ctx.font = '400 48px Anton, sans-serif'; ctx.fillText('DAY ONE', 0, 12);
+    ctx.font = '400 48px Anton, sans-serif'; ctx.fillText(tr('DAY ONE'), 0, 12);
     ctx.font = '600 20px "DM Sans", sans-serif'; ctx.fillText('19 NOV 2026', 0, 44);
     ctx.fillText('LEONIDA', 0, -38);
     ctx.restore();
@@ -682,7 +838,7 @@
       $('card-canvas').toBlob(function (b) { b ? resolve(b) : reject(new Error('no image')); }, 'image/png');
     });
   }
-  function fileName() { return 'leonida-' + score() + '-percent.png'; }
+  function fileName() { return settings.kind === 'wrapped' ? 'leonida-wrapped.png' : 'leonida-' + score() + '-percent.png'; }
 
   function challengeUrl() {
     var u = SITE + '?c=' + code();
@@ -690,7 +846,7 @@
     if (t) u += '&n=' + encodeURIComponent(t);
     return u;
   }
-  function shareText() { return 'I have seen ' + score() + '% of Leonida (' + rank() + '). How much have you seen?'; }
+  function shareText() { return tr('I have seen {n}% of Leonida ({rank}). How much have you seen?', { n: score(), rank: rank() }); }
 
   function download(blob) {
     var url = URL.createObjectURL(blob);
@@ -705,6 +861,22 @@
       return navigator.clipboard.writeText(text).catch(function () { return legacyCopy(text); });
     }
     return legacyCopy(text);
+  }
+  // On phones, open the share sheet (WhatsApp, Discord, Messages) instead of only copying. A cancelled share does
+  // nothing; anywhere the share sheet is missing or fails, fall back to copying.
+  function shareOrCopy(text, say, copied) {
+    var coarse = false;
+    try { coarse = matchMedia('(pointer: coarse)').matches; } catch (e) { /* old browser */ }
+    var fallback = function () {
+      return copy(text).then(function () { say(copied); }, function () { say(tr('Copy is blocked in this browser.')); });
+    };
+    if (coarse && navigator.share) {
+      return navigator.share({ text: text }).then(function () { say(tr('Shared.')); }, function (e) {
+        if (e && e.name === 'AbortError') return;
+        return fallback();
+      });
+    }
+    return fallback();
   }
   function legacyCopy(text) {
     return new Promise(function (resolve, reject) {
@@ -725,38 +897,38 @@
         var file = new File([blob], fileName(), { type: 'image/png' });
         var data = { files: [file], title: 'My Leonida card', text: shareText() + ' ' + challengeUrl() };
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          return navigator.share(data).then(function () { status('Shared. Now see if your crew can beat it.'); showThanks(); }, function (e) {
+          return navigator.share(data).then(function () { status(tr('Shared. Now see if your crew can beat it.')); showThanks(); }, function (e) {
             if (e && e.name === 'AbortError') return;
-            download(blob); status('Sharing is blocked here, so the card was downloaded instead.'); showThanks();
+            download(blob); status(tr('Sharing is blocked here, so the card was downloaded instead.')); showThanks();
           });
         }
         download(blob); showThanks();
         return copy(shareText() + ' ' + challengeUrl()).then(
-          function () { status('Card downloaded and the challenge text copied. Post both.'); },
-          function () { status('Card downloaded. Post it with your challenge link.'); });
+          function () { status(tr('Card downloaded and the challenge text copied. Post both.')); },
+          function () { status(tr('Card downloaded. Post it with your challenge link.')); });
       }).catch(function () { status('The card could not be made in this browser. Try another browser.'); })
         .then(function () { btn.disabled = false; });
     });
     $('download').addEventListener('click', function () {
       var btn = this; btn.disabled = true;
-      cardBlob().then(function (b) { download(b); status('Card downloaded: ' + fileName()); showThanks(); },
+      cardBlob().then(function (b) { download(b); status(tr('Card downloaded:') + ' ' + fileName()); showThanks(); },
         function () { status('The card could not be made in this browser. Try another browser.'); })
         .then(function () { btn.disabled = false; });
     });
     $('copy-link').addEventListener('click', function () {
-      copy(shareText() + ' ' + challengeUrl()).then(function () { status('Challenge copied. Paste it in your group chat.'); showThanks(); },
-        function () { status('Copy is blocked here. Your link: ' + challengeUrl()); });
+      copy(shareText() + ' ' + challengeUrl()).then(function () { status(tr('Challenge copied. Paste it in your group chat.')); showThanks(); },
+        function () { status(tr('Copy is blocked here. Your link:') + ' ' + challengeUrl()); });
     });
     document.querySelectorAll('[data-copy]').forEach(function (b) {
       var label = b.textContent;
       b.addEventListener('click', function () {
-        copy(b.dataset.copy).then(function () { b.textContent = b.dataset.done || 'Copied'; },
-          function () { b.textContent = 'Select the address above to copy'; })
+        copy(b.dataset.copy).then(function () { b.textContent = tr(b.dataset.done || 'Copied'); },
+          function () { b.textContent = tr('Select the address above to copy'); })
           .then(function () { setTimeout(function () { b.textContent = label; }, 2500); });
       });
     });
     $('reset').addEventListener('click', function () {
-      levels = [0, 0, 0, 0, 0, 0]; save('vch.map', code()); render(); toast('Map cleared.');
+      levels = [0, 0, 0, 0, 0, 0]; save('vch.map', code()); render(); toast(tr('Map cleared.'));
     });
   }
 
@@ -795,34 +967,35 @@
     var out = rows.filter(function (r) { return now >= r.t; });
     var soon = rows.filter(function (r) { return now < r.t; });
     $('clock-out').textContent = now >= LAST
-      ? 'Out in every PlayStation Store region with a listed time.'
-      : out.length ? 'Out in ' + out.length + ' of these ' + rows.length + ' windows: ' + out.map(function (r) { return r.place; }).join(', ') + '.'
-      : 'Not out anywhere yet. New Zealand goes first.';
-    var youLabel = mine === NA_ET ? 'You (USA and Canada window)' : 'Midnight where you are';
+      ? tr('Out in every PlayStation Store region with a listed time.')
+      : out.length ? tr('Out in {n} of these {m} windows:', { n: out.length, m: rows.length }) + ' ' + out.map(function (r) { return tr(r.place); }).join(', ') + '.'
+      : tr('Not out anywhere yet. New Zealand goes first.');
+    var youLabel = mine === NA_ET ? tr('You (USA and Canada window)') : tr('Midnight where you are');
     var list = soon.concat([{ place: youLabel, t: mine, you: true }]).sort(function (a, b) { return a.t - b.t || (a.you ? -1 : 1); });
     var frag = document.createDocumentFragment();
     list.forEach(function (r) {
       var li = document.createElement('li');
       var live = now >= r.t;
       li.className = (live ? 'is-live' : '') + (r.you ? ' is-you' : '');
-      var a = document.createElement('span'); a.className = 'place'; a.textContent = r.place;
+      var a = document.createElement('span'); a.className = 'place'; a.textContent = r.you ? r.place : tr(r.place);
       var b = document.createElement('span'); b.className = 'when';
-      b.textContent = live ? 'Out since ' + fmtTime(r.t) : 'In ' + fmtLeft(r.t - now) + ' · ' + fmtTime(r.t);
+      b.textContent = live ? tr('Out since {t}', { t: fmtTime(r.t) }) : tr('In {d}', { d: fmtLeft(r.t - now) }) + ' · ' + fmtTime(r.t);
       li.appendChild(a); li.appendChild(b); frag.appendChild(li);
     });
     ul.textContent = ''; ul.appendChild(frag);
     Array.prototype.forEach.call(document.querySelectorAll('.markets .when[data-at]'), function (el) {
       var t = Date.parse(el.getAttribute('data-at'));
-      el.textContent = now >= t ? 'Out since ' + fmtTime(t) : 'In ' + fmtLeft(t - now) + ' · ' + fmtTime(t);
+      el.textContent = now >= t ? tr('Out since {t}', { t: fmtTime(t) }) : tr('In {d}', { d: fmtLeft(t - now) }) + ' · ' + fmtTime(t);
       el.parentNode.parentNode.className = now >= t ? 'is-live' : '';
     });
-    $('live-line').textContent = now >= LAST ? 'GTA VI is out in every listed store. Leonida is open.'
-      : now >= mine ? (mine === NA_ET ? 'The USA and Canada window is open. Leonida is open.' : 'It’s past midnight where you are. If your store region matches, Leonida is open.')
-      : (mine === NA_ET ? 'The USA and Canada window opens in ' : 'Midnight where you are is in ') + fmtLeft(mine - now) + '. Plan your route now.';
+    $('live-line').textContent = now >= LAST ? tr('GTA VI is out in every listed store. Leonida is open.')
+      : now >= mine ? (mine === NA_ET ? tr('The USA and Canada window is open. Leonida is open.') : tr('It’s past midnight where you are. If your store region matches, Leonida is open.'))
+      : tr(mine === NA_ET ? 'The USA and Canada window opens in {d}. Plan your route now.' : 'Midnight where you are is in {d}. Plan your route now.', { d: fmtLeft(mine - now) });
   }
 
   // ---- start ----
   function start() {
+    translatePage(); bindLang();
     buildMap(); bindList(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindActions(); readChallenge();
     buildBingo(); renderDaily(); renderTipped(); renderAlias(); render(); tick();
     var clock = setInterval(tick, 30000);

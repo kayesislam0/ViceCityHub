@@ -7,6 +7,10 @@
 <meta name="description" content="Free GTA 6 tools: track how much of Leonida you have explored, take the Leonida Daily challenge, play day-one bingo and challenge your crew with a map card.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="https://vicecityhub.okenshop.com/">
+<link rel="alternate" hreflang="en" href="https://vicecityhub.okenshop.com/">
+<link rel="alternate" hreflang="es" href="https://vicecityhub.okenshop.com/?lang=es">
+<link rel="alternate" hreflang="pt" href="https://vicecityhub.okenshop.com/?lang=pt">
+<link rel="alternate" hreflang="x-default" href="https://vicecityhub.okenshop.com/">
 <meta name="theme-color" content="#0E1311">
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="hub/img/icon.svg" type="image/svg+xml">
@@ -29,12 +33,15 @@
 <link rel="preload" href="hub/fonts/anton-400.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="hub/fonts/dmsans-400.woff" as="font" type="font/woff" crossorigin>
 <link rel="stylesheet" href="hub/hub.css">
+<script src="hub/i18n.js" defer></script>
 <script src="hub/hub.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
 {"@type":"WebSite","@id":"https://vicecityhub.okenshop.com/#site","name":"Vice City Hub","inLanguage":"en","url":"https://vicecityhub.okenshop.com/"},
-{"@type":"WebApplication","name":"Leonida Map Tracker","url":"https://vicecityhub.okenshop.com/","applicationCategory":"GameApplication","operatingSystem":"Any","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Mark the GTA 6 regions you have explored and download a shareable map card."},
+{"@type":"WebApplication","name":"Leonida Map Tracker","url":"https://vicecityhub.okenshop.com/","applicationCategory":"GameApplication","operatingSystem":"Any","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Mark the GTA 6 regions you have explored and download a shareable map card.","inLanguage":["en","es","pt"],"featureList":["Leonida map tracker","Shareable map card","Crew challenge link","Leonida Daily challenge","Leonida Wrapped recap card","Day-one bingo"]},
 {"@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"How do I track my GTA 6 map progress?","acceptedAnswer":{"@type":"Answer","text":"Tap each region of Leonida on the map as you go: passed through, explored, or done 100%. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session."}},
+{"@type":"Question","name":"What is Leonida Wrapped?","acceptedAnswer":{"@type":"Answer","text":"A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best Leonida Daily streak and the regions you finished. Pick it under Card, then share or download it."}},
 {"@type":"Question","name":"What time does GTA 6 unlock?","acceptedAnswer":{"@type":"Answer","text":"GTA 6 unlocks at midnight local time on November 19, 2026, starting in New Zealand and ending in Mexico and Central America. On the PlayStation Store the USA and Canada share one unlock at midnight Eastern, so the US West Coast can play from 9 PM Pacific on November 18. The UK and Ireland unlock at midnight GMT and Mainland Europe at midnight CET. Your account region decides your unlock time."}},
 {"@type":"Question","name":"What time does GTA 6 unlock in the UK and Europe?","acceptedAnswer":{"@type":"Answer","text":"On the PlayStation Store, the UK and Ireland unlock at midnight GMT on November 19, 2026, and Mainland Europe at midnight CET, which is 11 PM GMT on November 18."}},
 {"@type":"Question","name":"What time does GTA 6 unlock in Australia?","acceptedAnswer":{"@type":"Answer","text":"Midnight AEDT on November 19, 2026, which is 1 PM UTC on November 18. Australia is one of the first regions to unlock, after New Zealand."}},
@@ -112,6 +119,13 @@
         <label for="tag">Name or gamer tag</label>
         <input id="tag" maxlength="24" autocomplete="nickname" spellcheck="false" placeholder="e.g. VicePrince99">
       </div>
+      <fieldset class="field">
+        <legend>Card</legend>
+        <div class="seg" id="kind">
+          <label><input type="radio" name="kind" value="map" checked><span>Map</span></label>
+          <label><input type="radio" name="kind" value="wrapped"><span>Leonida Wrapped</span></label>
+        </div>
+      </fieldset>
       <fieldset class="field">
         <legend>Plays on</legend>
         <div class="seg" id="platform">
@@ -302,6 +316,8 @@
 
   <section class="faq" aria-labelledby="faq-title">
     <h2 id="faq-title">Questions</h2>
+    <details><summary>How do I track my GTA 6 map progress?</summary><p>Tap each region of Leonida on the map as you go: passed through, explored, or done 100%. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session.</p></details>
+    <details><summary>What is Leonida Wrapped?</summary><p>A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best Leonida Daily streak and the regions you finished. Pick it under Card, then share or download it.</p></details>
     <details><summary>What time does GTA 6 unlock?</summary><p>GTA 6 unlocks at midnight local time on November 19, 2026, starting in New Zealand and ending in Mexico and Central America. On the PlayStation Store the USA and Canada share one unlock at midnight Eastern, so the US West Coast can play from 9 PM Pacific on November 18. The UK and Ireland unlock at midnight GMT and Mainland Europe at midnight CET. Your account region decides your unlock time.</p></details>
     <details><summary>What time does GTA 6 unlock in the UK and Europe?</summary><p>On the PlayStation Store, the UK and Ireland unlock at midnight GMT on November 19, 2026, and Mainland Europe at midnight CET, which is 11 PM GMT on November 18.</p></details>
     <details><summary>What time does GTA 6 unlock in Australia?</summary><p>Midnight AEDT on November 19, 2026, which is 1 PM UTC on November 18. Australia is one of the first regions to unlock, after New Zealand.</p></details>
@@ -316,6 +332,7 @@
 <footer class="foot">
   <p>Vice City Hub is an independent fan tool. Not affiliated with or endorsed by Rockstar Games or Take-Two Interactive. Grand Theft Auto and GTA are trademarks of Take-Two Interactive Software. No Rockstar artwork is used.</p>
   <p>Open source: <a href="https://github.com/kayesislam0/ViceCityHub" rel="noopener">fix a bug or suggest a tool on GitHub</a>.</p>
+  <nav class="langs" aria-label="Language"><a href="?lang=en" data-lang="en" hreflang="en" lang="en">English</a><a href="?lang=es" data-lang="es" hreflang="es" lang="es">Español</a><a href="?lang=pt" data-lang="pt" hreflang="pt" lang="pt">Português</a></nav>
   <p><button class="linklike" type="button" id="reset">Clear my map</button></p>
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
