@@ -56,7 +56,7 @@
       d: outline(['kWest', 'kNorth', 'kEast', 'kV', 'kA', 'kG']) },
     { id: 'gellhorn', name: 'Port Gellhorn', full: 'Port Gellhorn', label: [212, 238], two: true,
       d: outline(['-kG', 'gA', 'gGr', 'gCoast']) },
-    { id: 'ambrosia', name: 'Ambrosia', full: 'Ambrosia', label: [345, 228],
+    { id: 'ambrosia', name: 'Ambrosia', full: 'Ambrosia', label: [364, 226],
       d: outline(['-kA', 'aV', 'aGr', '-gA']) },
     { id: 'vice', name: 'Vice City', full: 'Vice City', label: [505, 318],
       d: outline(['-kV', 'vCoast', '-vGr', '-aV']) },
@@ -734,11 +734,11 @@
 
     var ty = 812;
     REGIONS.forEach(function (r, i) {
+      // three short bars per region: passed, explored, 100% (gold when finished)
       for (var k = 0; k < 3; k++) {
-        ctx.beginPath();
-        ctx.arc(cx + 12 + k * 30, ty - 10, 10, 0, Math.PI * 2);
-        if (k < levels[i]) { ctx.fillStyle = levels[i] === 3 ? T.done : T.accent; ctx.fill(); }
-        else { ctx.strokeStyle = T.ink2; ctx.lineWidth = 2.5; ctx.stroke(); }
+        roundRect(ctx, cx + k * 30, ty - 15, 24, 10, 5);
+        ctx.fillStyle = k < levels[i] ? (levels[i] === 3 ? T.done : T.accent) : T.line;
+        ctx.fill();
       }
       ctx.fillStyle = levels[i] ? T.ink : T.ink2;
       ctx.font = '600 28px "DM Sans", sans-serif';
@@ -770,77 +770,51 @@
   // The map as drawn on both cards, at (x, y) and scale sc of its 600 x 740 layout.
   // blend: { mine: [...], theirs: [...] } paints who explored each region instead of one player's levels.
   function drawMap(ctx, T, x, y, sc, blend) {
+    // The card map is deliberately quiet: flat land on a calm sea, one soft shadow for depth, and colour that only
+    // ever means progress. No grid, hatching, route dots or compass: every pixel left is one that survives
+    // Instagram, X and WhatsApp compression and reads at thumbnail size.
     var LV = blend ? blend.mine.map(function (m, i) { return Math.max(m, blend.theirs[i]); }) : levels;
-    // The card map uses the same layers as the page map: sea, stipple, grid, coastal shelf, fog of war, route, compass.
+    var tone = function (i) { return blend ? (blend.mine[i] && blend.theirs[i] ? 3 : LV[i] ? 2 : 0) : LV[i]; };
     ctx.save();
     ctx.translate(x, y); ctx.scale(sc, sc);
-    roundRect(ctx, 0, 0, 600, 740, 22); ctx.fillStyle = T.sea; ctx.fill();
-    ctx.save(); roundRect(ctx, 0, 0, 600, 740, 22); ctx.clip();
-    // The card is built to survive social-media compression: no fine dots or hairlines, only shapes and bold lines
-    // that JPEG re-encoding on Instagram, X or WhatsApp can't smear. A soft sea gradient and a wide grid give depth.
-    var sea = ctx.createRadialGradient(300, 300, 40, 300, 360, 520);
-    sea.addColorStop(0, 'rgba(143,179,191,.10)'); sea.addColorStop(1, 'rgba(0,0,0,.18)');
+    roundRect(ctx, 0, 0, 600, 740, 24); ctx.fillStyle = T.sea; ctx.fill();
+    ctx.save(); roundRect(ctx, 0, 0, 600, 740, 24); ctx.clip();
+    var sea = ctx.createRadialGradient(330, 330, 60, 300, 380, 560);
+    sea.addColorStop(0, 'rgba(255,255,255,.06)'); sea.addColorStop(1, 'rgba(0,0,0,.22)');
     ctx.fillStyle = sea; ctx.fillRect(0, 0, 600, 740);
-    ctx.strokeStyle = T.grid; ctx.lineWidth = 2;
-    for (var x = 100; x < 600; x += 100) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 740); ctx.stroke(); }
-    for (var y = 100; y < 740; y += 100) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(600, y); ctx.stroke(); }
-    REGIONS.forEach(function (r) { // coastal shelf
-      var sp = new Path2D(r.d);
-      ctx.fillStyle = 'rgba(143,179,191,.10)'; ctx.fill(sp);
-      ctx.strokeStyle = 'rgba(143,179,191,.22)'; ctx.lineWidth = 30; ctx.lineJoin = 'round'; ctx.stroke(sp);
-    });
+    // one soft shadow under the whole state
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 36; ctx.shadowOffsetY = 14;
+    ctx.fillStyle = T.fill[0];
+    REGIONS.forEach(function (r) { ctx.fill(new Path2D(r.d)); });
     ctx.restore();
-    // Unexplored regions: wide, bold diagonal bands (low detail, so they stay clean after compression).
-    var fog = patternTile(26, function (p) { p.strokeStyle = 'rgba(244,241,234,.11)'; p.lineWidth = 6; p.lineCap = 'square'; [-26, 0, 26].forEach(function (o) { p.beginPath(); p.moveTo(o - 2, 28); p.lineTo(o + 28, -2); p.stroke(); }); });
+    ctx.restore();
     REGIONS.forEach(function (r, i) {
       var path = new Path2D(r.d);
-      ctx.fillStyle = T.fill[blend ? (blend.mine[i] && blend.theirs[i] ? 3 : LV[i] ? 2 : 0) : LV[i]]; ctx.fill(path);
-      if (LV[i]) { var sh = ctx.createLinearGradient(0, 40, 0, 720); sh.addColorStop(0, 'rgba(255,255,255,.10)'); sh.addColorStop(1, 'rgba(0,0,0,.14)'); ctx.fillStyle = sh; ctx.fill(path); }
-      if (!LV[i] && fog) { ctx.fillStyle = fog; ctx.fill(path); }
-      ctx.strokeStyle = T.edge; ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.stroke(path);
-      if (blend) {
-        // Only you: your accent. Only them: gold. Both of you: white.
-        var me = blend.mine[i] > 0, them = blend.theirs[i] > 0;
-        if (me || them) { ctx.strokeStyle = me && them ? T.ink : me ? T.accent : T.done; ctx.lineWidth = 4; ctx.stroke(path); }
-      } else {
-        if (LV[i] === 2) { ctx.strokeStyle = T.accent; ctx.lineWidth = 3; ctx.stroke(path); }
-        if (LV[i] === 3) { ctx.strokeStyle = T.done; ctx.lineWidth = 4; ctx.stroke(path); }
-      }
+      ctx.fillStyle = T.fill[tone(i)]; ctx.fill(path);
+      ctx.strokeStyle = T.edge; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke(path);
+    });
+    // Edges carry one meaning each: gold for 100% on a map card; on a Blend, who explored the region.
+    REGIONS.forEach(function (r, i) {
+      var path = new Path2D(r.d), col = null;
+      if (blend) { var me = blend.mine[i] > 0, them = blend.theirs[i] > 0; if (me || them) col = me && them ? T.ink : me ? T.accent : T.done; }
+      else if (LV[i] === 3) col = T.done;
+      if (col) { ctx.strokeStyle = col; ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.stroke(path); }
     });
     var lake = new Path2D(LAKE);
-    ctx.fillStyle = T.lake; ctx.fill(lake); ctx.strokeStyle = T.edge; ctx.lineWidth = 4; ctx.stroke(lake);
-    // your route
-    var pts = [];
-    if (!blend) levels.forEach(function (l, i) { if (l) pts.push(anchorOf(REGIONS[i])); });
-    if (pts.length > 1) {
-      ctx.save(); ctx.strokeStyle = T.accent; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.setLineDash([1, 12]);
-      ctx.beginPath(); pts.forEach(function (p, k) { k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }); ctx.stroke(); ctx.restore();
-    }
-    pts.forEach(function (p) { ctx.beginPath(); ctx.arc(p[0], p[1], 7, 0, Math.PI * 2); ctx.fillStyle = T.sea; ctx.fill(); ctx.strokeStyle = T.accent; ctx.lineWidth = 3.5; ctx.stroke(); });
-    // labels above the route, outlined so they read at feed size
-    ctx.textAlign = 'center'; ctx.lineJoin = 'round';
+    ctx.fillStyle = T.sea; ctx.fill(lake);
+    ctx.textAlign = 'center';
     REGIONS.forEach(function (r, i) {
-      var dark = (blend ? (blend.mine[i] && blend.theirs[i] ? 3 : LV[i] ? 2 : 0) : LV[i]) >= T.darkFrom && r.id !== 'keys';
+      var t = tone(i), dark = t >= T.darkFrom && r.id !== 'keys';
       ctx.font = '400 30px Anton, sans-serif';
-      ctx.lineWidth = 6; ctx.strokeStyle = dark ? 'rgba(255,255,255,.35)' : 'rgba(14,19,17,.6)';
-      ctx.fillStyle = dark ? T.onFull : T.ink;
+      ctx.fillStyle = dark ? T.onFull : t ? T.ink : T.ink2;
       var lines = r.two ? [r.name.split(' ')[0], r.name.split(' ').slice(1).join(' ')] : [r.name];
-      lines.forEach(function (txt, k) {
-        var ly = r.label[1] + (r.two ? (k ? 20 : -12) : 0);
-        ctx.strokeText(txt, r.label[0], ly); ctx.fillText(txt, r.label[0], ly);
-      });
+      lines.forEach(function (txt, k) { ctx.fillText(txt, r.label[0], r.label[1] + (r.two ? (k ? 20 : -12) : 0)); });
     });
-    // compass
-    ctx.save(); ctx.translate(552, 684);
-    ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fillStyle = 'rgba(15,31,37,.85)'; ctx.fill();
-    ctx.strokeStyle = 'rgba(244,241,234,.35)'; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.fillStyle = T.accent; ctx.beginPath(); ctx.moveTo(0, -18); ctx.lineTo(6, 0); ctx.lineTo(0, -4); ctx.lineTo(-6, 0); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'rgba(244,241,234,.5)'; ctx.beginPath(); ctx.moveTo(0, 18); ctx.lineTo(6, 0); ctx.lineTo(0, 4); ctx.lineTo(-6, 0); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = T.ink; ctx.font = '600 18px "DM Sans", sans-serif'; ctx.fillText('N', 0, -34);
-    ctx.restore();
     ctx.restore();
     ctx.textAlign = 'left';
   }
+
 
   // Leonida Wrapped: the whole launch run on one card. Same drawing, same device, nothing uploaded.
   function longestStreak() {
@@ -974,18 +948,6 @@
     fitText(ctx, dt, 120, 20, '600 {s}px "DM Sans", sans-serif'); ctx.fillText(dt, 0, 46);
     ctx.font = '600 20px "DM Sans", sans-serif'; ctx.fillText(tr('LEONIDA'), 0, -38);
     ctx.restore();
-  }
-
-  function patternTile(size, paint) {
-    try {
-      // Tiles are painted at the card's pixel density, then scaled back so they stay crisp.
-      var k = $('card-canvas').width / 1080;
-      var c = document.createElement('canvas'); c.width = size * k; c.height = size * k;
-      var g = c.getContext('2d'); g.scale(k, k); paint(g);
-      var pat = $('card-canvas').getContext('2d').createPattern(c, 'repeat');
-      if (pat && pat.setTransform && window.DOMMatrix) pat.setTransform(new DOMMatrix([1 / k, 0, 0, 1 / k, 0, 0]));
-      return pat;
-    } catch (e) { return null; }
   }
 
   function roundRect(ctx, x, y, w, h, r) {
