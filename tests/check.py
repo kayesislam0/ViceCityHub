@@ -47,6 +47,13 @@ async def browser():
             if not await pg.evaluate("document.getElementById('card-canvas').toDataURL('image/png').length > 50000"): out.append(f'{w}px: the card did not paint')
             out += [f'{w}px: script error {e}' for e in errors]
             await ctx.close()
+        # Cheat codes: all 61 rows are in the page itself (search engines read it), and the search filters them.
+        ctx = await b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True)
+        pg = await ctx.new_page(); await pg.goto(base); await pg.wait_for_timeout(300)
+        if await pg.evaluate("document.querySelectorAll('#cheat-rows tr').length") != 61: out.append('cheats: expected 61 rows')
+        await pg.fill('#cheat-q', 'ammo')
+        if await pg.evaluate("[...document.querySelectorAll('#cheat-rows tr')].filter(r => !r.hidden).length") != 3: out.append('cheats: search for "ammo" should show 3')
+        await ctx.close()
         # Spanish and Portuguese run longer than English: no script errors, no sideways scrolling, text translated.
         for lang, word in [('es', 'Herramientas'), ('pt', 'Ferramentas')]:
             ctx = await b.new_context(viewport={'width': 320, 'height': 780}, has_touch=True, is_mobile=True)

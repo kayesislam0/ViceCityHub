@@ -588,6 +588,49 @@
     });
   }
 
+  // ---- cheat codes: search, type filter, "known code only", and a personal unlocked checklist ----
+  function bindCheats() {
+    var rows = Array.prototype.slice.call(document.querySelectorAll('#cheat-rows tr'));
+    if (!rows.length) return;
+    var got = load('vch.cheats', '').split(',').filter(Boolean);
+    var cat = 'all';
+    var norm = function (x) { return x.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); };
+    function count() {
+      $('cheat-count').textContent = tr('{n} of {m} unlocked', { n: got.length, m: rows.length });
+    }
+    function apply() {
+      var q = norm($('cheat-q').value.trim()), known = $('cheat-known').checked, shown = 0;
+      rows.forEach(function (tr_) {
+        var ok = (cat === 'all' || tr_.dataset.cat === cat) && (!known || tr_.hasAttribute('data-code')) &&
+          (!q || norm(tr_.textContent).indexOf(q) >= 0);
+        tr_.hidden = !ok; if (ok) shown++;
+      });
+      $('cheat-empty').hidden = shown > 0;
+    }
+    rows.forEach(function (tr_) {
+      var box = tr_.querySelector('input'), id = tr_.dataset.id;
+      box.checked = got.indexOf(id) >= 0;
+      tr_.classList.toggle('is-got', box.checked);
+      box.addEventListener('change', function () {
+        got = got.filter(function (g) { return g !== id; });
+        if (box.checked) { got.push(id); buzz(); }
+        tr_.classList.toggle('is-got', box.checked);
+        save('vch.cheats', got.join(','));
+        count();
+      });
+    });
+    $('cheat-q').addEventListener('input', apply);
+    $('cheat-known').addEventListener('change', apply);
+    document.querySelectorAll('.chips .chip').forEach(function (b) {
+      b.addEventListener('click', function () {
+        cat = b.dataset.cat;
+        document.querySelectorAll('.chips .chip').forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+        apply();
+      });
+    });
+    count(); apply();
+  }
+
   // ---- the card (1080 x 1350), drawn only near the screen or when exported ----
   var pending = false, cardVisible = false, cardDirty = true;
   function drawSoon() {
@@ -1071,7 +1114,7 @@
   // ---- start ----
   function start() {
     translatePage(); bindLang();
-    buildMap(); bindList(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindActions(); readChallenge();
+    buildMap(); bindList(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge();
     buildBingo(); renderDaily(); renderTipped(); renderAlias(); render(); tick();
     var clock = setInterval(tick, 30000);
     document.addEventListener('visibilitychange', function () {
