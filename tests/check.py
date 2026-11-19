@@ -15,7 +15,7 @@ def static():
     for want in ['<link rel="canonical" href="https://vicecityhub.okenshop.com/">', BTC, BINANCE, '"@type":"FAQPage"', 'og:image']:
         if want not in html: out.append(f'index.html is missing {want}')
     if '<script>' in html: out.append('inline script (the security policy blocks it)')
-    for f in ['robots.txt', 'sitemap.xml', '404.html', 'legal.html', 'site.webmanifest', 'hub/img/icon-192.png', 'hub/img/icon-512.png', 'hub/hub.js', 'hub/i18n.js', 'hub/hub.css', 'hub/img/og.png', 'hub/img/qr-btc.svg', 'hub/img/qr-binance.svg']:
+    for f in ['robots.txt', 'sitemap.xml', '404.html', 'legal.html', 'gta-6-cheat-codes.html', 'site.webmanifest', 'hub/img/icon-192.png', 'hub/img/icon-512.png', 'hub/hub.js', 'hub/i18n.js', 'hub/hub.css', 'hub/img/og.png', 'hub/img/qr-btc.svg', 'hub/img/qr-binance.svg']:
         if not (SITE / f).is_file(): out.append(f'{f} is missing')
     return out
 
@@ -49,7 +49,10 @@ async def browser():
             await ctx.close()
         # Cheat codes: all 61 rows are in the page itself (search engines read it), and the search filters them.
         ctx = await b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True)
-        pg = await ctx.new_page(); await pg.goto(base); await pg.wait_for_timeout(300)
+        pg = await ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
+        await pg.goto(base + 'gta-6-cheat-codes.html'); await pg.wait_for_timeout(300)
+        out += [f'cheat page: script error {e}' for e in errs]
+        if await pg.evaluate('document.documentElement.scrollWidth > innerWidth'): out.append('cheat page: sideways scrolling')
         if await pg.evaluate("document.querySelectorAll('#cheat-rows tr').length") != 61: out.append('cheats: expected 61 rows')
         await pg.fill('#cheat-q', 'ammo')
         if await pg.evaluate("[...document.querySelectorAll('#cheat-rows tr')].filter(r => !r.hidden).length") != 3: out.append('cheats: search for "ammo" should show 3')

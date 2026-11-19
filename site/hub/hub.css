@@ -399,3 +399,9 @@ kbd { display: inline-grid; place-items: center; min-width: 30px; height: 30px; 
   kbd { background: #fff !important; color: #000 !important; border-color: #000 !important; box-shadow: none !important; }
   .cheat-wrap { border-color: #000; }
 }
+
+.crumbs { font-size: 14px; color: var(--chalk-2); }
+.crumbs a { color: var(--chalk-2); }
+.cheats h1 { font: 400 clamp(44px, 8vw, 88px)/1 var(--display); margin-top: 12px; }
+section.cheats:first-child { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
+p.cheat-more { margin-top: 16px; }

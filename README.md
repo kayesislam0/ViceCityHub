@@ -29,7 +29,7 @@ and challenge your crew with one link.
 
 | | |
 |---|---|
-| **All 61 cheat codes** | Every GTA VI cheat with its button code (where known) and how to unlock it. Search, filter by type, tick off the ones you have. |
+| **All 61 cheat codes** | [Its own page](https://vicecityhub.okenshop.com/gta-6-cheat-codes): every GTA VI cheat with its button code (where known) and how to unlock it. Search, filter by type, tick off the ones you have. |
 | **Map tracker** | Tap each of Leonida's six regions as you go: passed through, explored, done 100%. Your score and rank update live. |
 | **Map card** | One tap makes a 2160 × 2700 picture of your map to post. Three looks, an optional "Day one" stamp. |
 | **Leonida Blend** | Open a friend's link and make a Blend: both maps on one card, how much of Leonida you covered together, your map match, and who carried. |

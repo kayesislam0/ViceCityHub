@@ -100,18 +100,20 @@
   function rank(n) { return tr(RANKS[rankIndex(n === undefined ? steps() : n)][1]); }
 
   // ---- language: English by default; Spanish and Portuguese from ?lang=, a saved choice, or the browser ----
-  var DICT = window.VCH_I18N || {};
+  // Translations load only for Spanish and Portuguese visitors (hub/i18n.js), so English pages stay light.
+  var SUPPORTED = { en: 1, es: 1, pt: 1 };
+  function dict() { return (window.VCH_I18N || {})[LANG] || {}; }
   var LANG = (function () {
     var q = '';
     try { q = (new URLSearchParams(location.search).get('lang') || '').toLowerCase(); } catch (e) { /* old browser */ }
     var saved = load('vch.lang', '');
     var nav = ((navigator.languages && navigator.languages[0]) || navigator.language || 'en').slice(0, 2).toLowerCase();
-    var pick = [q, saved, nav].filter(function (l) { return l === 'en' || DICT[l]; })[0] || 'en';
-    if (q && (q === 'en' || DICT[q])) save('vch.lang', q);
+    var pick = [q, saved, nav].filter(function (l) { return SUPPORTED[l]; })[0] || 'en';
+    if (q && SUPPORTED[q]) save('vch.lang', q);
     return pick;
   })();
   function tr(en, vars) {
-    var out = (LANG !== 'en' && DICT[LANG] && DICT[LANG][en]) || en;
+    var out = (LANG !== 'en' && dict()[en]) || en;
     if (vars) for (var k in vars) out = out.split('{' + k + '}').join(vars[k]);
     return out;
   }
@@ -124,8 +126,8 @@
     while ((n = w.nextNode())) todo.push(n);
     todo.forEach(function (node) {
       var raw = node.textContent, key = raw.replace(/\s+/g, ' ').trim();
-      if (!key || !DICT[LANG][key]) return;
-      node.textContent = raw.replace(raw.trim(), DICT[LANG][key]);
+      if (!key || !dict()[key]) return;
+      node.textContent = raw.replace(raw.trim(), dict()[key]);
     });
     ['aria-label', 'placeholder', 'alt'].forEach(function (attr) {
       document.querySelectorAll('[' + attr + ']').forEach(function (e) {
@@ -133,7 +135,7 @@
         e.setAttribute(attr, v.split(': ').map(function (part) { return tr(part); }).join(': '));
       });
     });
-    var tt = DICT[LANG]['@title']; if (tt) document.title = tt;
+    var tt = dict()['@title' + (document.body.dataset.page ? ':' + document.body.dataset.page : '')]; if (tt) document.title = tt;
   }
   function bindLang() {
     document.querySelectorAll('[data-lang]').forEach(function (a) {
@@ -1116,6 +1118,7 @@
   // ---- start ----
   function start() {
     translatePage(); bindLang();
+    if (!$('map')) { bindCheats(); return; } // the cheat code page has only the cheat list
     buildMap(); bindList(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge();
     buildBingo(); renderDaily(); renderTipped(); renderAlias(); render(); tick();
     var clock = setInterval(tick, 30000);
@@ -1134,5 +1137,11 @@
       Promise.all([document.fonts.load('400 40px Anton'), document.fonts.load('600 20px "DM Sans"')]).then(drawSoon, drawSoon);
     }
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+  function boot() {
+    if (LANG === 'en' || window.VCH_I18N) { start(); return; }
+    var sc = document.createElement('script');
+    sc.src = '/hub/i18n.js'; sc.onload = start; sc.onerror = start;
+    document.head.appendChild(sc);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

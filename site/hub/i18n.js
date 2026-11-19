@@ -1,5 +1,5 @@
 /* Vice City Hub translations: Spanish and Portuguese, keyed by the English text. English needs no entry.
-   To add a language, add an object with the same keys; hub.js picks it from ?lang=, a saved choice or the browser. */
+   Loaded by hub.js only for Spanish and Portuguese visitors. */
 window.VCH_I18N = {
  "es": {
   "@title": "Rastreador del mapa de GTA 6, reto diario y bingo | Vice City Hub",
@@ -436,7 +436,19 @@ window.VCH_I18N = {
   "Complete 50 meditations": "Completa 50 meditaciones",
   "Catch 100 fish": "Pesca 100 peces",
   "Make $250,000 selling collectibles": "Gana 250.000 $ vendiendo coleccionables",
-  "Steal 100 cop vehicles": "Roba 100 vehículos de policía"
+  "Steal 100 cop vehicles": "Roba 100 vehículos de policía",
+  "@title:cheats": "Trucos de GTA 6: los 61 trucos, códigos y cómo desbloquearlos",
+  "Skip to the cheat list": "Ir a la lista de trucos",
+  "GTA 6 cheat codes": "Trucos de GTA 6",
+  "All 61 cheats unlock after the main story. Here are the five people look for most; the full list has every known code, how to unlock each cheat and a checklist.": "Los 61 trucos se desbloquean tras la historia principal. Estos son los cinco más buscados; la lista completa tiene todos los códigos conocidos, cómo desbloquear cada truco y una lista para marcar.",
+  "See all 61 GTA 6 cheats": "Ver los 61 trucos de GTA 6",
+  "How many cheats are in GTA 6?": "¿Cuántos trucos tiene GTA 6?",
+  "61. Each one unlocks in the Progress menu after you finish the main story, and most also need a challenge done first. 17 button codes are known so far.": "61. Cada uno se desbloquea en el menú Progreso al terminar la historia principal, y la mayoría también exige un desafío. Por ahora se conocen 17 códigos.",
+  "More for your launch run": "Más para tu lanzamiento",
+  "Track how much of Leonida you have seen, make a Blend with a friend, and get your Wrapped card. Free, no sign-up.": "Registra cuánto de Leonida has visto, haz un Blend con un amigo y consigue tu tarjeta Wrapped. Gratis y sin registro.",
+  "Open the map tracker": "Abrir el rastreador del mapa",
+  "Leonida map tracker": "Rastreador del mapa de Leonida",
+  "/ Cheat codes": "/ Trucos"
  },
  "pt": {
   "@title": "Rastreador do mapa do GTA 6, desafio diário e bingo | Vice City Hub",
@@ -873,6 +885,18 @@ window.VCH_I18N = {
   "Complete 50 meditations": "Complete 50 meditações",
   "Catch 100 fish": "Pesque 100 peixes",
   "Make $250,000 selling collectibles": "Ganhe US$ 250.000 vendendo colecionáveis",
-  "Steal 100 cop vehicles": "Roube 100 viaturas"
+  "Steal 100 cop vehicles": "Roube 100 viaturas",
+  "@title:cheats": "Cheats do GTA 6: todos os 61, códigos e como liberar",
+  "Skip to the cheat list": "Pular para a lista de cheats",
+  "GTA 6 cheat codes": "Cheats do GTA 6",
+  "All 61 cheats unlock after the main story. Here are the five people look for most; the full list has every known code, how to unlock each cheat and a checklist.": "Os 61 cheats são liberados depois da história principal. Estes são os cinco mais procurados; a lista completa tem todos os códigos conhecidos, como liberar cada cheat e uma lista para marcar.",
+  "See all 61 GTA 6 cheats": "Ver os 61 cheats do GTA 6",
+  "How many cheats are in GTA 6?": "Quantos cheats o GTA 6 tem?",
+  "61. Each one unlocks in the Progress menu after you finish the main story, and most also need a challenge done first. 17 button codes are known so far.": "61. Cada um é liberado no menu Progresso depois da história principal, e a maioria também exige um desafio. Por enquanto 17 códigos são conhecidos.",
+  "More for your launch run": "Mais para o seu lançamento",
+  "Track how much of Leonida you have seen, make a Blend with a friend, and get your Wrapped card. Free, no sign-up.": "Acompanhe quanto de Leonida você já viu, faça um Blend com um amigo e pegue seu card Wrapped. Grátis e sem cadastro.",
+  "Open the map tracker": "Abrir o rastreador do mapa",
+  "Leonida map tracker": "Rastreador do mapa de Leonida",
+  "/ Cheat codes": "/ Cheats"
  }
 };
