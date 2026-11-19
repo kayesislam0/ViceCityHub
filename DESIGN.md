@@ -41,6 +41,8 @@ Rules: one accent. Neon marks the primary action and the live state. Surfaces st
 | Highway sign (`.sign`) | static | Region names. |
 | Tip card (`.way`) | static | Green sign, white QR on a white frame. |
 | Live line (`.live`) | static | "GTA 6 is out." with a neon dot. |
+| Exit sign (card dare) | static | Bottom of every card: green highway sign with a white inset border and an exit arrow (asphalt on the Highway look). |
+| Map picker (`.pick`) | hidden, shown after the first map tap | The selected region and four levels. |
 
 ## Motion
 
@@ -83,7 +85,7 @@ Every card reads in the same order:
 5. **The verdict:** one true line only this player could have ("Has never set foot in Grassrivers",
    "4 of 6 regions still under the fog", "Finished every region of Leonida").
 6. **The map** with names. Seen regions in their own colour; unseen regions under fog (diagonal stripes).
-7. **The dare band** in the accent: what to do, large ("Can you beat 50%?", "Get your Leonida Wrapped",
+7. **The exit sign:** a green highway sign inside the card margins with an exit arrow: what to do, large ("Can you beat 50%?", "Get your Leonida Wrapped",
    "Blend with me"), then vicecityhub.okenshop.com.
 
 Blend paints the map by who explored it: you in the accent, your friend in gold, regions you both explored in stripes
@@ -94,15 +96,15 @@ friend's own score from their link.
 
 | Element | Action | Result |
 |---|---|---|
-| Map region | Tap, Enter or Space | One step deeper. At 100% it stays, and a toast says to use the list to lower it |
-| List step button | Tap a step | Region goes to that step. Steps below it show as reached (pink tint) |
-| List step button | Tap the current step | Region goes back one step |
+| Map region | Tap, Enter or Space | One step deeper (stops at Finished) and selects the region in the picker under the map |
+| Map picker | Tap a level | The selected region goes to exactly that level, Not seen included |
+| List level button | Tap a level | Region goes to exactly that level. Tapping the current level does nothing; levels below it show as reached (pink tint) |
 | Street name: Share my name | Tap | Share sheet on phones, otherwise copies the nickname, the "known for" line and the link |
 | Street name: Another one | Tap | Next nickname for the same tag |
 | Street name: Put it on my card | Check | The card title uses the tag and nickname |
 | Bingo cell | Tap | Ticks or unticks; the centre is free and fixed. Finished lines get a gold edge; the score says how many ticks the next bingo needs |
 | Bingo: Share my board | Tap | Shares or copies your name, platform, score and an emoji grid |
-| Daily dare: I did it | Tap | Marks today; the 7-day row fills, and Share my streak becomes the primary button. Tap again to undo |
+| Daily dare: I did it | Tap | Marks today; the button goes away, the 7-day row fills, Share my streak becomes the primary button, and an Undo link appears under it |
 | Bingo: New board | Tap | New prompts, with Undo in the status line |
 | Card: Share card | Tap | Native share with the PNG where supported, otherwise download and copy the challenge text |
 | Card: challenge link | Tap (text button) | Copies the challenge text and link |
@@ -129,3 +131,9 @@ friend's own score from their link.
 - Storage blocked (private mode): everything works, nothing is remembered.
 - No Web Share: the card downloads and the challenge text is copied.
 - Reduced motion: all animation and transitions are off.
+
+### Touch
+
+- No tap-highlight flash, and no text selection on the map, game squares, level buttons or buttons.
+- The toast never takes taps (`pointer-events: none`), so it can't swallow a tap on the map.
+- The phone next-step bar hides whenever any part of the map is on screen.

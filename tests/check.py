@@ -39,6 +39,17 @@ async def browser():
             await pg.goto(base); await pg.wait_for_timeout(300)
             await pg.click('details.list-toggle > summary')
             await pg.click('#region-list li:nth-child(4) button[data-k="2"]')
+            # Marking: tapping the current level keeps it; the map picker sets an exact level; the daily dare only undoes on purpose.
+            await pg.click('#region-list li:nth-child(4) button[data-k="2"]')
+            if await pg.evaluate("localStorage.getItem('vch.map')[3]") != '2': out.append(f'{w}px: tapping the current level changed it')
+            await pg.evaluate("document.querySelector('#map .rg[data-i=\"3\"]').dispatchEvent(new MouseEvent('click', {bubbles: true}))")
+            await pg.click('#pick button[data-k="0"]')
+            if await pg.evaluate("localStorage.getItem('vch.map')[3]") != '0': out.append(f'{w}px: the map picker did not set Not seen')
+            if await pg.evaluate("getComputedStyle(document.getElementById('toast')).pointerEvents") != 'none': out.append(f'{w}px: the toast can block taps')
+            await pg.click('#daily-done')
+            if not await pg.evaluate("document.getElementById('daily-done').hidden"): out.append(f'{w}px: "I did it" still shows after marking')
+            await pg.click('#daily-undo')
+            if await pg.evaluate("localStorage.getItem('vch.daily')"): out.append(f'{w}px: daily undo did not clear today')
             await pg.click('#daily-done'); await pg.click('#tipped-btn')
             if await pg.evaluate(f'document.documentElement.scrollWidth > {w}'): out.append(f'{w}px: sideways scrolling')
             if touch:
