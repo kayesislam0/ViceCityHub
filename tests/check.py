@@ -37,6 +37,7 @@ async def browser():
             pg = await ctx.new_page(); errors = []
             pg.on('pageerror', lambda e: errors.append(str(e)))
             await pg.goto(base); await pg.wait_for_timeout(300)
+            await pg.click('details.list-toggle > summary')
             await pg.click('#region-list li:nth-child(4) button[data-k="2"]')
             await pg.click('#daily-done'); await pg.click('#tipped-btn')
             if await pg.evaluate('document.documentElement.scrollWidth > innerWidth'): out.append(f'{w}px: sideways scrolling')

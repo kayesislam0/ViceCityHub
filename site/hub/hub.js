@@ -1,10 +1,10 @@
-/* Vice City Hub: the Leonida map tracker, the shareable card, the street-name and bingo tools, the unlock clock.
+/* Vice City Hub: the Leonida map tracker, the shareable card, the street-name and bingo tools.
    Everything runs on the visitor's device. No requests to other sites; progress is kept in localStorage. */
 (function () {
   'use strict';
 
   var SITE = 'https://vicecityhub.okenshop.com/';
-  var LEVELS = ['Not yet', 'Passed through', 'Explored', 'Done 100%'];
+  var LEVELS = ['Not yet', 'Passed through', 'Explored', 'Finished'];
 
   function ellipse(cx, cy, rx, ry) {
     return 'M' + (cx - rx) + ' ' + cy + 'a' + rx + ' ' + ry + ' 0 1 0 ' + (2 * rx) + ' 0a' + rx + ' ' + ry + ' 0 1 0 ' + (-2 * rx) + ' 0Z';
@@ -52,17 +52,17 @@
     return d + 'Z';
   }
   var REGIONS = [
-    { id: 'kalaga', name: 'Mount Kalaga', full: 'Mount Kalaga National Park', label: [300, 104],
+    { id: 'kalaga', color: '#1F7A4D', name: 'Mount Kalaga', full: 'Mount Kalaga National Park', label: [300, 104],
       d: outline(['kWest', 'kNorth', 'kEast', 'kV', 'kA', 'kG']) },
-    { id: 'gellhorn', name: 'Port Gellhorn', full: 'Port Gellhorn', label: [212, 238], two: true,
+    { id: 'gellhorn', color: '#C9A15B', name: 'Port Gellhorn', full: 'Port Gellhorn', label: [212, 238], two: true,
       d: outline(['-kG', 'gA', 'gGr', 'gCoast']) },
-    { id: 'ambrosia', name: 'Ambrosia', full: 'Ambrosia', label: [364, 226],
+    { id: 'ambrosia', color: '#E8762C', name: 'Ambrosia', full: 'Ambrosia', label: [364, 226],
       d: outline(['-kA', 'aV', 'aGr', '-gA']) },
-    { id: 'vice', name: 'Vice City', full: 'Vice City', label: [505, 318],
+    { id: 'vice', color: '#FF5FA2', color2: '#3FD6E8', name: 'Vice City', full: 'Vice City', label: [505, 318],
       d: outline(['-kV', 'vCoast', '-vGr', '-aV']) },
-    { id: 'grass', name: 'Grassrivers', full: 'Grassrivers', label: [384, 506],
+    { id: 'grass', color: '#3FAE5A', name: 'Grassrivers', full: 'Grassrivers', label: [384, 506],
       d: outline(['-gGr', '-aGr', 'vGr', 'grCoast']) },
-    { id: 'keys', name: 'Leonida Keys', full: 'Leonida Keys', label: [190, 690],
+    { id: 'keys', color: '#19B5A5', name: 'Leonida Keys', full: 'Leonida Keys', label: [190, 690],
       hit: 'M112 642L512 628L516 724L112 724Z',
       d: ellipse(474, 652, 28, 10) + ellipse(424, 672, 24, 9) + ellipse(376, 688, 22, 9) + ellipse(328, 699, 20, 8) + ellipse(282, 707, 18, 8) }
   ];
@@ -73,14 +73,14 @@
                fill: ['#26302B', '#3E2B40', '#5E2F55', '#7D3B62'], onFull: '#0E1311', lake: '#10232A', darkFrom: 4, done: '#FFC35A', line: 'rgba(244,241,234,.14)' },
     sunset:  { bg: '#2A0F22', bg2: '#5E1F2C', sea: '#3A1630', grid: 'rgba(255,214,170,.07)', ink: '#FFF3E4', ink2: '#F2C9B0', accent: '#FFC35A', edge: '#2A0F22',
                fill: ['#47243A', '#8A3A3E', '#D46A3C', '#FFC35A'], onFull: '#2A0F22', lake: '#3A1630', darkFrom: 3, done: '#FFF3E4', line: 'rgba(255,243,228,.16)' },
-    highway: { bg: '#0B6B3A', bg2: '#0B6B3A', sea: '#095A31', grid: 'rgba(255,255,255,.07)', ink: '#FFFFFF', ink2: '#D6EEDF', accent: '#FFFFFF', edge: '#0B6B3A',
-               fill: ['#0F7F46', '#3E9A68', '#9FCDB2', '#FFFFFF'], onFull: '#0B6B3A', lake: '#095A31', darkFrom: 2, done: '#FFC35A', line: 'rgba(255,255,255,.2)' }
+    highway: { bg: '#0B6B3A', bg2: '#0B6B3A', sea: '#063F22', grid: 'rgba(255,255,255,.07)', ink: '#FFFFFF', ink2: '#D6EEDF', accent: '#FFFFFF', edge: '#0B6B3A',
+               fill: ['#0E5434', '#3E9A68', '#9FCDB2', '#FFFFFF'], onFull: '#0B6B3A', lake: '#063F22', darkFrom: 2, done: '#FFC35A', line: 'rgba(255,255,255,.2)' }
   };
   // Dusk to deep berry: each step reads as progress, and a finished region is calm to look at, with a gold edge as the reward.
   var MAP_FILL = ['#26302B', '#3E2B40', '#5E2F55', '#7D3B62'];
 
   // Ranks by steps (6 regions x 3 levels = 18).
-  var RANKS = [[0, 'Still in the menu'], [1, 'Tourist'], [4, 'Local'], [9, 'Hustler'], [13, 'Kingpin'], [18, 'Leonida legend']];
+  var RANKS = [[0, 'Still in the menu'], [1, 'Tourist'], [6, 'Local'], [13, 'Legend']];
 
   // ---- storage (may be blocked: private mode, embedded previews) ----
   function load(key, fallback) { try { var v = localStorage.getItem(key); return v === null ? fallback : v; } catch (e) { return fallback; } }
@@ -195,15 +195,10 @@
   function buildMap() {
     var svg = $('map');
     var defs = el('defs', {}, svg);
-    var fog = el('pattern', { id: 'fog', width: 12, height: 12, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(40)' }, defs);
-    el('line', { x1: 0, y1: 0, x2: 0, y2: 12, stroke: 'rgba(244,241,234,.16)', 'stroke-width': 3 }, fog);
-    var stip = el('pattern', { id: 'stipple', width: 14, height: 14, patternUnits: 'userSpaceOnUse' }, defs);
-    el('circle', { cx: 3, cy: 3, r: 1.1, fill: 'rgba(143,179,191,.25)' }, stip);
+    // Each region has its own colour; Vice City runs from neon pink to cyan.
+    var vg = el('linearGradient', { id: 'g-vice', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+    el('stop', { offset: '0', 'stop-color': '#FF5FA2' }, vg); el('stop', { offset: '1', 'stop-color': '#3FD6E8' }, vg);
     el('rect', { x: 0, y: 0, width: 600, height: 740, rx: 18, fill: '#0F1F25' }, svg);
-    el('rect', { x: 0, y: 0, width: 600, height: 740, rx: 18, fill: 'url(#stipple)' }, svg);
-    var grid = el('g', { stroke: 'rgba(244,241,234,.05)', 'stroke-width': 1 }, svg);
-    for (var x = 50; x < 600; x += 50) el('line', { x1: x, y1: 0, x2: x, y2: 740 }, grid);
-    for (var y = 50; y < 740; y += 50) el('line', { x1: 0, y1: y, x2: 600, y2: y }, grid);
     // The coastal shelf: a pale halo round the whole state, so its outline reads from across the room.
     var shelf = el('g', { 'pointer-events': 'none' }, svg);
     REGIONS.forEach(function (r) {
@@ -213,8 +208,8 @@
     pctEl = el('text', { class: 'map-pct', x: 578, y: 40 }, svg);
     REGIONS.forEach(function (r, i) {
       var g = el('g', { class: 'rg', tabindex: 0, role: 'button', 'data-i': i }, svg);
+      g.style.setProperty('--c', r.color);
       el('path', { d: r.d, class: 'shape' }, g);
-      el('path', { d: r.d, class: 'fog', fill: 'url(#fog)' }, g);
       if (r.hit) el('path', { d: r.hit, class: 'hit' }, g);
       g.addEventListener('click', function () { deeper(i); });
       g.addEventListener('keydown', function (e) {
@@ -237,23 +232,23 @@
       if (r.two) {
         var parts = r.name.split(' ');
         el('text', { x: lx, y: ly - 10, 'text-anchor': 'middle' }, lg).textContent = parts[0];
-        el('text', { x: lx, y: ly + 14, 'text-anchor': 'middle' }, lg).textContent = parts.slice(1).join(' ');
-        el('text', { class: 'lvl', x: lx, y: ly + 36, 'text-anchor': 'middle' }, lg);
+        el('text', { x: lx, y: ly + 16, 'text-anchor': 'middle' }, lg).textContent = parts.slice(1).join(' ');
+        el('text', { class: 'lvl', x: lx, y: ly + 40, 'text-anchor': 'middle' }, lg);
       } else {
         el('text', { x: lx, y: ly, 'text-anchor': 'middle' }, lg).textContent = r.name;
-        el('text', { class: 'lvl', x: lx, y: ly + 22, 'text-anchor': 'middle' }, lg);
+        el('text', { class: 'lvl', x: lx, y: ly + 26, 'text-anchor': 'middle' }, lg);
       }
+      // Finished badge: a gold disc with a tick, just right of the name.
+      var bx = lx + (r.two ? 58 : r.name.length * 6.4 + 20), by = (r.two ? ly - 18 : ly - 8);
+      var bd = el('g', { class: 'badge', transform: 'translate(' + bx + ' ' + by + ')' }, lg);
+      el('circle', { r: 11 }, bd); el('path', { d: 'M-5 0.5l3.4 3.4 6.2-7' }, bd);
       labels.push(lg);
     });
-    var cp = el('g', { class: 'compass', transform: 'translate(552 684)' }, svg);
-    el('circle', { r: 24, fill: 'rgba(15,31,37,.85)', stroke: 'rgba(244,241,234,.35)', 'stroke-width': 1.5 }, cp);
-    el('path', { d: 'M0 -18L6 0L0 -4L-6 0Z', fill: '#FF5FA2' }, cp);
-    el('path', { d: 'M0 18L6 0L0 4L-6 0Z', fill: 'rgba(244,241,234,.5)' }, cp);
-    el('text', { x: 0, y: -30, 'text-anchor': 'middle' }, cp).textContent = 'N';
   }
 
   // Your route: a dashed neon line through every region you have touched, in map order.
   function drawRoute() {
+    return; // the page map stays calm: colour and labels carry the state
     while (routeG.firstChild) routeG.removeChild(routeG.firstChild);
     var pts = [];
     levels.forEach(function (l, i) { if (l) pts.push(anchorOf(REGIONS[i])); });
@@ -273,11 +268,12 @@
 
   // A map tap goes one step deeper and stops at 100%, so a stray tap never wipes a finished region.
   function deeper(i) {
-    if (levels[i] === 3) { toast(tr('{name} is already 100%. To lower it, use the list.', { name: REGIONS[i].full })); return; }
+    if (levels[i] === 3) { toast(tr('{name} is already finished. To lower it, use the list.', { name: REGIONS[i].full })); return; }
     setLevel(i, levels[i] + 1);
   }
 
   function setLevel(i, lvl) {
+    touched = true;
     var before = steps();
     levels[i] = lvl;
     save('vch.map', code());
@@ -287,7 +283,7 @@
     var after = steps();
     if (rankIndex(after) > rankIndex(before)) {
       buzz();
-      toast(after === 18 ? tr('Rank up: Leonida legend. You have seen it all.') : tr('Rank up: {rank}. {n}% of Leonida seen.', { rank: rank(after), n: score() }));
+      toast(after === 18 ? tr('Every region finished. You have seen all of Leonida.') : tr('Rank up: {rank}. {n}% of Leonida seen.', { rank: rank(after), n: score() }));
       var m = $('meter'); m.classList.remove('flash'); void m.offsetWidth; m.classList.add('flash');
     }
   }
@@ -298,7 +294,7 @@
       var lvl = levels[i];
       var start = n === 0 && REGIONS[i].id === 'vice';
       g.dataset.level = lvl;
-      g.querySelector('.shape').setAttribute('fill', MAP_FILL[lvl]);
+      g.querySelector('.shape').setAttribute('fill', lvl ? (REGIONS[i].color2 ? 'url(#g-vice)' : REGIONS[i].color) : MAP_FILL[0]);
       labels[i].dataset.level = lvl;
       labels[i].classList.toggle('start', start);
       labels[i].querySelector('.lvl').textContent = lvl ? tr(LEVELS[lvl]) : (start ? tr('Tap to start') : '');
@@ -320,13 +316,25 @@
     pctEl.textContent = tr('{n}% seen', { n: p });
     drawRoute();
     $('rank').textContent = tr(RANKS[ri][1]);
-    $('meter-sub').textContent = tr('{v} of 6 regions · {n} of 18 steps', { v: visited(), n: n });
+    $('meter-sub').textContent = tr('{n} of 18 steps', { n: n });
     var next = RANKS[ri + 1];
     var from = RANKS[ri][0];
     $('xp').style.transform = 'scaleX(' + (next ? (n - from) / (next[0] - from) : 1) + ')';
-    $('next-rank').textContent = next ? tr(next[0] - n === 1 ? '1 step to {rank}' : '{n} steps to {rank}', { n: next[0] - n, rank: tr(next[1]) }) : tr('Every region done. Respect.');
+    $('next-rank').textContent = next ? tr(next[0] - n === 1 ? '1 step to {rank}' : '{n} steps to {rank}', { n: next[0] - n, rank: tr(next[1]) }) : tr('Top rank reached.');
     updateChallenge();
+    updateNextbar();
     drawSoon();
+  }
+
+  // ---- next-step bar: shown on phones once the map has progress, hidden while the card is on screen ----
+  var cardOnScreen = false, mapOnScreen = true, touched = false;
+  function updateNextbar() {
+    var nb = $('nextbar'); if (!nb) return;
+    var n = steps();
+    $('nb-pct').textContent = pctOf(n) + '%';
+    $('nb-rank').textContent = rank(n);
+    nb.hidden = !(n > 0 && touched);
+    nb.classList.toggle('is-away', cardOnScreen || mapOnScreen);
   }
 
   // ---- a friend's challenge (?c=320100&n=Name) ----
@@ -352,8 +360,7 @@
   function updateChallenge() {
     if (!rival) return;
     var mine = score();
-    $('challenge-you').textContent = mine + '%';
-    $('challenge-msg').textContent = mine === 0 ? tr('Mark your regions and beat their score.')
+    $('challenge-msg').textContent = mine === 0 ? tr('Beat it.')
       : mine < rival.pct ? tr('{n} points behind {name}. Keep going.', { n: rival.pct - mine, name: rival.name })
       : mine === rival.pct ? tr('Dead even with {name}. One more step wins it.', { name: rival.name })
       : tr('You beat {name}. Make your card and send it back.', { name: rival.name });
@@ -365,9 +372,10 @@
     tag: load('vch.tag', ''),
     platform: load('vch.platform', 'PS5'),
     theme: load('vch.theme', 'night'),
-    dayone: load('vch.dayone', '1') === '1',
+    dayone: load('vch.dayone', '0') === '1',
     useAlias: load('vch.useAlias', '0') === '1',
     aliasRoll: Number(load('vch.aliasRoll', '0')) || 0,
+    format: load('vch.format', 'square') === 'story' ? 'story' : 'square',
     // From 7 December the card opens on Wrapped, unless the visitor picked a card themselves.
     kind: load('vch.kind', Date.now() >= new Date(2026, 11, 7).getTime() ? 'wrapped' : 'map')
   };
@@ -392,6 +400,10 @@
     document.querySelectorAll('input[name="platform"]').forEach(function (r) {
       r.checked = r.value === settings.platform;
       r.addEventListener('change', function () { settings.platform = r.value; save('vch.platform', r.value); drawSoon(); });
+    });
+    document.querySelectorAll('input[name="format"]').forEach(function (r) {
+      r.checked = r.value === settings.format;
+      r.addEventListener('change', function () { settings.format = r.value; save('vch.format', r.value); drawSoon(); });
     });
     document.querySelectorAll('input[name="theme"]').forEach(function (r) {
       r.checked = r.value === settings.theme;
@@ -447,9 +459,8 @@
     });
     $('alias-copy').addEventListener('click', function () {
       var a = alias();
-      copy(tr('My Leonida street name: {name}. {known} Get yours:', { name: a.name, known: a.known }) + ' ' + SITE).then(
-        function () { toast(tr('Street name copied. Drop it in the group chat.')); },
-        function () { toast(tr('Copy is blocked here. Select the name to copy it.')); });
+      shareOrCopy(tr('My Leonida street name:') + '\n' + a.name + '\n' + a.known + '\n' + tr('Get yours:') + ' ' + SITE,
+        function (m) { toast(m); }, tr('Street name copied. Paste it in the group chat.'));
     });
   }
 
@@ -502,7 +513,7 @@
         renderBingoScore();
         if (after > before) {
           buzz();
-          toast(after === 8 ? tr('Blackout. You did it all on night one.') : tr(after === 1 ? 'BINGO! 1 line. Copy your board for the chat.' : 'BINGO! {n} lines. Copy your board for the chat.', { n: after }));
+          toast(after === 8 ? tr('Every square ticked.') : tr(after === 1 ? 'Bingo: 1 line. Share your board.' : 'Bingo: {n} lines. Share your board.', { n: after }));
           box.classList.remove('win'); void box.offsetWidth; box.classList.add('win');
         }
         drawSoon();
@@ -602,15 +613,15 @@
   function renderTipped() {
     var b = $('tipped-btn');
     b.setAttribute('aria-pressed', String(tipped));
-    b.querySelector('span').textContent = tipped ? tr('Thank you!') : tr('I sent a tip');
+    b.querySelector('span').textContent = tipped ? tr('Tip sent') : tr('I sent a tip');
     $('tipped-msg').textContent = tipped
-      ? tr('You kept the hub running. Your map card now carries a gold Backed the hub line. Tap again to remove it.')
-      : tr('Sent one? Tap here and your map card gets a gold Backed the hub line. We trust you, so there is nothing to check.');
+      ? tr('Your card now shows a gold Backed the hub line. Tap again to remove it.')
+      : tr('Sent a tip? Tap here to add a gold "Backed the hub" line to your card.');
   }
   function bindTipped() {
     $('tipped-btn').addEventListener('click', function () {
       tipped = !tipped; save('vch.tipped', tipped ? '1' : '');
-      if (tipped) { buzz(); toast(tr('Thank you. That keeps the lights on in Leonida.')); }
+      if (tipped) { buzz(); toast(tr('Thank you. Your card now shows Backed the hub.')); }
       renderTipped(); drawSoon();
     });
   }
@@ -693,123 +704,183 @@
     return s;
   }
 
+  // Card sizes: Square 1:1 for feeds, Story 9:16 for Stories, TikTok and Shorts. Painted at twice the layout size.
+  var FORMATS = { square: [1080, 1080], story: [1080, 1920] };
   function draw() {
     cardDirty = false;
     var cv = $('card-canvas');
+    var F = FORMATS[settings.format] || FORMATS.square, W = F[0], H = F[1], T = THEMES[settings.theme];
+    if (cv.width !== W * 2 || cv.height !== H * 2) { cv.width = W * 2; cv.height = H * 2; }
+    cv.classList.toggle('is-story', settings.format === 'story');
     var ctx = cv.getContext('2d');
-    var W = 1080, H = 1350, T = THEMES[settings.theme];
-    // The card is laid out at 1080 x 1350 and painted at twice that, so downloads stay sharp on any phone.
-    ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
+    ctx.setTransform(2, 0, 0, 2, 0, 0);
     ctx.imageSmoothingQuality = 'high';
     var bg = ctx.createLinearGradient(0, 0, 0, H);
     bg.addColorStop(0, T.bg); bg.addColorStop(1, T.bg2);
     ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-    if (settings.kind === 'wrapped') { drawWrapped(ctx, T, W, H); return; }
-    if (settings.kind === 'blend' && rival) { drawBlend(ctx, T, W, H); return; }
-
-    ctx.fillStyle = T.ink2;
-    ctx.font = '600 38px "DM Sans", sans-serif';
-    ctx.fillText(tr('Greetings from'), 64, 112);
-    ctx.fillStyle = T.ink;
-    ctx.font = '400 196px Anton, sans-serif';
-    ctx.fillText('LEONIDA', 56, 304);
-
-    drawMap(ctx, T, 44, 344, 0.96);
-
-    var cx = 640, n = steps(), p = pctOf(n);
-    ctx.fillStyle = T.accent;
-    ctx.font = '400 230px Anton, sans-serif';
-    var num = String(p);
-    ctx.fillText(num, cx, 600);
-    var nw = ctx.measureText(num).width;
-    ctx.font = '400 110px Anton, sans-serif';
-    ctx.fillText('%', cx + nw + 6, 600);
-    ctx.fillStyle = T.ink2;
-    ctx.font = '600 32px "DM Sans", sans-serif';
-    ctx.fillText(tr('of Leonida seen'), cx + 4, 650);
-    ctx.fillStyle = T.ink;
-    fitText(ctx, rank(n), 400, 66, '400 {s}px Anton, sans-serif');
-    ctx.fillText(rank(n), cx, 744);
-
-    var ty = 812;
-    REGIONS.forEach(function (r, i) {
-      // three short bars per region: passed, explored, 100% (gold when finished)
-      for (var k = 0; k < 3; k++) {
-        roundRect(ctx, cx + k * 30, ty - 15, 24, 10, 5);
-        ctx.fillStyle = k < levels[i] ? (levels[i] === 3 ? T.done : T.accent) : T.line;
-        ctx.fill();
-      }
-      ctx.fillStyle = levels[i] ? T.ink : T.ink2;
-      ctx.font = '600 28px "DM Sans", sans-serif';
-      ctx.fillText(r.name, cx + 110, ty);
-      ty += 52;
-    });
-
-    var tag = (settings.tag || '').trim() || tr('Player one');
-    var title = settings.useAlias ? alias().name : tag;
-    ctx.fillStyle = T.ink;
-    fitText(ctx, title, W - 128, 84, '400 {s}px Anton, sans-serif');
-    ctx.fillText(title, 64, 1196);
-    ctx.fillStyle = T.ink2;
-    ctx.font = '600 32px "DM Sans", sans-serif';
-    var lines = bingoLines();
-    var meta = tr('Plays on {p}', { p: settings.platform }) + ' · GTA VI' + (lines ? ' · Bingo ×' + lines : '');
-    ctx.fillText(meta, 64, 1246);
-    if (tipped) { var fs = ctx.fillStyle; ctx.fillStyle = '#FFC35A'; ctx.fillText(' · ' + tr('Backed the hub'), 64 + ctx.measureText(meta).width, 1246); ctx.fillStyle = fs; }
-
-    ctx.fillStyle = T.accent;
-    ctx.fillRect(0, H - 64, W, 64);
-    ctx.fillStyle = T.onFull;
-    ctx.font = '600 30px "DM Sans", sans-serif';
-    ctx.fillText(tr('How much have you seen?') + ' vicecityhub.okenshop.com', 64, H - 22);
-
-    if (settings.dayone) stamp(ctx, 940, 170, T);
+    // Wrapped and Blend keep their 1080 x 1350 layout, fitted into the chosen size.
+    if (settings.kind === 'wrapped' || (settings.kind === 'blend' && rival)) {
+      var k = Math.min(W / 1080, H / 1350), ox = (W - 1080 * k) / 2, oy = (H - 1350 * k) / 2;
+      ctx.save(); ctx.translate(ox, oy); ctx.scale(k, k);
+      if (settings.kind === 'wrapped') drawWrapped(ctx, T, 1080, 1350); else drawBlend(ctx, T, 1080, 1350);
+      ctx.restore();
+      return;
+    }
+    if (settings.format === 'story') drawStory(ctx, T, W, H); else drawSquare(ctx, T, W, H);
   }
 
-  // The map as drawn on both cards, at (x, y) and scale sc of its 600 x 740 layout.
-  // blend: { mine: [...], theirs: [...] } paints who explored each region instead of one player's levels.
-  function drawMap(ctx, T, x, y, sc, blend) {
-    // The card map is deliberately quiet: flat land on a calm sea, one soft shadow for depth, and colour that only
-    // ever means progress. No grid, hatching, route dots or compass: every pixel left is one that survives
-    // Instagram, X and WhatsApp compression and reads at thumbnail size.
+  // The % fills the width it is given: the number at full size, the % sign at half.
+  function bigPct(ctx, T, p, x, y, maxW, maxS) {
+    var s = maxS, num = String(p);
+    var fit = function () { ctx.font = '400 ' + s + 'px Anton, sans-serif'; var a = ctx.measureText(num).width; ctx.font = '400 ' + Math.round(s / 2) + 'px Anton, sans-serif'; return a + 8 + ctx.measureText('%').width; };
+    while (fit() > maxW && s > 60) s -= 6;
+    ctx.save();
+    ctx.fillStyle = T.accent;
+    ctx.font = '400 ' + s + 'px Anton, sans-serif'; ctx.fillText(num, x, y);
+    var nw = ctx.measureText(num).width;
+    ctx.font = '400 ' + Math.round(s / 2) + 'px Anton, sans-serif'; ctx.fillText('%', x + nw + 8, y);
+    ctx.restore();
+  }
+  // The rank on a green highway sign: the hub's one signature detail.
+  function rankSign(ctx, T, text, x, y, size) {
+    ctx.font = '400 ' + size + 'px Anton, sans-serif';
+    var w = ctx.measureText(text).width + size * 0.9, h = size * 1.5;
+    roundRect(ctx, x, y, w, h, 10); ctx.fillStyle = '#0B6B3A'; ctx.fill();
+    roundRect(ctx, x + 5, y + 5, w - 10, h - 10, 7); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#FFFFFF'; ctx.fillText(text, x + size * 0.45, y + h / 2 + size * 0.36);
+    return w;
+  }
+  function cardName() { var tag = (settings.tag || '').trim() || tr('Player one'); return settings.useAlias ? alias().name : tag; }
+  function metaLine() {
+    var lines = bingoLines();
+    return tr('Plays on {p}', { p: settings.platform }) + (lines ? '  ' + 'Bingo ×' + lines : '');
+  }
+  // Every card ends with the same band: what to do, then where. Sized to read at a third of its size in a feed.
+  function footer(ctx, T, W, H, h) {
+    ctx.fillStyle = T.accent; ctx.fillRect(0, H - h, W, h);
+    ctx.fillStyle = T.onFull;
+    ctx.font = '400 ' + Math.round(h * 0.4) + 'px Anton, sans-serif';
+    ctx.fillText(tr('Make yours in 20 seconds'), 64, H - h * 0.48);
+    ctx.font = '600 ' + Math.round(h * 0.28) + 'px "DM Sans", sans-serif';
+    ctx.fillText('vicecityhub.okenshop.com', 64, H - h * 0.14);
+  }
+  // Text on a region colour: dark on the bright colours, white on deep green.
+  function inkOn(r) { return r.id === 'kalaga' ? '#FFFFFF' : '#0E1311'; }
+  function regionPaint(ctx, r, x, w) {
+    if (!r.color2) return r.color;
+    var g = ctx.createLinearGradient(x, 0, x + w, 0); g.addColorStop(0, r.color); g.addColorStop(1, r.color2); return g;
+  }
+  function tick(ctx, cx, cy, rad, T) {
+    ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.fillStyle = T.done; ctx.fill();
+    ctx.strokeStyle = '#0E1311'; ctx.lineWidth = rad * 0.24; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(cx - rad * 0.45, cy + rad * 0.02); ctx.lineTo(cx - rad * 0.12, cy + rad * 0.36); ctx.lineTo(cx + rad * 0.48, cy - rad * 0.34); ctx.stroke();
+    ctx.lineCap = 'butt';
+  }
+  // Six region tiles: empty outline, half colour, full colour, full colour with a gold edge and tick.
+  function regionTiles(ctx, T, x, y, w, h, gap) {
+    var tw = (w - gap * 2) / 3;
+    REGIONS.forEach(function (r, i) {
+      var tx = x + (i % 3) * (tw + gap), ty = y + Math.floor(i / 3) * (h + gap), l = levels[i];
+      roundRect(ctx, tx, ty, tw, h, 14);
+      if (l) { ctx.globalAlpha = l === 1 ? 0.45 : 1; ctx.fillStyle = regionPaint(ctx, r, tx, tw); ctx.fill(); ctx.globalAlpha = 1; }
+      else { ctx.strokeStyle = T.line; ctx.lineWidth = 3; ctx.stroke(); }
+      if (l === 3) { roundRect(ctx, tx + 3, ty + 3, tw - 6, h - 6, 12); ctx.strokeStyle = T.done; ctx.lineWidth = 6; ctx.stroke(); }
+      var name = r.id === 'kalaga' ? 'Mt Kalaga' : r.name;
+      ctx.fillStyle = l >= 2 ? inkOn(r) : l === 1 ? '#FFFFFF' : T.ink2;
+      fitText(ctx, name, tw - (l === 3 ? 92 : 40), 44, '400 {s}px Anton, sans-serif');
+      ctx.fillText(name, tx + 20, ty + h / 2 + 16);
+      if (l === 3) tick(ctx, tx + tw - 40, ty + h / 2, 22, T);
+    });
+  }
+  // Minimal cards: one huge, sharp number; the name; the rank; the map. Nothing else competes.
+  function drawSquare(ctx, T, W, H) {
+    var n = steps(), p = pctOf(n);
+    rankSign(ctx, T, rank(n), 64, 64, 54);
+    drawMap(ctx, T, 572, 52, 0.76);
+    bigPct(ctx, T, p, 50, 700, 620, 480);
+    ctx.fillStyle = T.ink2; ctx.font = '600 46px "DM Sans", sans-serif';
+    ctx.fillText(tr('of Leonida seen'), 64, 772);
+    ctx.fillStyle = T.ink;
+    var nm = cardName(); fitText(ctx, nm, W - 128, 104, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 60, 900);
+    if (settings.dayone) { ctx.save(); ctx.translate(430, 215); ctx.scale(0.62, 0.62); stamp(ctx, 0, 0, T); ctx.restore(); }
+    footer(ctx, T, W, H, 124);
+  }
+  function drawStory(ctx, T, W, H) {
+    var n = steps(), p = pctOf(n);
+    rankSign(ctx, T, rank(n), 64, 120, 60);
+    bigPct(ctx, T, p, 48, 800, 960, 620);
+    ctx.fillStyle = T.ink2; ctx.font = '600 56px "DM Sans", sans-serif';
+    ctx.fillText(tr('of Leonida seen'), 64, 890);
+    ctx.fillStyle = T.ink;
+    var nm = cardName(); fitText(ctx, nm, W - 128, 132, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 60, 1060);
+    var sc = 0.86; drawMap(ctx, T, (W - 600 * sc) / 2, 1110, sc, null, { labels: true });
+    if (settings.dayone) stamp(ctx, 930, 190, T);
+    footer(ctx, T, W, H, 150);
+  }
+
+  // The map as drawn on the cards, at (x, y) and scale sc of its 600 x 740 layout. No frame: the state itself is the picture.
+  // blend: { mine: [...], theirs: [...] } paints who explored each region. opts.labels: region names (Story and Blend).
+  function drawMap(ctx, T, x, y, sc, blend, opts) {
+    var labels = !!(opts && opts.labels);
+    // Card label spots: Port Gellhorn and Ambrosia move apart so the bigger names never touch.
+    var SPOT = { gellhorn: [188, 240], ambrosia: [388, 212] };
     var LV = blend ? blend.mine.map(function (m, i) { return Math.max(m, blend.theirs[i]); }) : levels;
-    var tone = function (i) { return blend ? (blend.mine[i] && blend.theirs[i] ? 3 : LV[i] ? 2 : 0) : LV[i]; };
+    var tone = function (i) { return blend ? (LV[i] ? 2 : 0) : LV[i]; };
+    var paint = function (r, t) {
+      if (!t) return T.fill[0];
+      if (!r.color2) return r.color;
+      var g = ctx.createLinearGradient(0, 160, 0, 560); g.addColorStop(0, r.color); g.addColorStop(1, r.color2); return g;
+    };
     ctx.save();
     ctx.translate(x, y); ctx.scale(sc, sc);
-    roundRect(ctx, 0, 0, 600, 740, 24); ctx.fillStyle = T.sea; ctx.fill();
-    ctx.save(); roundRect(ctx, 0, 0, 600, 740, 24); ctx.clip();
-    var sea = ctx.createRadialGradient(330, 330, 60, 300, 380, 560);
-    sea.addColorStop(0, 'rgba(255,255,255,.06)'); sea.addColorStop(1, 'rgba(0,0,0,.22)');
-    ctx.fillStyle = sea; ctx.fillRect(0, 0, 600, 740);
+    ctx.lineJoin = 'round';
     // one soft shadow under the whole state
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 36; ctx.shadowOffsetY = 14;
-    ctx.fillStyle = T.fill[0];
-    REGIONS.forEach(function (r) { ctx.fill(new Path2D(r.d)); });
-    ctx.restore();
-    ctx.restore();
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 16; ctx.fillStyle = T.fill[0];
+    REGIONS.forEach(function (r) { ctx.fill(new Path2D(r.d)); }); ctx.restore();
+    REGIONS.forEach(function (r, i) {
+      var path = new Path2D(r.d), t = tone(i);
+      ctx.globalAlpha = t === 1 ? 0.5 : 1; ctx.fillStyle = paint(r, t); ctx.fill(path);
+      // The Keys are thin islands: a fat stroke in their own colour keeps them visible at thumbnail size.
+      if (r.id === 'keys') { ctx.strokeStyle = t ? (r.color) : T.fill[0]; ctx.lineWidth = 12; ctx.stroke(path); }
+      ctx.globalAlpha = 1;
+    });
     REGIONS.forEach(function (r, i) {
       var path = new Path2D(r.d);
-      ctx.fillStyle = T.fill[tone(i)]; ctx.fill(path);
-      ctx.strokeStyle = T.edge; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke(path);
+      ctx.strokeStyle = tone(i) ? T.bg : T.line; ctx.lineWidth = tone(i) ? 5 : 3; ctx.stroke(path);
     });
-    // Edges carry one meaning each: gold for 100% on a map card; on a Blend, who explored the region.
     REGIONS.forEach(function (r, i) {
       var path = new Path2D(r.d), col = null;
       if (blend) { var me = blend.mine[i] > 0, them = blend.theirs[i] > 0; if (me || them) col = me && them ? T.ink : me ? T.accent : T.done; }
       else if (LV[i] === 3) col = T.done;
-      if (col) { ctx.strokeStyle = col; ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.stroke(path); }
+      if (col) { ctx.strokeStyle = col; ctx.lineWidth = r.id === 'keys' ? 6 : 9; ctx.stroke(path); }
     });
-    var lake = new Path2D(LAKE);
-    ctx.fillStyle = T.sea; ctx.fill(lake);
+    ctx.fillStyle = T.bg; ctx.fill(new Path2D(LAKE));
     ctx.textAlign = 'center';
     REGIONS.forEach(function (r, i) {
-      var t = tone(i), dark = t >= T.darkFrom && r.id !== 'keys';
-      ctx.font = '400 30px Anton, sans-serif';
-      ctx.fillStyle = dark ? T.onFull : t ? T.ink : T.ink2;
-      var lines = r.two ? [r.name.split(' ')[0], r.name.split(' ').slice(1).join(' ')] : [r.name];
-      lines.forEach(function (txt, k) { ctx.fillText(txt, r.label[0], r.label[1] + (r.two ? (k ? 20 : -12) : 0)); });
+      var lp = SPOT[r.id] || r.label;
+      var t = tone(i), lines = r.two ? [r.name.split(' ')[0], r.name.split(' ').slice(1).join(' ')] : [r.name];
+      if (r.id === 'kalaga') lines = ['Mount Kalaga'];
+      var fs = 46, lh = 44;
+      if (labels) {
+        ctx.font = '400 ' + fs + 'px Anton, sans-serif';
+        lines.forEach(function (txt, k) {
+          var ly = lp[1] + (r.two ? (k ? lh / 2 + 4 : -lh / 2 + 4) : 10);
+          ctx.strokeStyle = 'rgba(14,19,17,.85)'; ctx.lineWidth = 10; ctx.strokeText(txt, lp[0], ly);
+          ctx.fillStyle = t ? '#FFFFFF' : T.ink2; ctx.fillText(txt, lp[0], ly);
+        });
+      }
+      if (!blend && LV[i] === 3) {
+        // With names: the tick sits right of the name if it fits, otherwise under it. Without names: on the label spot.
+        var bx = lp[0], by = lp[1];
+        if (labels) {
+          ctx.font = '400 ' + fs + 'px Anton, sans-serif';
+          var tw = Math.max.apply(null, lines.map(function (l) { return ctx.measureText(l).width; }));
+          if (lp[0] + tw / 2 + 64 < 600) { bx = lp[0] + tw / 2 + 36; by = lp[1] - 6; } else { by = lp[1] + (r.two ? lh + 36 : 62); }
+        }
+        if (r.id === 'keys') { bx = 470; by = labels ? 600 : 610; }
+        tick(ctx, bx, by, 26, T);
+      }
     });
     ctx.restore();
     ctx.textAlign = 'left';
@@ -829,7 +900,7 @@
     ctx.fillText(tr('LEONIDA'), 56, 284);
     ctx.fillStyle = T.accent;
     ctx.fillText(tr('WRAPPED'), 56, 452);
-    ctx.fillStyle = T.ink2; ctx.font = '600 30px "DM Sans", sans-serif';
+    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
     ctx.fillText(tr('19 Nov – 10 Dec 2026'), 64, 512);
 
     drawMap(ctx, T, 636, 572, 0.6);
@@ -838,12 +909,12 @@
     ctx.fillStyle = T.accent;
     fitText(ctx, pctOf(n) + '%', 560, 168, '400 {s}px Anton, sans-serif');
     ctx.fillText(pctOf(n) + '%', 58, 742);
-    ctx.fillStyle = T.ink2; ctx.font = '600 30px "DM Sans", sans-serif';
+    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
     ctx.fillText(tr('of Leonida seen'), 64, 792);
     ctx.fillStyle = T.ink;
     fitText(ctx, rank(n), 540, 88, '400 {s}px Anton, sans-serif');
     ctx.fillText(rank(n), 62, 910);
-    ctx.fillStyle = T.ink2; ctx.font = '600 30px "DM Sans", sans-serif';
+    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
     ctx.fillText(tr('final rank'), 64, 956);
 
     ctx.fillStyle = T.line; ctx.fillRect(64, 1030, W - 128, 2);
@@ -857,7 +928,7 @@
       ctx.fillStyle = st[2];
       fitText(ctx, st[0], 300, 76, '400 {s}px Anton, sans-serif');
       ctx.fillText(st[0], x, 1124);
-      ctx.fillStyle = T.ink2; ctx.font = '600 26px "DM Sans", sans-serif';
+      ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
       ctx.fillText(st[1], x + 2, 1162);
     });
 
@@ -868,10 +939,10 @@
     ctx.fillText(title, 64, 1250);
 
     ctx.fillStyle = T.accent;
-    ctx.fillRect(0, H - 64, W, 64);
+    ctx.fillRect(0, H - 84, W, 84);
     ctx.fillStyle = T.onFull;
-    ctx.font = '600 30px "DM Sans", sans-serif';
-    ctx.fillText(tr('Make yours:') + ' vicecityhub.okenshop.com', 64, H - 22);
+    fitText(ctx, tr('Make yours in 20 seconds') + '  vicecityhub.okenshop.com', W - 128, 42, '600 {s}px "DM Sans", sans-serif');
+    ctx.fillText(tr('Make yours in 20 seconds') + '  vicecityhub.okenshop.com', 64, H - 28);
   }
 
   // Leonida Blend: your map and a friend's (from their challenge link) on one card, Spotify-Blend style.
@@ -898,12 +969,12 @@
     ctx.fillStyle = T.accent;
     fitText(ctx, st.cover + '%', 420, 170, '400 {s}px Anton, sans-serif');
     ctx.fillText(st.cover + '%', x - 4, 640);
-    ctx.fillStyle = T.ink2; ctx.font = '600 28px "DM Sans", sans-serif';
+    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
     ctx.fillText(tr('of Leonida covered'), x, 686);
     ctx.fillText(tr('together'), x, 722);
     ctx.fillStyle = T.ink; ctx.font = '400 104px Anton, sans-serif';
     ctx.fillText(st.match + '%', x - 2, 852);
-    ctx.fillStyle = T.ink2; ctx.font = '600 28px "DM Sans", sans-serif';
+    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
     ctx.fillText(tr('map match'), x, 894);
     ctx.fillStyle = T.ink;
     var carry = st.carry === 0 ? tr('Dead even') : tr('{name} carried', { name: st.carry > 0 ? me : rival.name });
@@ -913,16 +984,16 @@
     [[T.accent, me], [T.done, rival.name], [T.ink, tr('Both of you')]].forEach(function (l, k) {
       var ly = 1060 + k * 48;
       ctx.strokeStyle = l[0]; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(x, ly - 10); ctx.lineTo(x + 40, ly - 10); ctx.stroke();
-      ctx.fillStyle = T.ink2; ctx.font = '600 26px "DM Sans", sans-serif';
-      fitText(ctx, l[1], 360, 26, '600 {s}px "DM Sans", sans-serif');
+      ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
+      fitText(ctx, l[1], 360, 36, '600 {s}px "DM Sans", sans-serif');
       ctx.fillText(l[1], x + 56, ly);
     });
 
     ctx.fillStyle = T.accent;
-    ctx.fillRect(0, H - 64, W, 64);
+    ctx.fillRect(0, H - 84, W, 84);
     ctx.fillStyle = T.onFull;
-    ctx.font = '600 30px "DM Sans", sans-serif';
-    ctx.fillText(tr('Blend with me:') + ' vicecityhub.okenshop.com', 64, H - 22);
+    fitText(ctx, tr('Blend with me:') + ' vicecityhub.okenshop.com', W - 128, 42, '600 {s}px "DM Sans", sans-serif');
+    ctx.fillText(tr('Blend with me:') + ' vicecityhub.okenshop.com', 64, H - 28);
   }
 
   // The date stamp: today's date and the day count since launch (19 Nov 2026 = Day one), on the visitor's own clock.
@@ -1072,82 +1143,20 @@
     });
   }
 
-  // ---- unlock clock ----
-  // PS5 PlayStation Store windows reported from GTAVice.net's scrape (15 windows, 63 countries); the main 11.
-  var PLACES = [
-    ['New Zealand', '2026-11-18T11:00:00Z'], ['Australia', '2026-11-18T13:00:00Z'], ['Japan, South Korea', '2026-11-18T15:00:00Z'],
-    ['Hong Kong, Malaysia, Singapore, Taiwan', '2026-11-18T16:00:00Z'], ['Indonesia', '2026-11-18T17:00:00Z'],
-    ['India', '2026-11-18T18:30:00Z'], ['UAE', '2026-11-18T20:00:00Z'], ['Mainland Europe', '2026-11-18T23:00:00Z'],
-    ['UK and Ireland', '2026-11-19T00:00:00Z'], ['USA and Canada', '2026-11-19T05:00:00Z'], ['Mexico, Central America', '2026-11-19T06:00:00Z']
-  ];
-  var NA_ET = Date.parse('2026-11-19T05:00:00Z');
-  var LAST = Date.parse('2026-11-19T06:00:00Z'); // the last listed window
-
-  function myUnlock() {
-    var tz = '';
-    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* older browsers */ }
-    // The USA and Canada share one window at midnight Eastern; everywhere else, local midnight.
-    var na = /^America\/(New_York|Detroit|Chicago|Denver|Phoenix|Boise|Los_Angeles|Anchorage|Juneau|Indiana|Kentucky|North_Dakota|Menominee|Adak|Sitka|Nome|Yakutat|Metlakatla|Toronto|Montreal|Vancouver|Edmonton|Winnipeg|Regina|Halifax|St_Johns|Moncton|Glace_Bay|Goose_Bay|Whitehorse|Dawson|Yellowknife|Iqaluit|Rankin_Inlet|Cambridge_Bay|Swift_Current|Atikokan|Creston|Fort_Nelson|Dawson_Creek|Inuvik|Resolute|Nipigon|Thunder_Bay|Rainy_River|Pangnirtung|Blanc-Sablon|Puerto_Rico)/.test(tz) || tz === 'Pacific/Honolulu';
-    return na ? NA_ET : new Date(2026, 10, 19, 0, 0, 0).getTime();
-  }
-  var timeFmt;
-  function fmtTime(t) {
-    try { timeFmt = timeFmt || new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' }); return timeFmt.format(new Date(t)); }
-    catch (e) { return new Date(t).toLocaleString(); }
-  }
-  function fmtLeft(ms) {
-    var m = Math.ceil(ms / 60000), h = Math.floor(m / 60);
-    return h ? h + 'h ' + (m % 60) + 'm' : m + 'm';
-  }
-
-  function tick() {
-    var now = Date.now(), ul = $('clock');
-    var mine = myUnlock();
-    var rows = PLACES.map(function (p) { return { place: p[0], t: Date.parse(p[1]) }; });
-    var out = rows.filter(function (r) { return now >= r.t; });
-    var soon = rows.filter(function (r) { return now < r.t; });
-    $('clock-out').textContent = now >= LAST
-      ? tr('Out in every PlayStation Store region with a listed time.')
-      : out.length ? tr('Out in {n} of these {m} windows:', { n: out.length, m: rows.length }) + ' ' + out.map(function (r) { return tr(r.place); }).join(', ') + '.'
-      : tr('Not out anywhere yet. New Zealand goes first.');
-    var youLabel = mine === NA_ET ? tr('You (USA and Canada window)') : tr('Midnight where you are');
-    var list = soon.concat([{ place: youLabel, t: mine, you: true }]).sort(function (a, b) { return a.t - b.t || (a.you ? -1 : 1); });
-    var frag = document.createDocumentFragment();
-    list.forEach(function (r) {
-      var li = document.createElement('li');
-      var live = now >= r.t;
-      li.className = (live ? 'is-live' : '') + (r.you ? ' is-you' : '');
-      var a = document.createElement('span'); a.className = 'place'; a.textContent = r.you ? r.place : tr(r.place);
-      var b = document.createElement('span'); b.className = 'when';
-      b.textContent = live ? tr('Out since {t}', { t: fmtTime(r.t) }) : tr('In {d}', { d: fmtLeft(r.t - now) }) + ' · ' + fmtTime(r.t);
-      li.appendChild(a); li.appendChild(b); frag.appendChild(li);
-    });
-    ul.textContent = ''; ul.appendChild(frag);
-    // After the last window everything is out: the per-window list has nothing left to count down.
-    ul.hidden = now >= LAST; $('clock-title').hidden = now >= LAST;
-    Array.prototype.forEach.call(document.querySelectorAll('.markets .when[data-at]'), function (el) {
-      var t = Date.parse(el.getAttribute('data-at'));
-      el.textContent = now >= t ? tr('Out since {t}', { t: fmtTime(t) }) : tr('In {d}', { d: fmtLeft(t - now) }) + ' · ' + fmtTime(t);
-      el.parentNode.parentNode.className = now >= t ? 'is-live' : '';
-    });
-    $('live-line').textContent = now >= LAST ? tr('GTA VI is out in every listed store. Leonida is open.')
-      : now >= mine ? (mine === NA_ET ? tr('The USA and Canada window is open. Leonida is open.') : tr('It’s past midnight where you are. If your store region matches, Leonida is open.'))
-      : tr(mine === NA_ET ? 'The USA and Canada window opens in {d}. Plan your route now.' : 'Midnight where you are is in {d}. Plan your route now.', { d: fmtLeft(mine - now) });
-  }
-
   // ---- start ----
   function start() {
     translatePage(); bindLang(); bindSaveLine();
     if (!$('map')) { bindCheats(); return; } // the cheat code page has only the cheat list
     buildMap(); bindList(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge();
-    buildBingo(); renderDaily(); renderTipped(); renderAlias(); render(); tick();
-    var clock = setInterval(tick, 30000);
-    document.addEventListener('visibilitychange', function () {
-      clearInterval(clock);
-      if (!document.hidden) { tick(); renderDaily(); clock = setInterval(tick, 30000); }
-    });
+    if (steps() > 0) touched = true;
+    buildBingo(); renderDaily(); renderTipped(); renderAlias(); render();
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) renderDaily(); });
     var cv = $('card-canvas');
     if ('IntersectionObserver' in window) {
+      // Away while you are still using the map, so the bar never covers a region you want to tap.
+      new IntersectionObserver(function (es) { mapOnScreen = es[0].intersectionRatio > 0.25; updateNextbar(); }, { threshold: [0, 0.25, 0.5] }).observe($('map-wrap'));
+      // Away once the card is on screen or already scrolled past, so the bar never covers the tools, tips or footer.
+      new IntersectionObserver(function (es) { var e = es[0]; cardOnScreen = e.isIntersecting || e.boundingClientRect.top < 0; updateNextbar(); }, { threshold: 0.15 }).observe($('card'));
       new IntersectionObserver(function (es) {
         cardVisible = es[0].isIntersecting;
         if (cardVisible && cardDirty) drawSoon();

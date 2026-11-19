@@ -54,7 +54,7 @@ html { scrollbar-color: var(--asphalt-3) var(--asphalt); }
 .top__nav .top__tip { display: inline-flex; align-items: center; gap: 8px; color: var(--asphalt); background: var(--neon); font-weight: 600; box-shadow: inset 0 0 0 1px rgba(14, 19, 17, .12); }
 .top__tip svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 @media (hover: hover) { .top__nav .top__tip:hover { background: var(--neon-hi); color: var(--asphalt); } }
-@media (max-width: 620px) { .top__nav a:not(.top__tip) { display: none; } }
+@media (max-width: 420px) { .top__nav a { padding: 0 8px; font-size: 14px; } .brand span { font-size: 19px; } }
 
 main { max-width: 1280px; margin: 0 auto; padding: 0 var(--gut); }
 section { padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }
@@ -103,6 +103,9 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .steps button.is-reached { background: rgba(255, 95, 162, .16); border-color: rgba(255, 95, 162, .5); color: var(--chalk); }
 .region-row[data-level="3"] { border-color: rgba(255, 195, 90, .55); }
 .region-row[data-level="3"] .steps button[aria-pressed="true"] { background: var(--sun); border-color: var(--sun); }
+.hero__cta { margin-top: 24px; }
+.hero__cta .btn { min-height: 52px; padding-inline: 24px; font-size: 17px; }
+.trust { margin-top: 12px; font-size: 14px; color: var(--chalk-2); max-width: 46ch; }
 .hint { color: var(--chalk-2); font-size: 14px; margin-top: 12px; }
 @media (max-width: 400px) {
   .region-row { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 12px; }
@@ -124,10 +127,24 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .rg { cursor: pointer; outline: none; }
 .rg .shape { transition: fill .35s cubic-bezier(.16, 1, .3, 1), stroke .35s; stroke: #0E1311; stroke-width: 3; stroke-linejoin: round; }
 .rg .hit { fill: transparent; stroke: none; }
-.rg .fog { pointer-events: none; transition: opacity .45s ease; }
-.rg:not([data-level="0"]) .fog { opacity: 0; }
-.rg[data-level="2"] .shape { stroke: var(--neon); stroke-width: 3; }
-.rg[data-level="3"] .shape { stroke: var(--sun); stroke-width: 3.5; }
+/* Region states. Not seen: dim outline. Passed through: its colour, softened. Explored: full colour with a glow.
+   Finished: full colour, a gold edge and a gold badge by the name. */
+.rg[data-level="0"] .shape { stroke: rgba(244, 241, 234, .28); stroke-width: 1.5; }
+.rg[data-level="1"] .shape { fill-opacity: .5; }
+.rg[data-level="2"] .shape { filter: drop-shadow(0 0 10px var(--c)); }
+.rg[data-level="3"] .shape { stroke: var(--sun); stroke-width: 5; filter: drop-shadow(0 0 8px rgba(255, 195, 90, .55)); }
+.rl .badge { display: none; }
+.rl[data-level="3"] .badge { display: inline; }
+.badge circle { fill: var(--sun); }
+.badge path { fill: none; stroke: var(--asphalt); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.legend { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; font-size: 14px; color: var(--chalk-2); }
+.legend li { display: inline-flex; align-items: center; gap: 8px; }
+.legend svg { width: 20px; height: 20px; }
+.lg-0 { fill: #26302B; stroke: rgba(244, 241, 234, .4); stroke-width: 1.5; }
+.lg-1 { fill: rgba(255, 95, 162, .5); }
+.lg-2 { fill: var(--neon); filter: drop-shadow(0 0 3px var(--neon)); }
+.lg-3 { fill: var(--neon); stroke: var(--sun); stroke-width: 2.5; }
+.lg-tick { fill: none; stroke: #FFFFFF; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .map-title { font: 400 30px/1 var(--display); fill: var(--chalk); letter-spacing: .02em; }
 .map-pct { font: 400 30px/1 var(--display); fill: var(--neon); text-anchor: end; font-variant-numeric: tabular-nums; }
 .route { fill: none; stroke: var(--neon); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1 9; opacity: .95; }
@@ -135,9 +152,9 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .compass text { font: 600 12px var(--text); fill: var(--chalk); }
 @media (hover: hover) { .rg:hover .shape { stroke: var(--chalk); } }
 .rg:focus-visible .shape { stroke: var(--neon); stroke-width: 5; }
-.rl text { font: 400 22px var(--display); fill: var(--chalk); letter-spacing: .01em; paint-order: stroke; stroke: rgba(14, 19, 17, .55); stroke-width: 4px; stroke-linejoin: round; }
+.rl text { font: 400 26px var(--display); fill: var(--chalk); letter-spacing: .01em; paint-order: stroke; stroke: rgba(14, 19, 17, .55); stroke-width: 4px; stroke-linejoin: round; }
 
-.rl .lvl { font: 600 15px var(--text); fill: var(--chalk-2); }
+.rl .lvl { font: 600 17px var(--text); fill: var(--chalk-2); }
 .rl[data-level="1"] .lvl, .rl[data-level="2"] .lvl { fill: var(--chalk); }
 .rl[data-level="3"] .lvl { fill: var(--sun); }
 .pop { animation: pop .5s cubic-bezier(.16, 1, .3, 1); transform-box: fill-box; transform-origin: center; }
@@ -148,6 +165,8 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 @media (min-width: 900px) { .card-maker { grid-template-columns: minmax(0, 1fr) minmax(0, .9fr); align-items: start; } }
 .card-maker__preview canvas { width: 100%; max-width: 520px; height: auto; aspect-ratio: 4 / 5; border-radius: 14px; margin-inline: auto;
   box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .7), 0 2px 8px rgba(0, 0, 0, .4); background: var(--asphalt-2); }
+.card-maker__preview canvas { aspect-ratio: auto; }
+.card-maker__preview canvas.is-story { max-width: 380px; }
 .field { margin: 22px 0 0; padding: 0; border: 0; min-width: 0; }
 .field label, .field legend { display: block; font-weight: 600; font-size: 15px; margin-bottom: 8px; padding: 0; }
 .field input[type="text"], .field input[type="search"], .field input:not([type]) { width: 100%; max-width: 420px; min-height: 48px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line-strong);
@@ -188,22 +207,6 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .way__note { font-size: 14px; color: #DDEFE4; }
 .way__note.warn { color: #FFE2A8; }
 .addr { background: rgba(0, 0, 0, .28); border-radius: 8px; padding: 10px 12px; max-width: 100%; }
-
-/* Unlock clock */
-.clock { list-style: none; padding: 0; margin: 28px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
-.clock li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; padding: 14px 16px; border-radius: var(--r); background: var(--asphalt-2); border: 1px solid var(--line); }
-.clock .place { font-weight: 600; }
-.clock .when { color: var(--chalk-2); font-size: 14px; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
-.clock .is-live .when { color: var(--neon); font-weight: 600; }
-.clock .is-you { border-color: var(--neon); }
-.markets { margin-top: 16px; }
-.markets__title { font: 400 26px/1.1 var(--display); margin-top: 36px; }
-.markets .when-wrap { display: grid; justify-items: end; gap: 2px; text-align: right; margin-left: auto; }
-.clock .place { flex: 1 1 140px; }
-.markets .note { color: var(--chalk-2); font-size: 13px; }
-.markets .is-live .when { color: var(--neon); font-weight: 600; }
-.markets .place::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 10px; border-radius: 50%; background: var(--line-strong); vertical-align: middle; }
-.markets .is-live .place::before { background: var(--neon); box-shadow: 0 0 0 4px rgba(255, 95, 162, .18); }
 
 /* Regions as highway signs */
 .signs { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); }
@@ -275,8 +278,6 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .addr code { letter-spacing: .02em; }
 .addr b { color: #FFE2A8; font-weight: 600; }
 
-.clock__out { display: flex; align-items: baseline; gap: 10px; margin-top: 20px; max-width: 820px; color: var(--chalk); }
-.clock__out::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--neon); transform: translateY(-2px); }
 
 /* Toast */
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 40; max-width: min(92vw, 460px); padding: 14px 18px; border-radius: 12px;
@@ -288,7 +289,6 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
-.clock .when--static { white-space: normal; }
 
 .amounts { list-style: none; padding: 0; margin: 24px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; max-width: 560px; }
 .amounts li { display: grid; gap: 2px; padding: 12px; border-radius: 10px; background: var(--asphalt-2); border: 1px solid var(--line-strong); }
@@ -393,7 +393,7 @@ kbd { display: inline-grid; place-items: center; min-width: 30px; height: 30px; 
 @media print {
   :root { color-scheme: light; }
   body { background: #fff !important; color: #000 !important; }
-  .top, .jump, .hero, .card-maker, .tools, .tip, .unlock, .regions, .faq, .foot, .toast, .challenge, .cheat-tools, .cheat-more, .c-got { display: none !important; }
+  .top, .jump, .hero, .card-maker, .tools, .tip, .regions, .faq, .foot, .toast, .challenge, .cheat-tools, .cheat-more, .c-got { display: none !important; }
   .cheat-table tbody tr[hidden] { display: table-row !important; }
   .cheat-table, .cheat-table th, .cheat-table td, .legal p, .legal li, .section-lede, .c-how { color: #000 !important; background: none !important; }
   kbd { background: #fff !important; color: #000 !important; border-color: #000 !important; box-shadow: none !important; }
@@ -406,18 +406,15 @@ kbd { display: inline-grid; place-items: center; min-width: 30px; height: 30px; 
 section.cheats:first-child { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 p.cheat-more { margin-top: 16px; }
 
-/* Phones: show the card first, its share buttons right under it, then the options that change it. */
+/* Phones: the card first, then name, size and the share buttons, then More options. */
 @media (max-width: 899px) {
   .card-maker { gap: 0; }
   .card-maker__form { display: contents; }
-  .card-maker__form > * { order: 5; }
+  .card-maker__form > * { order: 4; }
   .card-maker__form > h2 { order: 1; }
   .card-maker__form > .section-lede { order: 2; }
   .card-maker__preview { order: 3; margin-top: 20px; }
-  .card-maker__form > .actions, .card-maker__form > p:has(#copy-link), .card-maker__form > .status, .card-maker__form > .thanks { order: 4; }
-  .card-maker__form > .actions { margin-top: 16px; }
   .card-maker__form > .actions .btn { flex: 1 1 auto; white-space: nowrap; }
-  .card-maker__form > .field:has(#tag) { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--line); }
 }
 /* Toasts: compact, and on phones at the top, so they never cover the map region you just tapped. */
 .toast { padding: 10px 16px; font-size: 15px; line-height: 1.4; }
@@ -439,3 +436,52 @@ p.cheat-more { margin-top: 16px; }
 .saveline.is-warn svg { display: none; }
 
 .swatch { display: inline-block; width: 18px; height: 18px; margin-right: 8px; vertical-align: -3px; border-radius: 50%; background: linear-gradient(135deg, var(--a) 50%, var(--b) 50%); box-shadow: 0 0 0 1px rgba(244, 241, 234, .35); }
+
+/* Phones: a shorter hero, so the map and its % are on the first screen. */
+@media (max-width: 620px) {
+  .hero h1 { font-size: clamp(40px, 11vw, 48px); margin-top: 10px; }
+  .hero__lede { font-size: 16px; margin-top: 10px; }
+  .hero__cta { margin-top: 16px; }
+  .hero__cta .btn { width: 100%; }
+  .trust { margin-top: 8px; font-size: 13px; }
+}
+
+/* Card maker: the few choices that matter up front, the rest folded. */
+.actions--sub { margin-top: 12px; }
+.btn--quiet { background: transparent; }
+.card-maker .actions { margin-top: 24px; }
+.card-maker .actions .btn--primary { min-height: 56px; padding-inline: 28px; font-size: 17px; }
+details.more, details.list-toggle { margin-top: 24px; border-top: 1px solid var(--line); }
+details.more > summary, details.list-toggle > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 52px; font-weight: 600; font-size: 16px; color: var(--chalk); }
+details.more > summary::-webkit-details-marker, details.list-toggle > summary::-webkit-details-marker { display: none; }
+details.more > summary::after, details.list-toggle > summary::after { content: ""; width: 10px; height: 10px; border-right: 2px solid var(--chalk-2); border-bottom: 2px solid var(--chalk-2);
+  transform: rotate(45deg) translateY(-3px); transition: transform .2s; }
+details[open].more > summary::after, details[open].list-toggle > summary::after { transform: rotate(225deg) translateY(-3px); }
+details.more > .field:first-of-type { margin-top: 4px; }
+details.list-toggle .regions-list { margin-top: 4px; }
+
+/* Next step: after the first map tap on a phone, the way to the card is always one tap away. */
+.nextbar { position: fixed; z-index: 30; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 8px 8px 18px; border-radius: 16px;
+  background: var(--asphalt-2); border: 1px solid var(--line-strong); box-shadow: 0 16px 40px -12px rgba(0, 0, 0, .8);
+  transform: translateY(0); opacity: 1; transition: transform .25s cubic-bezier(.16, 1, .3, 1), opacity .2s; }
+.nextbar.is-away { transform: translateY(24px); opacity: 0; pointer-events: none; }
+.nextbar__score { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.nextbar__score b { font: 400 30px/1 var(--display); color: var(--neon); font-variant-numeric: tabular-nums; }
+.nextbar__score span { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nextbar .btn { flex: none; }
+@media (min-width: 900px) { .nextbar { display: none !important; } }
+
+/* Map key: four in a row, or a tidy 2 x 2 on narrow phones. */
+@media (max-width: 480px) { .legend { display: grid; grid-template-columns: repeat(2, max-content); justify-content: center; gap: 6px 24px; } }
+/* Empty status lines take no room. */
+.status:empty { min-height: 0; margin-top: 0; }
+/* Challenge from a friend's link: their %, then "Beat it". */
+.challenge { display: grid; gap: 8px; padding: 16px 20px; }
+.challenge__lead { font-size: 17px; }
+.challenge__lead b { font: 400 34px/1 var(--display); margin-inline: 2px; }
+.challenge__msg { font: 400 26px/1.1 var(--display); color: #FFFFFF; }
+.challenge__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.challenge.is-winning .challenge__msg { color: var(--asphalt); }
+.challenge.is-winning .btn--primary { background: var(--asphalt); border-color: var(--asphalt); color: var(--chalk); }
