@@ -283,6 +283,7 @@
   }
 
   function setLevel(i, lvl) {
+    touched = true;
     var before = steps();
     levels[i] = lvl;
     save('vch.map', code());
@@ -331,7 +332,19 @@
     $('xp').style.transform = 'scaleX(' + (next ? (n - from) / (next[0] - from) : 1) + ')';
     $('next-rank').textContent = next ? tr(next[0] - n === 1 ? '1 step to {rank}' : '{n} steps to {rank}', { n: next[0] - n, rank: tr(next[1]) }) : tr('Every region done. Respect.');
     updateChallenge();
+    updateNextbar();
     drawSoon();
+  }
+
+  // ---- next-step bar: shown on phones once the map has progress, hidden while the card is on screen ----
+  var cardOnScreen = false, touched = false;
+  function updateNextbar() {
+    var nb = $('nextbar'); if (!nb) return;
+    var n = steps();
+    $('nb-pct').textContent = pctOf(n) + '%';
+    $('nb-rank').textContent = rank(n);
+    nb.hidden = !(n > 0 && touched);
+    nb.classList.toggle('is-away', cardOnScreen);
   }
 
   // ---- a friend's challenge (?c=320100&n=Name) ----
@@ -749,7 +762,7 @@
     roundRect(ctx, x, y, w, h, 10); ctx.fillStyle = '#0B6B3A'; ctx.fill();
     roundRect(ctx, x + 5, y + 5, w - 10, h - 10, 7); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3; ctx.stroke();
     ctx.fillStyle = '#FFFFFF'; ctx.fillText(text, x + size * 0.45, y + h / 2 + size * 0.36);
-    return h;
+    return w;
   }
   function cardName() { var tag = (settings.tag || '').trim() || tr('Player one'); return settings.useAlias ? alias().name : tag; }
   function metaLine() {
@@ -801,11 +814,11 @@
     bigPct(ctx, T, p, 56, 412, 500, 330);
     ctx.fillStyle = T.ink2; ctx.font = '600 44px "DM Sans", sans-serif';
     ctx.fillText(tr('of Leonida'), 64, 478);
-    rankSign(ctx, T, rank(n), 64, 510, 50);
+    var signW = rankSign(ctx, T, rank(n), 64, 510, 50);
     ctx.fillStyle = T.ink;
     var nm = cardName(); fitText(ctx, nm, W - 128, 100, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 62, 700);
     regionTiles(ctx, T, 64, 732, W - 128, 84, 12);
-    if (settings.dayone) { ctx.save(); ctx.translate(452, 512); ctx.scale(0.74, 0.74); stamp(ctx, 0, 0, T); ctx.restore(); }
+    if (settings.dayone) { ctx.save(); ctx.translate(Math.min(700, Math.max(452, 64 + signW + 84)), 548); ctx.scale(0.74, 0.74); stamp(ctx, 0, 0, T); ctx.restore(); }
     footer(ctx, T, W, H, 124);
   }
   function drawStory(ctx, T, W, H) {
@@ -1155,10 +1168,12 @@
     translatePage(); bindLang(); bindSaveLine();
     if (!$('map')) { bindCheats(); return; } // the cheat code page has only the cheat list
     buildMap(); bindList(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge();
+    if (steps() > 0) touched = true;
     buildBingo(); renderDaily(); renderTipped(); renderAlias(); render();
     document.addEventListener('visibilitychange', function () { if (!document.hidden) renderDaily(); });
     var cv = $('card-canvas');
     if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { cardOnScreen = es[0].isIntersecting; updateNextbar(); }, { threshold: 0.15 }).observe($('card'));
       new IntersectionObserver(function (es) {
         cardVisible = es[0].isIntersecting;
         if (cardVisible && cardDirty) drawSoon();

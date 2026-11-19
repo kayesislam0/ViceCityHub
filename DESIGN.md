@@ -99,6 +99,14 @@ of its size, so no text on a card is below 40px (about 13px in a feed); key text
 | Card: Share card | Tap | Native share with the PNG where supported, otherwise download and copy the challenge text |
 | Card: challenge link | Tap (text button) | Copies the challenge text and link |
 
+### Flow helpers
+
+| Element | Behaviour |
+|---|---|
+| Next-step bar (`.nextbar`) | Phones only. Appears after the first map tap (or on return with progress): your %, rank and "Make my card". Slides away while the card section is on screen. |
+| Card maker | Name, Size, Share, Download, Copy challenge link up front. Card type, platform, look and date stamp sit in "More options" (`details.more`). |
+| Region list | Folded under "Edit regions as a list" (`details.list-toggle`). The map is the main control. |
+
 ### Responsive
 
 | Width | Changes |

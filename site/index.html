@@ -93,6 +93,8 @@
         </div>
       </div>
 
+      <details class="list-toggle">
+        <summary>Edit regions as a list</summary>
       <ol class="regions-list" id="region-list" aria-label="Your regions">
         <li class="region-row" data-level="0"><span class="region-row__name" id="rn-kalaga">Mount Kalaga National Park</span><div class="steps" role="group" aria-labelledby="rn-kalaga"><button type="button" data-k="1" aria-pressed="false" aria-label="Mount Kalaga National Park: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Mount Kalaga National Park: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Mount Kalaga National Park: Finished">Finished</button></div></li>
         <li class="region-row" data-level="0"><span class="region-row__name" id="rn-gellhorn">Port Gellhorn</span><div class="steps" role="group" aria-labelledby="rn-gellhorn"><button type="button" data-k="1" aria-pressed="false" aria-label="Port Gellhorn: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Port Gellhorn: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Port Gellhorn: Finished">Finished</button></div></li>
@@ -101,6 +103,7 @@
         <li class="region-row" data-level="0"><span class="region-row__name" id="rn-grass">Grassrivers</span><div class="steps" role="group" aria-labelledby="rn-grass"><button type="button" data-k="1" aria-pressed="false" aria-label="Grassrivers: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Grassrivers: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Grassrivers: Finished">Finished</button></div></li>
         <li class="region-row" data-level="0"><span class="region-row__name" id="rn-keys">Leonida Keys</span><div class="steps" role="group" aria-labelledby="rn-keys"><button type="button" data-k="1" aria-pressed="false" aria-label="Leonida Keys: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Leonida Keys: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Leonida Keys: Finished">Finished</button></div></li>
       </ol>
+      </details>
       <p class="saveline" data-saveline><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg><span class="saveline__note">Saved on this device as you go.</span> <button class="linklike" type="button">Copy my progress link</button></p>
     </div>
 
@@ -125,37 +128,12 @@
         <input id="tag" maxlength="24" autocomplete="nickname" spellcheck="false" placeholder="e.g. VicePrince99">
       </div>
       <fieldset class="field">
-        <legend>Card</legend>
-        <div class="seg" id="kind">
-          <label><input type="radio" name="kind" value="map" checked><span>Map</span></label>
-          <label><input type="radio" name="kind" value="wrapped"><span>Leonida Wrapped</span></label>
-          <label id="kind-blend" hidden><input type="radio" name="kind" value="blend"><span>Blend</span></label>
-        </div>
-      </fieldset>
-      <fieldset class="field">
         <legend>Size</legend>
         <div class="seg" id="format">
           <label><input type="radio" name="format" value="square" checked><span>Square 1:1</span></label>
           <label><input type="radio" name="format" value="story"><span>Story 9:16</span></label>
         </div>
       </fieldset>
-      <fieldset class="field">
-        <legend>Plays on</legend>
-        <div class="seg" id="platform">
-          <label><input type="radio" name="platform" value="PS5" checked><span>PS5</span></label>
-          <label><input type="radio" name="platform" value="Xbox Series"><span>Xbox Series</span></label>
-        </div>
-      </fieldset>
-      <fieldset class="field">
-        <legend>Look</legend>
-        <div class="seg" id="theme">
-          <label><input type="radio" name="theme" value="night" checked><span><i class="swatch" style="--a:#0E1311;--b:#FF5FA2" aria-hidden="true"></i>Neon night</span></label>
-          <label><input type="radio" name="theme" value="sunset"><span><i class="swatch" style="--a:#5E1F2C;--b:#FFC35A" aria-hidden="true"></i>Sunset</span></label>
-          <label><input type="radio" name="theme" value="highway"><span><i class="swatch" style="--a:#0B6B3A;--b:#FFFFFF" aria-hidden="true"></i>Highway</span></label>
-        </div>
-      </fieldset>
-      <label class="check"><input type="checkbox" id="dayone"><span>Add today's date stamp</span></label>
-
       <div class="actions">
         <button class="btn btn--primary" id="share" type="button">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg>
@@ -166,12 +144,39 @@
           <span>Download PNG</span>
         </button>
       </div>
-      <p><button class="linklike" id="copy-link" type="button">Or copy your link: friends who open it can make a Blend with you</button></p>
+      <p class="actions--sub"><button class="btn btn--quiet" id="copy-link" type="button">Copy challenge link</button></p>
       <p class="status" id="card-status" role="status"></p>
       <div class="thanks" id="thanks" hidden>
         <p><strong>Your card is on the house.</strong> No ads paid for it and nobody tracked you. If it made you grin, toss a coin in the jar so the next tool gets built.</p>
         <a class="btn btn--primary" href="#tip">Tip the hub</a>
       </div>
+      <details class="more">
+        <summary>More options</summary>
+        <fieldset class="field">
+          <legend>Card</legend>
+          <div class="seg" id="kind">
+            <label><input type="radio" name="kind" value="map" checked><span>Map</span></label>
+            <label><input type="radio" name="kind" value="wrapped"><span>Leonida Wrapped</span></label>
+            <label id="kind-blend" hidden><input type="radio" name="kind" value="blend"><span>Blend</span></label>
+          </div>
+        </fieldset>
+        <fieldset class="field">
+          <legend>Plays on</legend>
+          <div class="seg" id="platform">
+            <label><input type="radio" name="platform" value="PS5" checked><span>PS5</span></label>
+            <label><input type="radio" name="platform" value="Xbox Series"><span>Xbox Series</span></label>
+          </div>
+        </fieldset>
+        <fieldset class="field">
+          <legend>Look</legend>
+          <div class="seg" id="theme">
+            <label><input type="radio" name="theme" value="night" checked><span><i class="swatch" style="--a:#0E1311;--b:#FF5FA2" aria-hidden="true"></i>Neon night</span></label>
+            <label><input type="radio" name="theme" value="sunset"><span><i class="swatch" style="--a:#5E1F2C;--b:#FFC35A" aria-hidden="true"></i>Sunset</span></label>
+            <label><input type="radio" name="theme" value="highway"><span><i class="swatch" style="--a:#0B6B3A;--b:#FFFFFF" aria-hidden="true"></i>Highway</span></label>
+          </div>
+        </fieldset>
+        <label class="check"><input type="checkbox" id="dayone"><span>Add today's date stamp</span></label>
+      </details>
     </div>
     <div class="card-maker__preview">
       <canvas id="card-canvas" width="2160" height="2160" aria-label="Preview of your Leonida card" role="img"></canvas>
@@ -326,6 +331,10 @@
     <details><summary>Does my map leave my phone?</summary><p>Your name, map and card stay on your device. Nothing is uploaded, and there is no sign-up.</p></details>
     <details><summary>Do I get anything for a tip?</summary><p>No. Tips are voluntary gifts that pay for the domain and the time to build new tools. They cannot be refunded and give no in-game items.</p></details>
   </section>
+  <div class="nextbar" id="nextbar" hidden>
+    <p class="nextbar__score"><b id="nb-pct">0%</b> <span id="nb-rank"></span></p>
+    <a class="btn btn--primary" href="#card">Make my card</a>
+  </div>
 </main>
 
 <footer class="foot">
