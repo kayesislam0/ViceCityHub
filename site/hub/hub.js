@@ -756,59 +756,84 @@
     var lines = bingoLines();
     return tr('Plays on {p}', { p: settings.platform }) + (lines ? '  ' + 'Bingo ×' + lines : '');
   }
-  // Every card ends with the same band: what to do, then where.
+  // Every card ends with the same band: what to do, then where. Sized to read at a third of its size in a feed.
   function footer(ctx, T, W, H, h) {
     ctx.fillStyle = T.accent; ctx.fillRect(0, H - h, W, h);
     ctx.fillStyle = T.onFull;
-    ctx.font = '400 ' + Math.round(h * 0.34) + 'px Anton, sans-serif';
-    ctx.fillText(tr('Make yours in 20 seconds'), 64, H - h * 0.5);
-    ctx.font = '600 ' + Math.round(h * 0.22) + 'px "DM Sans", sans-serif';
-    ctx.fillText('vicecityhub.okenshop.com', 64, H - h * 0.18);
+    ctx.font = '400 ' + Math.round(h * 0.4) + 'px Anton, sans-serif';
+    ctx.fillText(tr('Make yours in 20 seconds'), 64, H - h * 0.48);
+    ctx.font = '600 ' + Math.round(h * 0.28) + 'px "DM Sans", sans-serif';
+    ctx.fillText('vicecityhub.okenshop.com', 64, H - h * 0.14);
+  }
+  // Text on a region colour: dark on the bright colours, white on deep green.
+  function inkOn(r) { return r.id === 'kalaga' ? '#FFFFFF' : '#0E1311'; }
+  function regionPaint(ctx, r, x, w) {
+    if (!r.color2) return r.color;
+    var g = ctx.createLinearGradient(x, 0, x + w, 0); g.addColorStop(0, r.color); g.addColorStop(1, r.color2); return g;
+  }
+  function tick(ctx, cx, cy, rad, T) {
+    ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.fillStyle = T.done; ctx.fill();
+    ctx.strokeStyle = '#0E1311'; ctx.lineWidth = rad * 0.24; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(cx - rad * 0.45, cy + rad * 0.02); ctx.lineTo(cx - rad * 0.12, cy + rad * 0.36); ctx.lineTo(cx + rad * 0.48, cy - rad * 0.34); ctx.stroke();
+    ctx.lineCap = 'butt';
+  }
+  // Six region tiles: empty outline, half colour, full colour, full colour with a gold edge and tick.
+  function regionTiles(ctx, T, x, y, w, h, gap) {
+    var tw = (w - gap * 2) / 3;
+    REGIONS.forEach(function (r, i) {
+      var tx = x + (i % 3) * (tw + gap), ty = y + Math.floor(i / 3) * (h + gap), l = levels[i];
+      roundRect(ctx, tx, ty, tw, h, 14);
+      if (l) { ctx.globalAlpha = l === 1 ? 0.45 : 1; ctx.fillStyle = regionPaint(ctx, r, tx, tw); ctx.fill(); ctx.globalAlpha = 1; }
+      else { ctx.strokeStyle = T.line; ctx.lineWidth = 3; ctx.stroke(); }
+      if (l === 3) { roundRect(ctx, tx + 3, ty + 3, tw - 6, h - 6, 12); ctx.strokeStyle = T.done; ctx.lineWidth = 6; ctx.stroke(); }
+      var name = r.id === 'kalaga' ? 'Mt Kalaga' : r.name;
+      ctx.fillStyle = l >= 2 ? inkOn(r) : l === 1 ? '#FFFFFF' : T.ink2;
+      fitText(ctx, name, tw - (l === 3 ? 92 : 40), 44, '400 {s}px Anton, sans-serif');
+      ctx.fillText(name, tx + 20, ty + h / 2 + 16);
+      if (l === 3) tick(ctx, tx + tw - 40, ty + h / 2, 22, T);
+    });
   }
   function drawSquare(ctx, T, W, H) {
     var n = steps(), p = pctOf(n);
-    drawMap(ctx, T, 556, 72, 0.7);
-    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
-    ctx.fillText(tr('I have seen'), 64, 110);
-    bigPct(ctx, T, p, 56, 420, 470, 330);
-    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
+    drawMap(ctx, T, 590, 48, 0.74);
+    ctx.fillStyle = T.ink2; ctx.font = '600 44px "DM Sans", sans-serif';
+    ctx.fillText(tr('I have seen'), 64, 112);
+    bigPct(ctx, T, p, 56, 412, 500, 330);
+    ctx.fillStyle = T.ink2; ctx.font = '600 44px "DM Sans", sans-serif';
     ctx.fillText(tr('of Leonida'), 64, 478);
+    rankSign(ctx, T, rank(n), 64, 510, 50);
     ctx.fillStyle = T.ink;
-    var nm = cardName(); fitText(ctx, nm, 470, 88, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 62, 600);
-    rankSign(ctx, T, rank(n), 64, 636, 44);
-    ctx.fillStyle = T.ink2; ctx.font = '600 28px "DM Sans", sans-serif';
-    ctx.fillText(metaLine(), 64, 790);
-    if (tipped) { ctx.fillStyle = '#FFC35A'; ctx.fillText(tr('Backed the hub'), 64, 830); }
-    if (settings.dayone) { ctx.save(); ctx.translate(820, 790); ctx.scale(0.8, 0.8); stamp(ctx, 0, 0, T); ctx.restore(); }
-    footer(ctx, T, W, H, 130);
+    var nm = cardName(); fitText(ctx, nm, W - 128, 100, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 62, 700);
+    regionTiles(ctx, T, 64, 732, W - 128, 84, 12);
+    if (settings.dayone) { ctx.save(); ctx.translate(452, 512); ctx.scale(0.74, 0.74); stamp(ctx, 0, 0, T); ctx.restore(); }
+    footer(ctx, T, W, H, 124);
   }
   function drawStory(ctx, T, W, H) {
     var n = steps(), p = pctOf(n);
-    ctx.fillStyle = T.ink2; ctx.font = '600 44px "DM Sans", sans-serif';
-    ctx.fillText(tr('I have seen'), 64, 170);
-    bigPct(ctx, T, p, 56, 590, 700, 470);
-    ctx.fillStyle = T.ink2; ctx.font = '600 44px "DM Sans", sans-serif';
-    ctx.fillText(tr('of Leonida'), 64, 668);
+    rankSign(ctx, T, rank(n), 64, 96, 60);
+    ctx.fillStyle = T.ink2; ctx.font = '600 52px "DM Sans", sans-serif';
+    ctx.fillText(tr('I have seen'), 64, 262);
+    bigPct(ctx, T, p, 56, 730, 760, 460);
+    ctx.fillStyle = T.ink2; ctx.font = '600 52px "DM Sans", sans-serif';
+    ctx.fillText(tr('of Leonida'), 64, 800);
     ctx.fillStyle = T.ink;
-    var nm = cardName(); fitText(ctx, nm, W - 128, 120, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 60, 820);
-    rankSign(ctx, T, rank(n), 64, 862, 56);
-    ctx.fillStyle = T.ink2; ctx.font = '600 32px "DM Sans", sans-serif';
-    ctx.fillText(metaLine() + (tipped ? '' : ''), 64, 1004);
-    if (tipped) { ctx.fillStyle = '#FFC35A'; ctx.fillText(tr('Backed the hub'), 64, 1048); }
-    var sc = 0.86; drawMap(ctx, T, (W - 600 * sc) / 2, 1080, sc);
-    if (settings.dayone) stamp(ctx, 920, 230, T);
-    footer(ctx, T, W, H, 170);
+    var nm = cardName(); fitText(ctx, nm, W - 128, 130, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 60, 950);
+    ctx.fillStyle = T.ink2; ctx.font = '600 44px "DM Sans", sans-serif';
+    ctx.fillText(metaLine(), 64, 1018);
+    if (tipped) { ctx.fillStyle = '#FFC35A'; ctx.fillText(tr('Backed the hub'), 64 + ctx.measureText(metaLine() + '   ').width, 1018); }
+    var sc = 0.92; drawMap(ctx, T, (W - 600 * sc) / 2, 1050, sc, null, { labels: true });
+    if (settings.dayone) stamp(ctx, 900, 170, T);
+    footer(ctx, T, W, H, 164);
   }
 
-  // The map as drawn on both cards, at (x, y) and scale sc of its 600 x 740 layout.
-  // blend: { mine: [...], theirs: [...] } paints who explored each region instead of one player's levels.
-  function drawMap(ctx, T, x, y, sc, blend) {
-    // The card map is deliberately quiet: flat land on a calm sea, one soft shadow for depth, and colour that only
-    // ever means progress. No grid, hatching, route dots or compass: every pixel left is one that survives
-    // Instagram, X and WhatsApp compression and reads at thumbnail size.
+  // The map as drawn on the cards, at (x, y) and scale sc of its 600 x 740 layout. No frame: the state itself is the picture.
+  // blend: { mine: [...], theirs: [...] } paints who explored each region. opts.labels: region names (Story and Blend).
+  function drawMap(ctx, T, x, y, sc, blend, opts) {
+    var labels = !!(opts && opts.labels);
+    // Card label spots: Port Gellhorn and Ambrosia move apart so the bigger names never touch.
+    var SPOT = { gellhorn: [196, 238], ambrosia: [376, 214] };
     var LV = blend ? blend.mine.map(function (m, i) { return Math.max(m, blend.theirs[i]); }) : levels;
     var tone = function (i) { return blend ? (LV[i] ? 2 : 0) : LV[i]; };
-    // Not seen: the theme's quiet land. Passed through: the region's colour, softened. Explored and finished: full colour.
     var paint = function (r, t) {
       if (!t) return T.fill[0];
       if (!r.color2) return r.color;
@@ -816,50 +841,52 @@
     };
     ctx.save();
     ctx.translate(x, y); ctx.scale(sc, sc);
-    roundRect(ctx, 0, 0, 600, 740, 24); ctx.fillStyle = T.sea; ctx.fill();
-    ctx.save(); roundRect(ctx, 0, 0, 600, 740, 24); ctx.clip();
-    var sea = ctx.createRadialGradient(330, 330, 60, 300, 380, 560);
-    sea.addColorStop(0, 'rgba(255,255,255,.06)'); sea.addColorStop(1, 'rgba(0,0,0,.22)');
-    ctx.fillStyle = sea; ctx.fillRect(0, 0, 600, 740);
+    ctx.lineJoin = 'round';
     // one soft shadow under the whole state
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 36; ctx.shadowOffsetY = 14;
-    ctx.fillStyle = T.fill[0];
-    REGIONS.forEach(function (r) { ctx.fill(new Path2D(r.d)); });
-    ctx.restore();
-    ctx.restore();
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 16; ctx.fillStyle = T.fill[0];
+    REGIONS.forEach(function (r) { ctx.fill(new Path2D(r.d)); }); ctx.restore();
+    REGIONS.forEach(function (r, i) {
+      var path = new Path2D(r.d), t = tone(i);
+      ctx.globalAlpha = t === 1 ? 0.5 : 1; ctx.fillStyle = paint(r, t); ctx.fill(path);
+      // The Keys are thin islands: a fat stroke in their own colour keeps them visible at thumbnail size.
+      if (r.id === 'keys') { ctx.strokeStyle = t ? (r.color) : T.fill[0]; ctx.lineWidth = 12; ctx.stroke(path); }
+      ctx.globalAlpha = 1;
+    });
     REGIONS.forEach(function (r, i) {
       var path = new Path2D(r.d);
-      ctx.fillStyle = paint(r, tone(i)); ctx.globalAlpha = tone(i) === 1 ? 0.5 : 1; ctx.fill(path); ctx.globalAlpha = 1;
-      ctx.strokeStyle = T.edge; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke(path);
+      ctx.strokeStyle = tone(i) ? T.bg : T.line; ctx.lineWidth = tone(i) ? 5 : 3; ctx.stroke(path);
     });
-    // Edges carry one meaning each: gold for 100% on a map card; on a Blend, who explored the region.
     REGIONS.forEach(function (r, i) {
       var path = new Path2D(r.d), col = null;
       if (blend) { var me = blend.mine[i] > 0, them = blend.theirs[i] > 0; if (me || them) col = me && them ? T.ink : me ? T.accent : T.done; }
       else if (LV[i] === 3) col = T.done;
-      if (col) { ctx.strokeStyle = col; ctx.lineWidth = blend ? 5 : 7; ctx.lineJoin = 'round'; ctx.stroke(path); }
+      if (col) { ctx.strokeStyle = col; ctx.lineWidth = r.id === 'keys' ? 6 : 9; ctx.stroke(path); }
     });
-    var lake = new Path2D(LAKE);
-    ctx.fillStyle = T.sea; ctx.fill(lake);
+    ctx.fillStyle = T.bg; ctx.fill(new Path2D(LAKE));
     ctx.textAlign = 'center';
     REGIONS.forEach(function (r, i) {
-      var t = tone(i);
-      ctx.font = '400 30px Anton, sans-serif'; ctx.lineJoin = 'round';
-      var lines = r.two ? [r.name.split(' ')[0], r.name.split(' ').slice(1).join(' ')] : [r.name];
-      lines.forEach(function (txt, k) {
-        var ly = r.label[1] + (r.two ? (k ? 20 : -12) : 0);
-        ctx.strokeStyle = 'rgba(14,19,17,.75)'; ctx.lineWidth = 7; ctx.strokeText(txt, r.label[0], ly);
-        ctx.fillStyle = t ? '#FFFFFF' : T.ink2; ctx.fillText(txt, r.label[0], ly);
-      });
-      // A finished region gets a gold badge with a tick next to its name.
+      var lp = SPOT[r.id] || r.label;
+      var t = tone(i), lines = r.two ? [r.name.split(' ')[0], r.name.split(' ').slice(1).join(' ')] : [r.name];
+      if (r.id === 'kalaga') lines = ['Mount Kalaga'];
+      var fs = 46, lh = 44;
+      if (labels) {
+        ctx.font = '400 ' + fs + 'px Anton, sans-serif';
+        lines.forEach(function (txt, k) {
+          var ly = lp[1] + (r.two ? (k ? lh / 2 + 4 : -lh / 2 + 4) : 10);
+          ctx.strokeStyle = 'rgba(14,19,17,.85)'; ctx.lineWidth = 10; ctx.strokeText(txt, lp[0], ly);
+          ctx.fillStyle = t ? '#FFFFFF' : T.ink2; ctx.fillText(txt, lp[0], ly);
+        });
+      }
       if (!blend && LV[i] === 3) {
-        ctx.font = '400 30px Anton, sans-serif';
-        var bw = Math.max.apply(null, lines.map(function (l) { return ctx.measureText(l).width; }));
-        var bx = r.label[0] + bw / 2 + 22, by = r.label[1] - (r.two ? 20 : 10);
-        ctx.beginPath(); ctx.arc(bx, by, 15, 0, Math.PI * 2); ctx.fillStyle = T.done; ctx.fill();
-        ctx.strokeStyle = '#0E1311'; ctx.lineWidth = 3.5; ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(bx - 7, by + 1); ctx.lineTo(bx - 2, by + 6); ctx.lineTo(bx + 7, by - 5); ctx.stroke();
+        // With names: the tick sits right of the name if it fits, otherwise under it. Without names: on the label spot.
+        var bx = lp[0], by = lp[1];
+        if (labels) {
+          ctx.font = '400 ' + fs + 'px Anton, sans-serif';
+          var tw = Math.max.apply(null, lines.map(function (l) { return ctx.measureText(l).width; }));
+          if (lp[0] + tw / 2 + 64 < 600) { bx = lp[0] + tw / 2 + 36; by = lp[1] - 6; } else { by = lp[1] + (r.two ? lh + 36 : 62); }
+        }
+        if (r.id === 'keys') { bx = 470; by = labels ? 600 : 610; }
+        tick(ctx, bx, by, 26, T);
       }
     });
     ctx.restore();
@@ -880,7 +907,7 @@
     ctx.fillText(tr('LEONIDA'), 56, 284);
     ctx.fillStyle = T.accent;
     ctx.fillText(tr('WRAPPED'), 56, 452);
-    ctx.fillStyle = T.ink2; ctx.font = '600 30px "DM Sans", sans-serif';
+    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
     ctx.fillText(tr('19 Nov – 10 Dec 2026'), 64, 512);
 
     drawMap(ctx, T, 636, 572, 0.6);
@@ -889,12 +916,12 @@
     ctx.fillStyle = T.accent;
     fitText(ctx, pctOf(n) + '%', 560, 168, '400 {s}px Anton, sans-serif');
     ctx.fillText(pctOf(n) + '%', 58, 742);
-    ctx.fillStyle = T.ink2; ctx.font = '600 30px "DM Sans", sans-serif';
+    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
     ctx.fillText(tr('of Leonida seen'), 64, 792);
     ctx.fillStyle = T.ink;
     fitText(ctx, rank(n), 540, 88, '400 {s}px Anton, sans-serif');
     ctx.fillText(rank(n), 62, 910);
-    ctx.fillStyle = T.ink2; ctx.font = '600 30px "DM Sans", sans-serif';
+    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
     ctx.fillText(tr('final rank'), 64, 956);
 
     ctx.fillStyle = T.line; ctx.fillRect(64, 1030, W - 128, 2);
@@ -908,7 +935,7 @@
       ctx.fillStyle = st[2];
       fitText(ctx, st[0], 300, 76, '400 {s}px Anton, sans-serif');
       ctx.fillText(st[0], x, 1124);
-      ctx.fillStyle = T.ink2; ctx.font = '600 26px "DM Sans", sans-serif';
+      ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
       ctx.fillText(st[1], x + 2, 1162);
     });
 
@@ -919,10 +946,10 @@
     ctx.fillText(title, 64, 1250);
 
     ctx.fillStyle = T.accent;
-    ctx.fillRect(0, H - 64, W, 64);
+    ctx.fillRect(0, H - 84, W, 84);
     ctx.fillStyle = T.onFull;
-    ctx.font = '600 30px "DM Sans", sans-serif';
-    ctx.fillText(tr('Make yours in 20 seconds') + '  vicecityhub.okenshop.com', 64, H - 22);
+    fitText(ctx, tr('Make yours in 20 seconds') + '  vicecityhub.okenshop.com', W - 128, 42, '600 {s}px "DM Sans", sans-serif');
+    ctx.fillText(tr('Make yours in 20 seconds') + '  vicecityhub.okenshop.com', 64, H - 28);
   }
 
   // Leonida Blend: your map and a friend's (from their challenge link) on one card, Spotify-Blend style.
@@ -949,12 +976,12 @@
     ctx.fillStyle = T.accent;
     fitText(ctx, st.cover + '%', 420, 170, '400 {s}px Anton, sans-serif');
     ctx.fillText(st.cover + '%', x - 4, 640);
-    ctx.fillStyle = T.ink2; ctx.font = '600 28px "DM Sans", sans-serif';
+    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
     ctx.fillText(tr('of Leonida covered'), x, 686);
     ctx.fillText(tr('together'), x, 722);
     ctx.fillStyle = T.ink; ctx.font = '400 104px Anton, sans-serif';
     ctx.fillText(st.match + '%', x - 2, 852);
-    ctx.fillStyle = T.ink2; ctx.font = '600 28px "DM Sans", sans-serif';
+    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
     ctx.fillText(tr('map match'), x, 894);
     ctx.fillStyle = T.ink;
     var carry = st.carry === 0 ? tr('Dead even') : tr('{name} carried', { name: st.carry > 0 ? me : rival.name });
@@ -964,16 +991,16 @@
     [[T.accent, me], [T.done, rival.name], [T.ink, tr('Both of you')]].forEach(function (l, k) {
       var ly = 1060 + k * 48;
       ctx.strokeStyle = l[0]; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(x, ly - 10); ctx.lineTo(x + 40, ly - 10); ctx.stroke();
-      ctx.fillStyle = T.ink2; ctx.font = '600 26px "DM Sans", sans-serif';
-      fitText(ctx, l[1], 360, 26, '600 {s}px "DM Sans", sans-serif');
+      ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
+      fitText(ctx, l[1], 360, 36, '600 {s}px "DM Sans", sans-serif');
       ctx.fillText(l[1], x + 56, ly);
     });
 
     ctx.fillStyle = T.accent;
-    ctx.fillRect(0, H - 64, W, 64);
+    ctx.fillRect(0, H - 84, W, 84);
     ctx.fillStyle = T.onFull;
-    ctx.font = '600 30px "DM Sans", sans-serif';
-    ctx.fillText(tr('Blend with me:') + ' vicecityhub.okenshop.com', 64, H - 22);
+    fitText(ctx, tr('Blend with me:') + ' vicecityhub.okenshop.com', W - 128, 42, '600 {s}px "DM Sans", sans-serif');
+    ctx.fillText(tr('Blend with me:') + ' vicecityhub.okenshop.com', 64, H - 28);
   }
 
   // The date stamp: today's date and the day count since launch (19 Nov 2026 = Day one), on the visitor's own clock.

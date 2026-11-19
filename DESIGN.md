@@ -70,10 +70,18 @@ Map labels are white Anton with a dark outline (`paint-order: stroke`), so they 
 
 ### Card
 
-Two sizes: Square 1:1 (1080 x 1080) and Story 9:16 (1080 x 1920), painted at 2x. Order of weight: the % (largest, neon,
-soft glow), then the name, then the rank on a green highway sign. The map uses the same region colours and states.
-Every card ends with a neon band: "Make yours in 20 seconds" and vicecityhub.okenshop.com. Wrapped and Blend keep their
-1080 x 1350 layout, fitted and centred in the chosen size.
+Two sizes: Square 1:1 (1080 x 1080) and Story 9:16 (1080 x 1920), painted at 2x. A feed shows a card at about a third
+of its size, so no text on a card is below 40px (about 13px in a feed); key text is 50px and up.
+
+- Weight order: the % (Anton, 330 to 480px, theme accent with a soft glow), the name (Anton 100 to 130px), the rank on a
+  green highway sign.
+- Square: % and rank left, map right without labels, then six region tiles (3 x 2). Tile states: outline only, region
+  colour at 45%, full colour, full colour with a gold edge and tick. Dark text on bright tiles, white on Mount Kalaga.
+- Story: rank sign, %, name, platform, then a large map with 46px region names and gold ticks.
+- The card map has no frame: one soft shadow, unseen regions outlined, the Keys drawn with a thick stroke.
+- Every card ends with a band in the accent: "Make yours in 20 seconds" and vicecityhub.okenshop.com.
+- Wrapped and Blend keep their 1080 x 1350 layout, fitted and centred; their smallest text is 36px.
+- Contrast on cards: lowest pair is white on Mount Kalaga at 5.3:1; all others 6:1 or more.
 
 ### Interactions
 
