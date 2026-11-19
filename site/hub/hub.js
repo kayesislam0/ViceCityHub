@@ -372,7 +372,7 @@
     tag: load('vch.tag', ''),
     platform: load('vch.platform', 'PS5'),
     theme: load('vch.theme', 'night'),
-    dayone: load('vch.dayone', '1') === '1',
+    dayone: load('vch.dayone', '0') === '1',
     useAlias: load('vch.useAlias', '0') === '1',
     aliasRoll: Number(load('vch.aliasRoll', '0')) || 0,
     format: load('vch.format', 'square') === 'story' ? 'story' : 'square',
@@ -736,7 +736,6 @@
     var fit = function () { ctx.font = '400 ' + s + 'px Anton, sans-serif'; var a = ctx.measureText(num).width; ctx.font = '400 ' + Math.round(s / 2) + 'px Anton, sans-serif'; return a + 8 + ctx.measureText('%').width; };
     while (fit() > maxW && s > 60) s -= 6;
     ctx.save();
-    ctx.shadowColor = T.accent; ctx.shadowBlur = 40;
     ctx.fillStyle = T.accent;
     ctx.font = '400 ' + s + 'px Anton, sans-serif'; ctx.fillText(num, x, y);
     var nw = ctx.measureText(num).width;
@@ -794,37 +793,30 @@
       if (l === 3) tick(ctx, tx + tw - 40, ty + h / 2, 22, T);
     });
   }
+  // Minimal cards: one huge, sharp number; the name; the rank; the map. Nothing else competes.
   function drawSquare(ctx, T, W, H) {
     var n = steps(), p = pctOf(n);
-    drawMap(ctx, T, 590, 48, 0.74);
-    ctx.fillStyle = T.ink2; ctx.font = '600 44px "DM Sans", sans-serif';
-    ctx.fillText(tr('I have seen'), 64, 112);
-    bigPct(ctx, T, p, 56, 412, 500, 330);
-    ctx.fillStyle = T.ink2; ctx.font = '600 44px "DM Sans", sans-serif';
-    ctx.fillText(tr('of Leonida'), 64, 478);
-    var signW = rankSign(ctx, T, rank(n), 64, 510, 50);
+    rankSign(ctx, T, rank(n), 64, 64, 46);
+    bigPct(ctx, T, p, 52, 560, 640, 470);
+    ctx.fillStyle = T.ink2; ctx.font = '600 46px "DM Sans", sans-serif';
+    ctx.fillText(tr('of Leonida seen'), 64, 636);
     ctx.fillStyle = T.ink;
-    var nm = cardName(); fitText(ctx, nm, W - 128, 100, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 62, 700);
-    regionTiles(ctx, T, 64, 732, W - 128, 84, 12);
-    if (settings.dayone) { ctx.save(); ctx.translate(Math.min(700, Math.max(452, 64 + signW + 84)), 548); ctx.scale(0.74, 0.74); stamp(ctx, 0, 0, T); ctx.restore(); }
-    footer(ctx, T, W, H, 124);
+    var nm = cardName(); fitText(ctx, nm, 560, 104, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 62, 840);
+    drawMap(ctx, T, 632, 236, 0.72);
+    if (settings.dayone) { ctx.save(); ctx.translate(940, 150); ctx.scale(0.8, 0.8); stamp(ctx, 0, 0, T); ctx.restore(); }
+    footer(ctx, T, W, H, 120);
   }
   function drawStory(ctx, T, W, H) {
     var n = steps(), p = pctOf(n);
-    rankSign(ctx, T, rank(n), 64, 96, 60);
-    ctx.fillStyle = T.ink2; ctx.font = '600 52px "DM Sans", sans-serif';
-    ctx.fillText(tr('I have seen'), 64, 262);
-    bigPct(ctx, T, p, 56, 730, 760, 460);
-    ctx.fillStyle = T.ink2; ctx.font = '600 52px "DM Sans", sans-serif';
-    ctx.fillText(tr('of Leonida'), 64, 800);
+    rankSign(ctx, T, rank(n), 64, 120, 60);
+    bigPct(ctx, T, p, 48, 800, 960, 620);
+    ctx.fillStyle = T.ink2; ctx.font = '600 56px "DM Sans", sans-serif';
+    ctx.fillText(tr('of Leonida seen'), 64, 890);
     ctx.fillStyle = T.ink;
-    var nm = cardName(); fitText(ctx, nm, W - 128, 130, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 60, 950);
-    ctx.fillStyle = T.ink2; ctx.font = '600 44px "DM Sans", sans-serif';
-    ctx.fillText(metaLine(), 64, 1018);
-    if (tipped) { ctx.fillStyle = '#FFC35A'; ctx.fillText(tr('Backed the hub'), 64 + ctx.measureText(metaLine() + '   ').width, 1018); }
-    var sc = 0.92; drawMap(ctx, T, (W - 600 * sc) / 2, 1050, sc, null, { labels: true });
-    if (settings.dayone) stamp(ctx, 900, 170, T);
-    footer(ctx, T, W, H, 164);
+    var nm = cardName(); fitText(ctx, nm, W - 128, 132, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 60, 1060);
+    var sc = 0.86; drawMap(ctx, T, (W - 600 * sc) / 2, 1110, sc, null, { labels: true });
+    if (settings.dayone) stamp(ctx, 930, 190, T);
+    footer(ctx, T, W, H, 150);
   }
 
   // The map as drawn on the cards, at (x, y) and scale sc of its 600 x 740 layout. No frame: the state itself is the picture.
@@ -832,7 +824,7 @@
   function drawMap(ctx, T, x, y, sc, blend, opts) {
     var labels = !!(opts && opts.labels);
     // Card label spots: Port Gellhorn and Ambrosia move apart so the bigger names never touch.
-    var SPOT = { gellhorn: [196, 238], ambrosia: [376, 214] };
+    var SPOT = { gellhorn: [188, 240], ambrosia: [388, 212] };
     var LV = blend ? blend.mine.map(function (m, i) { return Math.max(m, blend.theirs[i]); }) : levels;
     var tone = function (i) { return blend ? (LV[i] ? 2 : 0) : LV[i]; };
     var paint = function (r, t) {
