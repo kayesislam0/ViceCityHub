@@ -54,30 +54,39 @@
   var REGIONS = [
     { id: 'kalaga', color: '#1F7A4D', name: 'Mount Kalaga', full: 'Mount Kalaga National Park', label: [300, 104],
       d: outline(['kWest', 'kNorth', 'kEast', 'kV', 'kA', 'kG']) },
-    { id: 'gellhorn', color: '#C9A15B', name: 'Port Gellhorn', full: 'Port Gellhorn', label: [212, 238], two: true,
+    { id: 'gellhorn', color: '#C9A15B', name: 'Port Gellhorn', full: 'Port Gellhorn', label: [218, 206], two: true,
       d: outline(['-kG', 'gA', 'gGr', 'gCoast']) },
-    { id: 'ambrosia', color: '#E8762C', name: 'Ambrosia', full: 'Ambrosia', label: [364, 226],
+    { id: 'ambrosia', color: '#E8762C', name: 'Ambrosia', full: 'Ambrosia', label: [342, 224],
       d: outline(['-kA', 'aV', 'aGr', '-gA']) },
-    { id: 'vice', color: '#FF5FA2', color2: '#3FD6E8', name: 'Vice City', full: 'Vice City', label: [505, 318],
+    { id: 'vice', color: '#FF5FA2', color2: '#3FD6E8', name: 'Vice City', full: 'Vice City', label: [500, 300],
       d: outline(['-kV', 'vCoast', '-vGr', '-aV']) },
-    { id: 'grass', color: '#3FAE5A', name: 'Grassrivers', full: 'Grassrivers', label: [384, 506],
+    { id: 'grass', color: '#3FAE5A', name: 'Grassrivers', full: 'Grassrivers', label: [360, 452],
       d: outline(['-gGr', '-aGr', 'vGr', 'grCoast']) },
-    { id: 'keys', color: '#19B5A5', name: 'Leonida Keys', full: 'Leonida Keys', label: [190, 690],
+    { id: 'keys', color: '#19B5A5', name: 'Leonida Keys', full: 'Leonida Keys', label: [190, 690], out: true,
       hit: 'M112 642L512 628L516 724L112 724Z',
       d: ellipse(474, 652, 28, 10) + ellipse(424, 672, 24, 9) + ellipse(376, 688, 22, 9) + ellipse(328, 699, 20, 8) + ellipse(282, 707, 18, 8) }
   ];
   var LAKE = ellipse(368, 296, 24, 34);
 
+  // Three colour schemes for the map and the card. Colour means progress only, one step per level, the same way in each:
+  // fog = not seen, a tint = passed through, full colour = explored, gold = finished (gold is the reward in every scheme).
+  //   Neon night (default): hot pink on near-black. Pink reads as positive and energising, and against black it is the
+  //     most eye-catching colour on the page; it is also Vice City's nightlife colour.
+  //   Golden hour: warm coral on deep plum. Orange-red is positive and high-energy: a Leonida sunset.
+  //   Ocean drive: cyan on deep navy. Blue-green is positive and calm, and blue against gold is the pair colour-blind
+  //     players tell apart most easily.
+  // passed is the accent at 35% over the background, so all four levels step clearly in lightness as well as colour.
   var THEMES = {
-    night:   { bg: '#0E1311', bg2: '#0E1311', sea: '#10232A', grid: 'rgba(244,241,234,.06)', ink: '#F4F1EA', ink2: '#B4BDB8', accent: '#FF5FA2', edge: '#0E1311',
-               fill: ['#26302B', '#3E2B40', '#5E2F55', '#7D3B62'], onFull: '#0E1311', lake: '#10232A', darkFrom: 4, done: '#FFC35A', line: 'rgba(244,241,234,.14)', fog: 'rgba(244,241,234,.08)' },
-    sunset:  { bg: '#2A0F22', bg2: '#5E1F2C', sea: '#3A1630', grid: 'rgba(255,214,170,.07)', ink: '#FFF3E4', ink2: '#F2C9B0', accent: '#FFC35A', edge: '#2A0F22',
-               fill: ['#47243A', '#8A3A3E', '#D46A3C', '#FFC35A'], onFull: '#2A0F22', lake: '#3A1630', darkFrom: 3, done: '#FFF3E4', line: 'rgba(255,243,228,.16)', fog: 'rgba(255,214,170,.12)' },
-    highway: { bg: '#0B6B3A', bg2: '#0B6B3A', sea: '#063F22', grid: 'rgba(255,255,255,.07)', ink: '#FFFFFF', ink2: '#D6EEDF', accent: '#FFFFFF', edge: '#FFFFFF', signBg: '#0E1311',
-               fill: ['#0E5434', '#3E9A68', '#9FCDB2', '#FFFFFF'], onFull: '#0B6B3A', lake: '#063F22', darkFrom: 2, done: '#FFC35A', line: 'rgba(255,255,255,.2)', fog: 'rgba(255,255,255,.12)' }
+    night:  { name: 'Neon night', bg: '#0E1311', bg2: '#0E1311', ink: '#F4F1EA', ink2: '#B4BDB8', accent: '#FF5FA2', passed: '#622E44', done: '#FFC35A',
+              onFull: '#0E1311', edge: '#0E1311', lake: '#0F1F25', sea: '#0F1F25', line: 'rgba(244,241,234,.14)', fog: 'rgba(244,241,234,.09)', fill: ['#1A2420'] },
+    sunset: { name: 'Golden hour', bg: '#2A0F22', bg2: '#4A1A2A', ink: '#FFF3E4', ink2: '#F2C9B0', accent: '#FF6B5B', passed: '#742F36', done: '#FFC35A',
+              onFull: '#2A0F22', edge: '#2A0F22', lake: '#3A1630', sea: '#341429', line: 'rgba(255,243,228,.16)', fog: 'rgba(255,214,170,.10)', fill: ['#3A1A30'] },
+    ocean:  { name: 'Ocean drive', bg: '#08151F', bg2: '#0B2233', ink: '#EEF7FA', ink2: '#A9C3CC', accent: '#3FD6E8', passed: '#1B5965', done: '#FFC35A',
+              onFull: '#08151F', edge: '#08151F', lake: '#06111A', sea: '#0A1C29', line: 'rgba(238,247,250,.14)', fog: 'rgba(238,247,250,.09)', fill: ['#14232E'] }
   };
-  // Dusk to deep berry: each step reads as progress, and a finished region is calm to look at, with a gold edge as the reward.
-  var MAP_FILL = ['#26302B', '#3E2B40', '#5E2F55', '#7D3B62'];
+  function levelFill(T, l) { return [null, T.passed, T.accent, T.done][l]; }
+  // Short level words on the map, so a label never runs past its region.
+  var SHORT = ['', 'Passed', 'Explored', 'Finished'];
 
   // Ranks by steps (6 regions x 3 levels = 18). Small, frequent steps early, so the next rank is always close;
   // the last one is only for a fully finished map.
@@ -207,23 +216,21 @@
   // Where a region's route dot sits: just above its name, so the dot never covers the label.
   function anchorOf(r) { return [r.label[0], r.label[1] - 40]; }
 
+  var fogBase = null, fogLine = null, seaEl = null;
   function buildMap() {
     var svg = $('map');
     var defs = el('defs', {}, svg);
-    // Each region has its own colour; Vice City runs from neon pink to cyan.
-    var vg = el('linearGradient', { id: 'g-vice', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
-    el('stop', { offset: '0', 'stop-color': '#FF5FA2' }, vg); el('stop', { offset: '1', 'stop-color': '#3FD6E8' }, vg);
-    el('rect', { x: 0, y: 0, width: 600, height: 740, rx: 18, fill: '#0F1F25' }, svg);
-    // The coastal shelf: a pale halo round the whole state, so its outline reads from across the room.
+    // Fog over regions you have not seen: fine diagonal lines, so "unknown" reads at a glance.
+    var pat = el('pattern', { id: 'fog', width: 12, height: 12, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, defs);
+    fogBase = el('rect', { width: 12, height: 12 }, pat); fogLine = el('rect', { width: 3, height: 12 }, pat);
+    seaEl = el('rect', { x: 0, y: 0, width: 600, height: 740, rx: 18 }, svg);
+    // The coast: a faint line round the whole state, so its outline reads before anything is coloured in.
     var shelf = el('g', { 'pointer-events': 'none' }, svg);
-    REGIONS.forEach(function (r) {
-      el('path', { d: r.d, fill: 'rgba(143,179,191,.10)', stroke: 'rgba(143,179,191,.22)', 'stroke-width': 30, 'stroke-linejoin': 'round' }, shelf);
-    });
-    el('text', { class: 'map-title', x: 22, y: 40 }, svg).textContent = 'LEONIDA';
+    REGIONS.forEach(function (r) { el('path', { d: r.d, fill: 'none', stroke: 'rgba(143,179,191,.14)', 'stroke-width': 16, 'stroke-linejoin': 'round' }, shelf); });
+    el('text', { class: 'map-title', x: 22, y: 40 }, svg).textContent = 'Leonida';
     pctEl = el('text', { class: 'map-pct', x: 578, y: 40 }, svg);
     REGIONS.forEach(function (r, i) {
       var g = el('g', { class: 'rg', tabindex: 0, role: 'button', 'data-i': i }, svg);
-      g.style.setProperty('--c', r.color);
       el('path', { d: r.d, class: 'shape' }, g);
       if (r.hit) el('path', { d: r.hit, class: 'hit' }, g);
       g.addEventListener('click', function () { deeper(i); });
@@ -237,28 +244,43 @@
       });
       groups.push(g);
     });
-    lakeEl = el('path', { d: LAKE, fill: '#0F1F25', stroke: '#0E1311', 'stroke-width': 3, 'pointer-events': 'none' }, svg);
-    el('text', { x: 368, y: 300, 'text-anchor': 'middle', fill: '#8FB3BF', 'font-size': 12, 'font-family': 'DM Sans, sans-serif', 'font-weight': 600, 'pointer-events': 'none' }, svg).textContent = tr('Lake');
+    lakeEl = el('path', { d: LAKE, class: 'lake', 'pointer-events': 'none' }, svg);
+    el('text', { class: 'lake-name', x: 368, y: 300, 'text-anchor': 'middle', 'pointer-events': 'none' }, svg).textContent = tr('Lake');
     routeG = el('g', { 'pointer-events': 'none' }, svg);
-    // Names sit above the route, so the dotted line never runs through a label.
+    // Each label: the name, and under it the level in a short word. A finished region gets a tick in front of "Finished".
     REGIONS.forEach(function (r) {
-      var lg = el('g', { class: 'rl', 'pointer-events': 'none' }, svg);
-      var lx = r.label[0], ly = r.label[1];
+      var lg = el('g', { class: 'rl' + (r.out ? ' out' : ''), 'pointer-events': 'none' }, svg);
+      var lx = r.label[0], ly = r.label[1], lvlY;
       if (r.two) {
         var parts = r.name.split(' ');
         el('text', { x: lx, y: ly - 10, 'text-anchor': 'middle' }, lg).textContent = parts[0];
         el('text', { x: lx, y: ly + 16, 'text-anchor': 'middle' }, lg).textContent = parts.slice(1).join(' ');
-        el('text', { class: 'lvl', x: lx, y: ly + 40, 'text-anchor': 'middle' }, lg);
+        lvlY = ly + 38;
       } else {
         el('text', { x: lx, y: ly, 'text-anchor': 'middle' }, lg).textContent = r.name;
-        el('text', { class: 'lvl', x: lx, y: ly + 26, 'text-anchor': 'middle' }, lg);
+        lvlY = ly + 22;
       }
-      // Finished badge: a gold disc with a tick, just right of the name.
-      var bx = lx + (r.two ? 58 : r.name.length * 6.4 + 20), by = (r.two ? ly - 18 : ly - 8);
-      var bd = el('g', { class: 'badge', transform: 'translate(' + bx + ' ' + by + ')' }, lg);
-      el('circle', { r: 11 }, bd); el('path', { d: 'M-5 0.5l3.4 3.4 6.2-7' }, bd);
+      el('text', { class: 'lvl', x: lx, y: lvlY, 'text-anchor': 'middle' }, lg);
+      var bd = el('g', { class: 'badge' }, lg);
+      el('circle', { r: 8 }, bd); el('path', { d: 'M-3.6 0.2l2.5 2.5 4.6-5' }, bd);
       labels.push(lg);
     });
+    applyPalette();
+  }
+  // Paints the map in the chosen scheme: sea, fog, and the colours the key and the picker show.
+  function applyPalette() {
+    var T = THEMES[settings.theme], w = $('map-wrap');
+    seaEl.setAttribute('fill', T.sea);
+    fogBase.setAttribute('fill', T.fill[0]); fogLine.setAttribute('fill', T.fog);
+    lakeEl.setAttribute('fill', T.lake); lakeEl.setAttribute('stroke', T.edge);
+    [['--m-bg', T.bg], ['--m-edge', T.edge], ['--m-fog', T.fill[0]], ['--m-passed', T.passed], ['--m-accent', T.accent], ['--m-done', T.done], ['--m-on', T.onFull]]
+      .forEach(function (v) { w.style.setProperty(v[0], v[1]); });
+    document.querySelectorAll('input[name="theme"], input[name="map-theme"]').forEach(function (r) { r.checked = r.value === settings.theme; });
+  }
+  function setTheme(v) {
+    if (!THEMES[v]) return;
+    settings.theme = v; save('vch.theme', v);
+    applyPalette(); render();
   }
 
   // Your route: a dashed neon line through every region you have touched, in map order.
@@ -344,10 +366,18 @@
       var lvl = levels[i];
       var start = n === 0 && REGIONS[i].id === 'vice';
       g.dataset.level = lvl;
-      g.querySelector('.shape').setAttribute('fill', lvl ? (REGIONS[i].color2 ? 'url(#g-vice)' : REGIONS[i].color) : MAP_FILL[0]);
+      g.querySelector('.shape').setAttribute('fill', lvl ? levelFill(THEMES[settings.theme], lvl) : 'url(#fog)');
       labels[i].dataset.level = lvl;
       labels[i].classList.toggle('start', start);
-      labels[i].querySelector('.lvl').textContent = lvl ? tr(LEVELS[lvl]) : (start ? tr('Tap to start') : '');
+      var lt = labels[i].querySelector('.lvl');
+      lt.textContent = lvl ? tr(SHORT[lvl]) : (start ? tr('Tap to start') : '');
+      // The tick sits just left of "Finished", centred with it as one unit.
+      if (lvl === 3) {
+        var tw = 0; try { tw = lt.getComputedTextLength(); } catch (e) { tw = 60; }
+        var cx = Number(lt.getAttribute('x')), cy = Number(lt.getAttribute('y')) - 5;
+        lt.setAttribute('dx', 10);
+        labels[i].querySelector('.badge').setAttribute('transform', 'translate(' + (cx - tw / 2 - 2) + ' ' + cy + ')');
+      } else lt.removeAttribute('dx');
       g.classList.toggle('start', start);
       if (start && g.nextSibling !== lakeEl) g.parentNode.insertBefore(g, lakeEl); // dashed outline drawn above its neighbours
       g.setAttribute('aria-label', tr('{name}, {level}. Select to raise the level.', { name: REGIONS[i].full, level: tr(LEVELS[lvl]) }));
@@ -442,6 +472,7 @@
     kind: load('vch.kind', Date.now() >= new Date(2026, 11, 7).getTime() ? 'wrapped' : 'map')
   };
   if (settings.kind !== 'wrapped') settings.kind = 'map'; // Blend is chosen per visit, from a friend's link
+  if (settings.theme === 'highway') settings.theme = 'ocean'; // the old Highway look became Ocean drive
   if (!THEMES[settings.theme]) settings.theme = 'night';
   if (settings.platform !== 'PS5' && settings.platform !== 'Xbox Series') settings.platform = 'PS5';
 
@@ -467,9 +498,10 @@
       r.checked = r.value === settings.format;
       r.addEventListener('change', function () { settings.format = r.value; save('vch.format', r.value); drawSoon(); });
     });
-    document.querySelectorAll('input[name="theme"]').forEach(function (r) {
+    // The colour scheme can be picked under the map or in the card options; both stay in step.
+    document.querySelectorAll('input[name="theme"], input[name="map-theme"]').forEach(function (r) {
       r.checked = r.value === settings.theme;
-      r.addEventListener('change', function () { settings.theme = r.value; save('vch.theme', r.value); drawSoon(); });
+      r.addEventListener('change', function () { if (r.checked) setTheme(r.value); });
     });
     document.querySelectorAll('input[name="kind"]').forEach(function (r) {
       r.checked = r.value === settings.kind;
@@ -1039,9 +1071,10 @@
 
   // Text on a region colour: dark on the bright colours, white on deep green.
   function inkOn(r) { return r.id === 'kalaga' ? '#FFFFFF' : '#0E1311'; }
+  // The finished tick sits on a gold region, so it is drawn dark with a gold check.
   function tick(ctx, cx, cy, rad, T) {
-    ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.fillStyle = T.done; ctx.fill();
-    ctx.strokeStyle = '#0E1311'; ctx.lineWidth = rad * 0.24; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.fillStyle = T.onFull; ctx.fill();
+    ctx.strokeStyle = T.done; ctx.lineWidth = rad * 0.24; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.beginPath(); ctx.moveTo(cx - rad * 0.45, cy + rad * 0.02); ctx.lineTo(cx - rad * 0.12, cy + rad * 0.36); ctx.lineTo(cx + rad * 0.48, cy - rad * 0.34); ctx.stroke();
     ctx.lineCap = 'butt';
   }
@@ -1093,7 +1126,7 @@
   function drawMap(ctx, T, x, y, sc, blend, opts) {
     var labels = !!(opts && opts.labels);
     // Card label spots: Port Gellhorn and Ambrosia move apart so the bigger names never touch.
-    var SPOT = { gellhorn: [188, 240], ambrosia: [388, 212] };
+    var SPOT = { gellhorn: [188, 240], ambrosia: [388, 212], vice: [505, 318], grass: [384, 506] };
     var LV = blend ? blend.mine.map(function (m, i) { return Math.max(m, blend.theirs[i]); }) : levels;
     var fog = stripes(ctx, T.fill[0], T.fog, 22);
     var both = blend ? stripes(ctx, T.accent, T.done, 26) : null;
@@ -1102,9 +1135,7 @@
         var me = blend.mine[i] > 0, them = blend.theirs[i] > 0;
         return me && them ? both : me ? T.accent : them ? T.done : fog;
       }
-      if (!LV[i]) return fog;
-      if (!r.color2) return r.color;
-      var g = ctx.createLinearGradient(0, 160, 0, 560); g.addColorStop(0, r.color); g.addColorStop(1, r.color2); return g;
+      return LV[i] ? levelFill(T, LV[i]) : fog;
     };
     ctx.save();
     ctx.translate(x, y); ctx.scale(sc, sc);
@@ -1114,17 +1145,13 @@
     REGIONS.forEach(function (r) { ctx.fill(new Path2D(r.d)); }); ctx.restore();
     REGIONS.forEach(function (r, i) {
       var path = new Path2D(r.d), seen = LV[i] > 0;
-      ctx.globalAlpha = !blend && LV[i] === 1 ? 0.55 : 1; ctx.fillStyle = paint(r, i); ctx.fill(path);
+      ctx.fillStyle = paint(r, i); ctx.fill(path);
       // The Keys are thin islands: a fat stroke in their own fill keeps them visible at thumbnail size.
-      if (r.id === 'keys') { ctx.strokeStyle = seen ? (blend ? paint(r, i) : r.color) : T.fill[0]; ctx.lineWidth = 10; ctx.stroke(path); }
-      ctx.globalAlpha = 1;
+      if (r.id === 'keys') { ctx.strokeStyle = seen ? paint(r, i) : T.fill[0]; ctx.lineWidth = 10; ctx.stroke(path); }
     });
     REGIONS.forEach(function (r, i) {
       var path = new Path2D(r.d);
       ctx.strokeStyle = LV[i] ? T.edge : T.line; ctx.lineWidth = LV[i] ? 5 : 2.5; ctx.stroke(path);
-    });
-    if (!blend) REGIONS.forEach(function (r, i) {
-      if (LV[i] === 3) { ctx.strokeStyle = T.done; ctx.lineWidth = r.id === 'keys' ? 6 : 9; ctx.stroke(new Path2D(r.d)); }
     });
     ctx.fillStyle = T.lake; ctx.fill(new Path2D(LAKE));
     ctx.textAlign = 'center';

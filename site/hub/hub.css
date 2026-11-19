@@ -117,46 +117,47 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .meter__next { color: var(--chalk-2); font-size: 14px; margin-top: 6px; }
 .meter.flash { animation: flash 1s cubic-bezier(.16, 1, .3, 1); }
 @keyframes flash { 0% { border-color: var(--neon); box-shadow: 0 0 0 0 rgba(255, 95, 162, .5); } 100% { border-color: var(--line); box-shadow: 0 0 0 14px rgba(255, 95, 162, 0); } }
-.rg.start .shape { stroke: var(--neon); stroke-width: 4; stroke-dasharray: 12 10; animation: march 1.2s linear infinite; }
-.rl.start .lvl { fill: var(--neon); }
-@keyframes march { to { stroke-dashoffset: -22; } }
+.rg.start .shape { stroke: var(--m-accent, var(--neon)); stroke-width: 3; stroke-dasharray: 10 8; }
+.rl.start .lvl { fill: var(--m-accent, var(--neon)); }
 
 .map { margin: 0; }
 .map svg { width: 100%; height: auto; touch-action: manipulation; }
 .map figcaption { color: var(--chalk-2); font-size: 13px; margin-top: 8px; text-align: center; }
 .rg { cursor: pointer; outline: none; }
-.rg .shape { transition: fill .35s cubic-bezier(.16, 1, .3, 1), stroke .35s; stroke: #0E1311; stroke-width: 3; stroke-linejoin: round; }
+.rg .shape { transition: fill .3s cubic-bezier(.16, 1, .3, 1), stroke .2s; stroke: var(--m-edge, #0E1311); stroke-width: 3; stroke-linejoin: round; }
 .rg .hit { fill: transparent; stroke: none; }
 /* Region states. Not seen: dim outline. Passed through: its colour, softened. Explored: full colour with a glow.
    Finished: full colour, a gold edge and a gold badge by the name. */
-.rg[data-level="0"] .shape { stroke: rgba(244, 241, 234, .28); stroke-width: 1.5; }
-.rg[data-level="1"] .shape { fill-opacity: .5; }
-.rg[data-level="2"] .shape { filter: drop-shadow(0 0 10px var(--c)); }
-.rg[data-level="3"] .shape { stroke: var(--sun); stroke-width: 5; filter: drop-shadow(0 0 8px rgba(255, 195, 90, .55)); }
 .rl .badge { display: none; }
 .rl[data-level="3"] .badge { display: inline; }
-.badge circle { fill: var(--sun); }
-.badge path { fill: none; stroke: var(--asphalt); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.badge circle { fill: var(--m-on, #0E1311); }
+.badge path { fill: none; stroke: var(--m-done, #FFC35A); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .legend { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; font-size: 14px; color: var(--chalk-2); }
 .legend li { display: inline-flex; align-items: center; gap: 8px; }
 .legend svg { width: 20px; height: 20px; }
-.lg-0 { fill: #26302B; stroke: rgba(244, 241, 234, .4); stroke-width: 1.5; }
-.lg-1 { fill: rgba(255, 95, 162, .5); }
-.lg-2 { fill: var(--neon); filter: drop-shadow(0 0 3px var(--neon)); }
-.lg-3 { fill: var(--neon); stroke: var(--sun); stroke-width: 2.5; }
-.lg-tick { fill: none; stroke: #FFFFFF; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.map-title { font: 400 30px/1 var(--display); fill: var(--chalk); letter-spacing: .02em; }
-.map-pct { font: 400 30px/1 var(--display); fill: var(--neon); text-anchor: end; font-variant-numeric: tabular-nums; }
+.lg-0 { fill: url(#lg-fog); stroke: rgba(244, 241, 234, .3); stroke-width: 1; }
+.lg-1 { fill: var(--m-passed); }
+.lg-2 { fill: var(--m-accent); }
+.lg-3 { fill: var(--m-done); }
+.lg-tick { fill: none; stroke: var(--m-on); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.map-title { font: 400 30px/1 var(--display); fill: var(--chalk); }
+.map-pct { font: 400 30px/1 var(--display); fill: var(--m-accent, var(--neon)); text-anchor: end; font-variant-numeric: tabular-nums; }
 .route { fill: none; stroke: var(--neon); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1 9; opacity: .95; }
 .route-dot { fill: var(--asphalt); stroke: var(--neon); stroke-width: 3; }
 .compass text { font: 600 12px var(--text); fill: var(--chalk); }
 @media (hover: hover) { .rg:hover .shape { stroke: var(--chalk); } }
-.rg:focus-visible .shape { stroke: var(--neon); stroke-width: 5; }
-.rl text { font: 400 26px var(--display); fill: var(--chalk); letter-spacing: .01em; paint-order: stroke; stroke: rgba(14, 19, 17, .55); stroke-width: 4px; stroke-linejoin: round; }
+.rg:focus-visible .shape { stroke: var(--chalk); stroke-width: 5; }
+.rl text { font: 400 24px var(--display); fill: var(--chalk); paint-order: stroke; stroke: rgba(14, 19, 17, .5); stroke-width: 3px; stroke-linejoin: round; }
 
-.rl .lvl { font: 600 17px var(--text); fill: var(--chalk-2); }
-.rl[data-level="1"] .lvl, .rl[data-level="2"] .lvl { fill: var(--chalk); }
-.rl[data-level="3"] .lvl { fill: var(--sun); }
+.rl .lvl { font: 600 15px var(--text); fill: var(--chalk-2); }
+.rl[data-level="1"] .lvl { fill: var(--chalk); }
+/* Explored and finished regions are bright, so their words are dark, with no outline. */
+.rl[data-level="2"] text, .rl[data-level="3"] text { fill: var(--m-on); stroke: none; }
+.lake { stroke-width: 3; }
+.lake-name { font: 600 12px var(--text); fill: #8FB3BF; }
+.palette { margin: 16px 0 0; padding: 0; border: 0; min-width: 0; display: grid; justify-items: center; gap: 8px; }
+.palette legend { padding: 0; margin: 0 auto 8px; font-size: 14px; font-weight: 600; color: var(--chalk-2); text-align: center; }
+.palette .seg { justify-content: center; }
 .pop { animation: pop .5s cubic-bezier(.16, 1, .3, 1); transform-box: fill-box; transform-origin: center; }
 @keyframes pop { 0% { transform: scale(1); } 35% { transform: scale(1.035); } 100% { transform: scale(1); } }
 
@@ -591,3 +592,13 @@ a, button, label, summary, .rg, .cell { -webkit-tap-highlight-color: transparent
 /* Card maker: the secondary buttons sit in one row and share the width on phones, like the buttons above them. */
 .actions--sub { display: flex; flex-wrap: wrap; gap: 10px; }
 @media (max-width: 899px) { .card-maker__form > .actions--sub .btn { flex: 1 1 auto; } }
+.lg-fog-a { fill: var(--m-fog); } .lg-fog-b { fill: rgba(244, 241, 234, .28); }
+/* The Keys label sits on the sea beside the islands, so it stays light whatever the level. */
+.rl.out[data-level] text { fill: var(--chalk); stroke: rgba(14, 19, 17, .5); }
+.rl.out[data-level] .lvl { fill: var(--chalk-2); }
+.rl.out[data-level="3"] .lvl { fill: var(--m-done); }
+/* Map colours: three equal tiles in one row, swatch above the name. */
+.palette .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; max-width: 440px; }
+.palette .seg label { display: grid; }
+.palette .seg span { flex-direction: column; justify-content: center; gap: 6px; min-height: 64px; padding: 8px 6px; border-radius: 12px; font-size: 14px; text-align: center; line-height: 1.2; }
+.palette .swatch { margin: 0; width: 22px; height: 22px; }

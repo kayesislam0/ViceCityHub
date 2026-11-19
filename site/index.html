@@ -123,11 +123,19 @@
         </div>
       </div>
       <ul class="legend" aria-label="Map key">
-        <li><svg aria-hidden="true" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" class="lg-0"/></svg>Not seen</li>
+        <li><svg aria-hidden="true" viewBox="0 0 20 20"><defs><pattern id="lg-fog" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" class="lg-fog-a"/><rect width="1.6" height="5" class="lg-fog-b"/></pattern></defs><rect x="2" y="2" width="16" height="16" rx="4" class="lg-0"/></svg>Not seen</li>
         <li><svg aria-hidden="true" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" class="lg-1"/></svg>Passed through</li>
         <li><svg aria-hidden="true" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" class="lg-2"/></svg>Explored</li>
         <li><svg aria-hidden="true" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" class="lg-3"/><path d="M6.5 10.2l2.4 2.4 4.6-5" class="lg-tick"/></svg>Finished</li>
       </ul>
+      <fieldset class="palette">
+        <legend>Map colours</legend>
+        <div class="seg">
+          <label><input type="radio" name="map-theme" value="night"><span><i class="swatch" style="--a:#0E1311;--b:#FF5FA2" aria-hidden="true"></i>Neon night</span></label>
+          <label><input type="radio" name="map-theme" value="sunset"><span><i class="swatch" style="--a:#2A0F22;--b:#FF6B5B" aria-hidden="true"></i>Golden hour</span></label>
+          <label><input type="radio" name="map-theme" value="ocean"><span><i class="swatch" style="--a:#08151F;--b:#3FD6E8" aria-hidden="true"></i>Ocean drive</span></label>
+        </div>
+      </fieldset>
       <figcaption>Fan-made map. Not Rockstar's. Not to scale.</figcaption>
     </figure>
   </section>
@@ -181,11 +189,11 @@
           </div>
         </fieldset>
         <fieldset class="field">
-          <legend>Look</legend>
+          <legend>Colours</legend>
           <div class="seg" id="theme">
             <label><input type="radio" name="theme" value="night" checked><span><i class="swatch" style="--a:#0E1311;--b:#FF5FA2" aria-hidden="true"></i>Neon night</span></label>
-            <label><input type="radio" name="theme" value="sunset"><span><i class="swatch" style="--a:#5E1F2C;--b:#FFC35A" aria-hidden="true"></i>Sunset</span></label>
-            <label><input type="radio" name="theme" value="highway"><span><i class="swatch" style="--a:#0B6B3A;--b:#FFFFFF" aria-hidden="true"></i>Highway</span></label>
+            <label><input type="radio" name="theme" value="sunset"><span><i class="swatch" style="--a:#2A0F22;--b:#FF6B5B" aria-hidden="true"></i>Golden hour</span></label>
+            <label><input type="radio" name="theme" value="ocean"><span><i class="swatch" style="--a:#08151F;--b:#3FD6E8" aria-hidden="true"></i>Ocean drive</span></label>
           </div>
         </fieldset>
         <label class="check"><input type="checkbox" id="dayone"><span>Show the day on my card</span></label>
