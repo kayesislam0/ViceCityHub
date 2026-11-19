@@ -1157,14 +1157,16 @@
     // Names sit at the same roomy spots as on the page map, sized to stay inside their region; a finished region gets
     // its tick centred under the name, the same place every time.
     REGIONS.forEach(function (r, i) {
-      var lp = r.label, fs = 32, lines = r.two ? r.name.split(' ') : [r.id === 'kalaga' ? 'Mount Kalaga' : r.name];
+      var nudge = { gellhorn: [-10, 10], ambrosia: [8, 4] }[r.id] || [0, 0];
+      var lp = [r.label[0] + nudge[0], r.label[1] + nudge[1]], fs = 32, lines = r.two ? r.name.split(' ') : [r.id === 'kalaga' ? 'Mount Kalaga' : r.name];
       var top = r.two ? lp[1] - 10 : lp[1], last = top + (lines.length - 1) * 28;
       if (labels) {
         ctx.font = '400 ' + fs + 'px Anton, sans-serif';
         lines.forEach(function (txt, k) {
           var ly = top + k * 28;
-          ctx.strokeStyle = 'rgba(14,19,17,.85)'; ctx.lineWidth = 8; ctx.strokeText(txt, lp[0], ly);
-          ctx.fillStyle = LV[i] ? '#FFFFFF' : T.ink2; ctx.fillText(txt, lp[0], ly);
+          // No outline effect: dark ink on bright fills, light ink on dark ones (the Keys label sits on the sea).
+          var bright = !r.out && (blend ? LV[i] > 0 : LV[i] >= 2);
+          ctx.fillStyle = bright ? T.onFull : LV[i] ? '#FFFFFF' : T.ink2; ctx.fillText(txt, lp[0], ly);
         });
       }
       if (!blend && LV[i] === 3) tick(ctx, r.id === 'keys' ? 470 : lp[0], r.id === 'keys' ? 610 : labels ? last + 26 : lp[1] - 8, 16, T);
