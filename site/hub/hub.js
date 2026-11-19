@@ -232,14 +232,14 @@
       if (r.two) {
         var parts = r.name.split(' ');
         el('text', { x: lx, y: ly - 10, 'text-anchor': 'middle' }, lg).textContent = parts[0];
-        el('text', { x: lx, y: ly + 14, 'text-anchor': 'middle' }, lg).textContent = parts.slice(1).join(' ');
-        el('text', { class: 'lvl', x: lx, y: ly + 36, 'text-anchor': 'middle' }, lg);
+        el('text', { x: lx, y: ly + 16, 'text-anchor': 'middle' }, lg).textContent = parts.slice(1).join(' ');
+        el('text', { class: 'lvl', x: lx, y: ly + 40, 'text-anchor': 'middle' }, lg);
       } else {
         el('text', { x: lx, y: ly, 'text-anchor': 'middle' }, lg).textContent = r.name;
-        el('text', { class: 'lvl', x: lx, y: ly + 22, 'text-anchor': 'middle' }, lg);
+        el('text', { class: 'lvl', x: lx, y: ly + 26, 'text-anchor': 'middle' }, lg);
       }
       // Finished badge: a gold disc with a tick, just right of the name.
-      var bx = lx + (r.two ? 46 : r.name.length * 5.4 + 16), by = (r.two ? ly - 18 : ly - 8);
+      var bx = lx + (r.two ? 58 : r.name.length * 6.4 + 20), by = (r.two ? ly - 18 : ly - 8);
       var bd = el('g', { class: 'badge', transform: 'translate(' + bx + ' ' + by + ')' }, lg);
       el('circle', { r: 11 }, bd); el('path', { d: 'M-5 0.5l3.4 3.4 6.2-7' }, bd);
       labels.push(lg);
@@ -248,6 +248,7 @@
 
   // Your route: a dashed neon line through every region you have touched, in map order.
   function drawRoute() {
+    return; // the page map stays calm: colour and labels carry the state
     while (routeG.firstChild) routeG.removeChild(routeG.firstChild);
     var pts = [];
     levels.forEach(function (l, i) { if (l) pts.push(anchorOf(REGIONS[i])); });
@@ -315,7 +316,7 @@
     pctEl.textContent = tr('{n}% seen', { n: p });
     drawRoute();
     $('rank').textContent = tr(RANKS[ri][1]);
-    $('meter-sub').textContent = tr('{v} of 6 regions · {n} of 18 steps', { v: visited(), n: n });
+    $('meter-sub').textContent = tr('{n} of 18 steps', { n: n });
     var next = RANKS[ri + 1];
     var from = RANKS[ri][0];
     $('xp').style.transform = 'scaleX(' + (next ? (n - from) / (next[0] - from) : 1) + ')';
@@ -326,14 +327,14 @@
   }
 
   // ---- next-step bar: shown on phones once the map has progress, hidden while the card is on screen ----
-  var cardOnScreen = false, touched = false;
+  var cardOnScreen = false, mapOnScreen = true, touched = false;
   function updateNextbar() {
     var nb = $('nextbar'); if (!nb) return;
     var n = steps();
     $('nb-pct').textContent = pctOf(n) + '%';
     $('nb-rank').textContent = rank(n);
     nb.hidden = !(n > 0 && touched);
-    nb.classList.toggle('is-away', cardOnScreen);
+    nb.classList.toggle('is-away', cardOnScreen || mapOnScreen);
   }
 
   // ---- a friend's challenge (?c=320100&n=Name) ----
@@ -359,8 +360,7 @@
   function updateChallenge() {
     if (!rival) return;
     var mine = score();
-    $('challenge-you').textContent = mine + '%';
-    $('challenge-msg').textContent = mine === 0 ? tr('Mark your regions and beat their score.')
+    $('challenge-msg').textContent = mine === 0 ? tr('Beat it.')
       : mine < rival.pct ? tr('{n} points behind {name}. Keep going.', { n: rival.pct - mine, name: rival.name })
       : mine === rival.pct ? tr('Dead even with {name}. One more step wins it.', { name: rival.name })
       : tr('You beat {name}. Make your card and send it back.', { name: rival.name });
@@ -796,15 +796,15 @@
   // Minimal cards: one huge, sharp number; the name; the rank; the map. Nothing else competes.
   function drawSquare(ctx, T, W, H) {
     var n = steps(), p = pctOf(n);
-    rankSign(ctx, T, rank(n), 64, 64, 46);
-    bigPct(ctx, T, p, 52, 560, 640, 470);
+    rankSign(ctx, T, rank(n), 64, 64, 54);
+    drawMap(ctx, T, 572, 52, 0.76);
+    bigPct(ctx, T, p, 50, 700, 620, 480);
     ctx.fillStyle = T.ink2; ctx.font = '600 46px "DM Sans", sans-serif';
-    ctx.fillText(tr('of Leonida seen'), 64, 636);
+    ctx.fillText(tr('of Leonida seen'), 64, 772);
     ctx.fillStyle = T.ink;
-    var nm = cardName(); fitText(ctx, nm, 560, 104, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 62, 840);
-    drawMap(ctx, T, 632, 236, 0.72);
-    if (settings.dayone) { ctx.save(); ctx.translate(940, 150); ctx.scale(0.8, 0.8); stamp(ctx, 0, 0, T); ctx.restore(); }
-    footer(ctx, T, W, H, 120);
+    var nm = cardName(); fitText(ctx, nm, W - 128, 104, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 60, 900);
+    if (settings.dayone) { ctx.save(); ctx.translate(430, 215); ctx.scale(0.62, 0.62); stamp(ctx, 0, 0, T); ctx.restore(); }
+    footer(ctx, T, W, H, 124);
   }
   function drawStory(ctx, T, W, H) {
     var n = steps(), p = pctOf(n);
@@ -1153,6 +1153,8 @@
     document.addEventListener('visibilitychange', function () { if (!document.hidden) renderDaily(); });
     var cv = $('card-canvas');
     if ('IntersectionObserver' in window) {
+      // Away while you are still using the map, so the bar never covers a region you want to tap.
+      new IntersectionObserver(function (es) { mapOnScreen = es[0].intersectionRatio > 0.25; updateNextbar(); }, { threshold: [0, 0.25, 0.5] }).observe($('map-wrap'));
       // Away once the card is on screen or already scrolled past, so the bar never covers the tools, tips or footer.
       new IntersectionObserver(function (es) { var e = es[0]; cardOnScreen = e.isIntersecting || e.boundingClientRect.top < 0; updateNextbar(); }, { threshold: 0.15 }).observe($('card'));
       new IntersectionObserver(function (es) {

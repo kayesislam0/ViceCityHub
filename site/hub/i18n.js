@@ -2,6 +2,11 @@
    Loaded by hub.js only for Spanish and Portuguese visitors. */
 window.VCH_I18N = {
  "es": {
+  "{n} of 18 steps": "{n} de 18 pasos",
+  "has seen": "ha visto",
+  "of Leonida.": "de Leonida.",
+  "Beat it.": "Supéralo.",
+  "Beat it": "Supéralo",
   "Support": "Apoyo",
   "Support the hub": "Apoya el hub",
   "Legend": "Leyenda viva",
@@ -493,6 +498,11 @@ window.VCH_I18N = {
   "DAY {n}": "DÍA {n}"
  },
  "pt": {
+  "{n} of 18 steps": "{n} de 18 passos",
+  "has seen": "já viu",
+  "of Leonida.": "de Leonida.",
+  "Beat it.": "Supere.",
+  "Beat it": "Supere",
   "Support": "Apoiar",
   "Support the hub": "Apoie o hub",
   "Legend": "Lenda",

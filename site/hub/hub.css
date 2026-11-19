@@ -152,9 +152,9 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .compass text { font: 600 12px var(--text); fill: var(--chalk); }
 @media (hover: hover) { .rg:hover .shape { stroke: var(--chalk); } }
 .rg:focus-visible .shape { stroke: var(--neon); stroke-width: 5; }
-.rl text { font: 400 22px var(--display); fill: var(--chalk); letter-spacing: .01em; paint-order: stroke; stroke: rgba(14, 19, 17, .55); stroke-width: 4px; stroke-linejoin: round; }
+.rl text { font: 400 26px var(--display); fill: var(--chalk); letter-spacing: .01em; paint-order: stroke; stroke: rgba(14, 19, 17, .55); stroke-width: 4px; stroke-linejoin: round; }
 
-.rl .lvl { font: 600 15px var(--text); fill: var(--chalk-2); }
+.rl .lvl { font: 600 17px var(--text); fill: var(--chalk-2); }
 .rl[data-level="1"] .lvl, .rl[data-level="2"] .lvl { fill: var(--chalk); }
 .rl[data-level="3"] .lvl { fill: var(--sun); }
 .pop { animation: pop .5s cubic-bezier(.16, 1, .3, 1); transform-box: fill-box; transform-origin: center; }
@@ -472,3 +472,16 @@ details.list-toggle .regions-list { margin-top: 4px; }
 .nextbar__score span { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nextbar .btn { flex: none; }
 @media (min-width: 900px) { .nextbar { display: none !important; } }
+
+/* Map key: four in a row, or a tidy 2 x 2 on narrow phones. */
+@media (max-width: 480px) { .legend { display: grid; grid-template-columns: repeat(2, max-content); justify-content: center; gap: 6px 24px; } }
+/* Empty status lines take no room. */
+.status:empty { min-height: 0; margin-top: 0; }
+/* Challenge from a friend's link: their %, then "Beat it". */
+.challenge { display: grid; gap: 8px; padding: 16px 20px; }
+.challenge__lead { font-size: 17px; }
+.challenge__lead b { font: 400 34px/1 var(--display); margin-inline: 2px; }
+.challenge__msg { font: 400 26px/1.1 var(--display); color: #FFFFFF; }
+.challenge__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.challenge.is-winning .challenge__msg { color: var(--asphalt); }
+.challenge.is-winning .btn--primary { background: var(--asphalt); border-color: var(--asphalt); color: var(--chalk); }

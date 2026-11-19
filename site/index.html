@@ -67,9 +67,12 @@
 
 <main id="main">
   <div class="challenge" id="challenge" hidden>
-    <p class="challenge__vs"><span><strong id="challenge-name">A friend</strong> <b id="challenge-score">0%</b></span><span class="challenge__x">vs</span><span><strong>You</strong> <b id="challenge-you">0%</b></span></p>
-    <p class="challenge__msg" id="challenge-msg">Mark your regions and beat their score.</p>
-    <button class="btn btn--blend" id="blend-go" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span>Make our Blend</span></button>
+    <p class="challenge__lead"><strong id="challenge-name">A friend</strong> has seen <b id="challenge-score">0%</b> of Leonida.</p>
+    <p class="challenge__msg" id="challenge-msg">Beat it.</p>
+    <div class="challenge__actions">
+      <a class="btn btn--primary" href="#map-wrap">Beat it</a>
+      <button class="btn btn--blend" id="blend-go" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span>Make our Blend</span></button>
+    </div>
   </div>
 
   <section class="hero" id="tracker" aria-labelledby="hero-title">

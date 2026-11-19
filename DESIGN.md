@@ -75,11 +75,11 @@ of its size, so no text on a card is below 40px (about 13px in a feed); key text
 
 - Weight order: the % (Anton, 470 to 620px, solid theme accent, no glow so edges stay sharp), the name (Anton 100 to 130px), the rank on a
   green highway sign.
-- Square: rank sign, %, "of Leonida seen", name on the left; map on the right without labels. Date stamp off by default.
+- Square: rank sign top left, map top right without labels, then the % across the lower half, "of Leonida seen", the name. Date stamp off by default.
   colour at 45%, full colour, full colour with a gold edge and tick. Dark text on bright tiles, white on Mount Kalaga.
 - Story: rank sign, %, name, platform, then a large map with 46px region names and gold ticks.
 - The card map has no frame: one soft shadow, unseen regions outlined, the Keys drawn with a thick stroke.
-- Every card ends with a band in the accent: "Make yours in 20 seconds" and vicecityhub.okenshop.com.
+- The page map has no route line. Every card ends with a band in the accent: "Make yours in 20 seconds" and vicecityhub.okenshop.com.
 - Wrapped and Blend keep their 1080 x 1350 layout, fitted and centred; their smallest text is 36px.
 - Contrast on cards: lowest pair is white on Mount Kalaga at 5.3:1; all others 6:1 or more.
 
@@ -103,7 +103,7 @@ of its size, so no text on a card is below 40px (about 13px in a feed); key text
 
 | Element | Behaviour |
 |---|---|
-| Next-step bar (`.nextbar`) | Phones only. Appears after the first map tap (or on return with progress): your %, rank and "Make my card". Slides away while the card section is on screen. |
+| Next-step bar (`.nextbar`) | Phones and tablets. After the first map tap: your %, rank and "Make my card". Hidden while the map or the card is on screen, and after the card. |
 | Card maker | Name, Size, Share, Download, Copy challenge link up front. Card type, platform, look and date stamp sit in "More options" (`details.more`). |
 | Region list | Folded under "Edit regions as a list" (`details.list-toggle`). The map is the main control. |
 
