@@ -19,7 +19,7 @@ tests/check.py       Checks: files, exact tip details, no script errors, no side
 
 ## Put it live (once)
 
-1. Vercel → Add New → Project → import `kayesislam0/vicecityhub`.
+1. Vercel → Add New → Project → import `kayesislam0/ViceCity-Hub`.
 2. Root Directory: leave as the repository root. Framework preset: Other. Leave build and install commands empty.
 3. Settings → Domains → add `vicecityhub.okenshop.com`.
 4. At your DNS provider keep (or add) the record Vercel shows, usually `CNAME vicecityhub → cname.vercel-dns.com`.
