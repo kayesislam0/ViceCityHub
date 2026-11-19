@@ -405,3 +405,29 @@ kbd { display: inline-grid; place-items: center; min-width: 30px; height: 30px; 
 .cheats h1 { font: 400 clamp(44px, 8vw, 88px)/1 var(--display); margin-top: 12px; }
 section.cheats:first-child { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 p.cheat-more { margin-top: 16px; }
+
+/* Phones: show the card first, its share buttons right under it, then the options that change it. */
+@media (max-width: 899px) {
+  .card-maker { gap: 0; }
+  .card-maker__form { display: contents; }
+  .card-maker__form > * { order: 5; }
+  .card-maker__form > h2 { order: 1; }
+  .card-maker__form > .section-lede { order: 2; }
+  .card-maker__preview { order: 3; margin-top: 20px; }
+  .card-maker__form > .actions, .card-maker__form > p:has(#copy-link), .card-maker__form > .status, .card-maker__form > .thanks { order: 4; }
+  .card-maker__form > .actions { margin-top: 16px; }
+  .card-maker__form > .actions .btn { flex: 1 1 auto; white-space: nowrap; }
+  .card-maker__form > .field:has(#tag) { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--line); }
+}
+/* Toasts: compact, and on phones at the top, so they never cover the map region you just tapped. */
+.toast { padding: 10px 16px; font-size: 15px; line-height: 1.4; }
+@media (max-width: 899px) {
+  .toast { bottom: auto; top: calc(72px + env(safe-area-inset-top)); transform: translate(-50%, -12px); }
+  .toast.is-in { transform: translate(-50%, 0); }
+}
+.brand span, .top__tip { white-space: nowrap; }
+@media (max-width: 370px) {
+  .top__tip span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .top__nav .top__tip { padding-inline: 12px; }
+  .top__tip svg { width: 22px; height: 22px; }
+}
