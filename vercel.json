@@ -13,6 +13,36 @@
       ],
       "destination": "https://vicecityhub.okenshop.com/:path*",
       "permanent": true
+    },
+    {
+      "source": "/source",
+      "destination": "https://github.com/kayesislam0/ViceCityHub",
+      "permanent": false
+    },
+    {
+      "source": "/report",
+      "destination": "https://github.com/kayesislam0/ViceCityHub/issues/new?template=bug.yml",
+      "permanent": false
+    },
+    {
+      "source": "/idea",
+      "destination": "https://github.com/kayesislam0/ViceCityHub/issues/new?template=idea.yml",
+      "permanent": false
+    },
+    {
+      "source": "/good-first-issues",
+      "destination": "https://github.com/kayesislam0/ViceCityHub/labels/good%20first%20issue",
+      "permanent": false
+    },
+    {
+      "source": "/issues",
+      "destination": "https://github.com/kayesislam0/ViceCityHub/issues",
+      "permanent": false
+    },
+    {
+      "source": "/security-report",
+      "destination": "https://github.com/kayesislam0/ViceCityHub/security/advisories/new",
+      "permanent": false
     }
   ],
   "headers": [

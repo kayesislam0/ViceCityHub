@@ -5,13 +5,13 @@ Thanks for helping. Fixes and small improvements from anyone are welcome, and ev
 ## Before you start
 
 - **Small fix?** Just open a pull request.
-- **Bigger change** (a new tool, a new section, a redesign)? Open an [idea issue](https://github.com/kayesislam0/ViceCityHub/issues/new?template=idea.yml) first, so you don't spend an evening on something that won't fit.
-- Looking for something to do? Try the [`good first issue`](https://github.com/kayesislam0/ViceCityHub/labels/good%20first%20issue) label.
+- **Bigger change** (a new tool, a new section, a redesign)? Open an [idea issue](https://vicecityhub.okenshop.com/idea) first, so you don't spend an evening on something that won't fit.
+- Looking for something to do? Try the [`good first issue`](https://vicecityhub.okenshop.com/good-first-issues) label.
 
 ## Set up
 
 ```sh
-git clone https://github.com/<you>/ViceCityHub.git
+git clone <your fork>
 cd ViceCityHub/site
 python3 -m http.server 8000      # open http://localhost:8000
 ```
