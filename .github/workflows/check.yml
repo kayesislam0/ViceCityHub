@@ -16,7 +16,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
         with:
@@ -30,3 +30,7 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Run the checks
         run: python tests/check.py
+      - name: Tap and untap every control
+        run: |
+          python tests/taps.py
+          python tests/taps.py "?lang=es&c=233101&n=Mia"

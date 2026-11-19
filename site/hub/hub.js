@@ -93,9 +93,16 @@
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* not supported */ }
   // In-app browsers (Instagram, Facebook, TikTok, Snapchat...) often throw away site data when you close them.
   var inApp = /FBAN|FBAV|FB_IAB|Instagram|Messenger|Line\/|TikTok|musical_ly|Snapchat|Twitter|Pinterest|; wv\)/i.test(navigator.userAgent || '');
-  function progressCode() {
+  function progressData() {
     var o = {};
     try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k.indexOf('vch.') === 0) o[k] = localStorage.getItem(k); } } catch (e) { /* blocked */ }
+    return o;
+  }
+  function encodeProgress(o) {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function progressCode() {
+    var o = progressData();
     return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
   function progressLink() { return location.origin + location.pathname + '#p=' + progressCode(); }
@@ -180,12 +187,18 @@
 
   // ---- toast ----
   var toastTimer;
-  function toast(msg) {
+  function toast(msg, action, run) {
     var t = $('toast');
     t.textContent = msg; t.hidden = false;
+    if (action) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'toast__act'; b.textContent = action;
+      b.addEventListener('click', function () { run(); t.classList.remove('is-in'); setTimeout(function () { t.hidden = true; }, 250); });
+      t.appendChild(document.createTextNode(' ')); t.appendChild(b);
+    }
     t.classList.remove('is-in'); void t.offsetWidth; t.classList.add('is-in');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove('is-in'); setTimeout(function () { t.hidden = true; }, 250); }, 3800);
+    toastTimer = setTimeout(function () { t.classList.remove('is-in'); setTimeout(function () { t.hidden = true; }, 250); }, action ? 6000 : 3800);
   }
   function buzz() { try { if (navigator.vibrate) navigator.vibrate(14); } catch (e) { /* not supported */ } }
 
@@ -276,9 +289,10 @@
     if (levels[i] < 3) setLevel(i, levels[i] + 1); else render();
   }
   function bindPick() {
-    $('pick').querySelectorAll('button').forEach(function (b) {
+    $('pick').querySelectorAll('.pick__steps button').forEach(function (b) {
       b.addEventListener('click', function () { if (picked >= 0) setLevel(picked, Number(b.dataset.k)); });
     });
+    $('map-undo').addEventListener('click', undoMap);
   }
   function renderPick() {
     var box = $('pick'); if (!box) return;
@@ -287,7 +301,8 @@
     var l = levels[picked];
     $('pick-name').textContent = REGIONS[picked].full;
     $('pick-hint').textContent = l === 3 ? tr('Finished. Pick a level to change it') : tr('Tap again to go deeper, or pick a level');
-    box.querySelectorAll('button').forEach(function (b) {
+    $('map-undo').hidden = !past.length;
+    box.querySelectorAll('.pick__steps button').forEach(function (b) {
       var k = Number(b.dataset.k);
       b.setAttribute('aria-pressed', String(k === l));
       b.classList.toggle('is-reached', k > 0 && k < l);
@@ -295,7 +310,19 @@
     });
   }
 
+  var past = [];
+  function remember() { past.push(code()); if (past.length > 30) past.shift(); }
+  function undoMap() {
+    if (!past.length) return;
+    var was = code();
+    levels = past.pop().split('').map(Number);
+    save('vch.map', code()); render();
+    for (var k = 0; k < 6; k++) if (was[k] !== code()[k]) { picked = k; break; }
+    renderPick();
+  }
   function setLevel(i, lvl) {
+    if (levels[i] === lvl) { render(); return; }
+    remember();
     touched = true;
     var before = steps();
     levels[i] = lvl;
@@ -393,6 +420,13 @@
       : mine === rival.pct ? tr('Dead even with {name}. One more step wins it.', { name: rival.name })
       : tr('You beat {name}. Make your card and send it back.', { name: rival.name });
     $('challenge').classList.toggle('is-winning', mine > rival.pct);
+    // Region by region: where each of you is ahead, so there is always a concrete next step.
+    var ahead = 0, behind = [], even = 0;
+    levels.forEach(function (l, i) { if (l > rival.levels[i]) ahead++; else if (l < rival.levels[i]) behind.push(tr(REGIONS[i].full)); else even++; });
+    var line = mine === 0 ? '' : behind.length
+      ? tr('Ahead in {a} of 6 regions. Catch up in {list}', { a: ahead, list: behind.slice(0, 3).join(', ') + (behind.length > 3 ? '…' : '') })
+      : tr('Level with or ahead of {name} in every region', { name: rival.name });
+    $('vs-regions').textContent = line; $('vs-regions').hidden = !line;
   }
 
   // ---- card settings ----
@@ -477,9 +511,15 @@
     var a = alias();
     $('alias-aka').textContent = tr('{name}, known on the street as', { name: a.tag });
     $('alias-name').textContent = a.nick;
+    $('alias-prev').hidden = settings.aliasRoll < 1;
     $('alias-known').textContent = a.known;
   }
   function bindAlias() {
+    $('alias-prev').addEventListener('click', function () {
+      if (settings.aliasRoll < 1) return;
+      settings.aliasRoll -= 1; save('vch.aliasRoll', String(settings.aliasRoll));
+      renderAlias(); drawSoon();
+    });
     $('alias-roll').addEventListener('click', function () {
       settings.aliasRoll += 1; save('vch.aliasRoll', String(settings.aliasRoll));
       renderAlias(); drawSoon();
@@ -492,21 +532,42 @@
     });
   }
 
-  // ---- day-one bingo: 3 x 3, free centre, a different board for every player ----
+  // ---- launch-night bingo: 3 x 3 or 5 x 5, free centre, a different board for every player ----
+  // 24 prompts: a 5 x 5 board uses all of them, a 3 x 3 board draws 8. Each size keeps its own ticks.
   var BINGO = ['Wanted in the first 10 minutes', 'Skipped a mission to explore', 'Crashed within a block of the start',
     'Changed outfit before anything else', 'Drove on the beach', 'Got lost in the swamp', 'Watched a sunset on purpose',
     'Stole a boat', 'Still playing at 3 AM', 'Lost a fight to a stranger', 'One radio station on repeat',
-    'Followed the GPS into water', 'Fell off something tall', 'Hid from the cops in an alley', 'Texted the crew “it’s so good”',
-    'Forgot to eat dinner', 'Drove to the Keys at night', 'Restarted a mission 3 times', 'Took 20 screenshots before mission 2',
-    'Honked at everything', 'Parked somewhere ridiculous', 'Swam when you should have driven', 'Ran out of money already',
+    'Followed the GPS into water', 'Fell off a roof', 'Hid from the cops in an alley', 'Texted the crew “it’s so good”',
+    'Forgot to eat dinner', 'Drove to the Keys at night', 'Restarted a mission 3 times', '20 photos before mission 2',
+    'Honked at every car', 'Parked in a silly spot', 'Swam when you should have driven', 'Ran out of money already',
     'Missed a turn on Ocean Drive'];
-  var LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
-  var bingo = {
-    seed: Number(load('vch.bingoSeed', '0')) || (Math.floor(Math.random() * 1e9) + 1),
-    marks: (function () { var m = load('vch.bingoMarks', '000010000'); return /^[01]{9}$/.test(m) ? m.split('').map(Number) : [0, 0, 0, 0, 1, 0, 0, 0, 0]; })()
-  };
-  bingo.marks[4] = 1;
+  // Rows, columns and both diagonals of an n x n board.
+  function linesOf(n) {
+    var out = [], d1 = [], d2 = [];
+    for (var r = 0; r < n; r++) {
+      var row = [], col = [];
+      for (var c = 0; c < n; c++) { row.push(r * n + c); col.push(c * n + r); }
+      out.push(row, col); d1.push(r * n + r); d2.push(r * n + (n - 1 - r));
+    }
+    return out.concat([d1, d2]);
+  }
+  // 5 x 5 needs a screen at least 360px wide for its words to fit whole; narrower phones play 3 x 3 (the 5 x 5 board and
+  // its ticks stay saved for a wider screen).
+  function fitsBig() { try { return !matchMedia('(max-width: 359px)').matches; } catch (e) { return true; } }
+  var bingo = { size: load('vch.bingoSize', '3') === '5' && fitsBig() ? 5 : 3, seed: Number(load('vch.bingoSeed', '0')) || (Math.floor(Math.random() * 1e9) + 1) };
+  function marksKey() { return bingo.size === 5 ? 'vch.bingoMarksBig' : 'vch.bingoMarks'; }
+  function cellCount() { return bingo.size * bingo.size; }
+  function centre() { return (cellCount() - 1) / 2; }
+  function freshMarks() { var m = []; for (var i = 0; i < cellCount(); i++) m.push(i === centre() ? 1 : 0); return m; }
+  function loadMarks() {
+    var m = load(marksKey(), ''), n = cellCount();
+    bingo.marks = new RegExp('^[01]{' + n + '}$').test(m) ? m.split('').map(Number) : freshMarks();
+    bingo.marks[centre()] = 1;
+  }
+  function saveMarks() { save(marksKey(), bingo.marks.join('')); }
+  loadMarks();
   save('vch.bingoSeed', String(bingo.seed));
+  function LINES() { return linesOf(bingo.size); }
 
   function boardPrompts() {
     var idx = BINGO.map(function (_, i) { return i; });
@@ -515,50 +576,54 @@
       s = (Math.imul(s, 1103515245) + 12345) >>> 0;
       var j = s % (i + 1); var t = idx[i]; idx[i] = idx[j]; idx[j] = t;
     }
-    var picks = idx.slice(0, 8).map(function (k) { return BINGO[k]; });
-    picks.splice(4, 0, 'Free: played on launch night');
+    var picks = idx.slice(0, cellCount() - 1).map(function (k) { return BINGO[k]; });
+    picks.splice(centre(), 0, 'Free: played on launch night');
     return picks;
   }
-  function bingoLines() { return LINES.filter(function (l) { return l.every(function (i) { return bingo.marks[i]; }); }).length; }
+  function bingoLines() { return LINES().filter(function (l) { return l.every(function (i) { return bingo.marks[i]; }); }).length; }
   // Ticks still needed for the closest unfinished line (0 when every line is done).
   function bingoNeed() {
-    var need = 3;
-    LINES.forEach(function (l) { var k = l.filter(function (i) { return !bingo.marks[i]; }).length; if (k) need = Math.min(need, k); });
-    return bingoLines() === LINES.length ? 0 : need;
+    var need = bingo.size;
+    LINES().forEach(function (l) { var k = l.filter(function (i) { return !bingo.marks[i]; }).length; if (k) need = Math.min(need, k); });
+    return bingoLines() === LINES().length ? 0 : need;
   }
+  function ticked() { return bingo.marks.reduce(function (a, b) { return a + b; }, 0) - 1; }
   function paintLines() {
     var on = {};
-    LINES.forEach(function (l) { if (l.every(function (i) { return bingo.marks[i]; })) l.forEach(function (i) { on[i] = 1; }); });
+    LINES().forEach(function (l) { if (l.every(function (i) { return bingo.marks[i]; })) l.forEach(function (i) { on[i] = 1; }); });
     Array.prototype.forEach.call($('bingo').children, function (c, i) { c.classList.toggle('is-line', !!on[i]); });
   }
 
   function buildBingo() {
-    var box = $('bingo');
+    var box = $('bingo'), c = centre();
     box.textContent = '';
+    box.classList.toggle('is-big', bingo.size === 5);
+    box.style.setProperty('--n', bingo.size);
     boardPrompts().forEach(function (text, i) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'cell' + (i === 4 ? ' cell--free' : '');
+      b.className = 'cell' + (i === c ? ' cell--free' : '');
       b.textContent = tr(text);
       b.setAttribute('aria-pressed', String(Boolean(bingo.marks[i])));
-      if (i === 4) b.setAttribute('aria-disabled', 'true');
+      if (i === c) b.setAttribute('aria-disabled', 'true');
       b.addEventListener('click', function () {
-        if (i === 4) return;
+        if (i === c) return;
         var before = bingoLines();
         bingo.marks[i] = bingo.marks[i] ? 0 : 1;
-        save('vch.bingoMarks', bingo.marks.join(''));
+        saveMarks();
         b.setAttribute('aria-pressed', String(Boolean(bingo.marks[i])));
         var after = bingoLines();
         renderBingoScore();
         if (after > before) {
           buzz();
-          toast(after === 8 ? tr('Every square ticked.') : tr(after === 1 ? 'Bingo: 1 line. Share your board.' : 'Bingo: {n} lines. Share your board.', { n: after }));
+          toast(after === LINES().length ? tr('Every square ticked.') : tr(after === 1 ? 'Bingo: 1 line. Share your board.' : 'Bingo: {n} lines. Share your board.', { n: after }));
           box.classList.remove('win'); void box.offsetWidth; box.classList.add('win');
         }
         drawSoon();
       });
       box.appendChild(b);
     });
+    document.querySelectorAll('input[name="bingo-size"]').forEach(function (r) { r.checked = Number(r.value) === bingo.size; });
     renderBingoScore();
   }
   function renderBingoScore() {
@@ -570,32 +635,43 @@
     paintLines();
   }
   function bingoText() {
-    var rows = [0, 3, 6].map(function (r) {
-      return [0, 1, 2].map(function (c) { return bingo.marks[r + c] ? '🟪' : '⬛'; }).join('');
-    });
-    var n = bingoLines(), ticked = bingo.marks.reduce(function (a, b) { return a + b; }, 0) - 1;
+    var rows = [];
+    for (var r = 0; r < bingo.size; r++) {
+      var row = '';
+      for (var c = 0; c < bingo.size; c++) row += bingo.marks[r * bingo.size + c] ? '🟪' : '⬛';
+      rows.push(row);
+    }
+    var n = bingoLines();
     var who = (settings.tag || '').trim();
-    var head = (who ? tr('{name}\'s launch-night bingo', { name: who }) : tr('My launch-night bingo')) + ' · ' + settings.platform + ' · ' + (n ? (n === 1 ? tr('1 bingo') : tr('{n} bingos', { n: n })) : tr('{k} of 8 ticked', { k: ticked }));
-    return head + '\n' + rows.join('\n') + '\n' + SITE;
+    var head = (who ? tr('{name}\'s launch-night bingo', { name: who }) : tr('My launch-night bingo')) + ' (' + bingo.size + '×' + bingo.size + ') · ' + settings.platform + ' · ' +
+      (n ? (n === 1 ? tr('1 bingo') : tr('{n} bingos', { n: n })) : tr('{k} of {m} ticked', { k: ticked(), m: cellCount() - 1 }));
+    return head + '\n' + rows.join('\n') + '\n' + SITE + '#tools';
   }
   function bingoStatus(msg) { var s = $('bingo-status'); s.textContent = ''; setTimeout(function () { s.textContent = msg; }, 30); }
   function bindBingo() {
     $('bingo-copy').addEventListener('click', function () {
       shareOrCopy(bingoText(), bingoStatus, tr('Board copied. Paste it in the group chat.'));
     });
+    // Size: switching keeps the ticks of each size, so going back to 3 x 3 finds your old board.
+    document.querySelectorAll('input[name="bingo-size"]').forEach(function (r) {
+      r.addEventListener('change', function () {
+        bingo.size = Number(r.value) === 5 ? 5 : 3; save('vch.bingoSize', String(bingo.size));
+        loadMarks(); buildBingo(); drawSoon(); $('bingo-status').textContent = '';
+      });
+    });
     $('bingo-new').addEventListener('click', function () {
-      var undo = { seed: bingo.seed, marks: bingo.marks.slice() };
+      var undo = { seed: bingo.seed, marks: bingo.marks.slice(), size: bingo.size };
       bingo.seed = Math.floor(Math.random() * 1e9) + 1;
-      bingo.marks = [0, 0, 0, 0, 1, 0, 0, 0, 0];
-      save('vch.bingoSeed', String(bingo.seed)); save('vch.bingoMarks', bingo.marks.join(''));
+      bingo.marks = freshMarks();
+      save('vch.bingoSeed', String(bingo.seed)); saveMarks();
       buildBingo(); drawSoon();
       var st = $('bingo-status');
       st.textContent = tr('New board.') + ' ';
       var u = document.createElement('button');
       u.type = 'button'; u.className = 'linklike'; u.textContent = tr('Undo');
       u.addEventListener('click', function () {
-        bingo.seed = undo.seed; bingo.marks = undo.marks;
-        save('vch.bingoSeed', String(bingo.seed)); save('vch.bingoMarks', bingo.marks.join(''));
+        bingo.seed = undo.seed; bingo.size = undo.size; bingo.marks = undo.marks;
+        save('vch.bingoSeed', String(bingo.seed)); save('vch.bingoSize', String(bingo.size)); saveMarks();
         buildBingo(); drawSoon(); st.textContent = tr('Old board back.');
       });
       st.appendChild(u);
@@ -634,7 +710,21 @@
     $('daily-reset').textContent = done ? tr('Done. Next dare in {t}', { t: untilMidnight() }) : tr('Same dare for everyone. New one in {t}', { t: untilMidnight() });
     $('daily-streak-n').textContent = st;
     $('daily-streak').textContent = st === 1 ? tr('day streak') : tr('days streak');
-    $('daily-total').textContent = dailyDone.length === 1 ? tr('1 dare done in total') : tr('{n} dares done in total', { n: dailyDone.length });
+    var best = Math.max(longestStreak(), st);
+    $('daily-total').textContent = (dailyDone.length === 1 ? tr('1 dare done in total') : tr('{n} dares done in total', { n: dailyDone.length })) +
+      ' · ' + (best === 1 ? tr('best 1 day') : tr('best {n} days', { n: best }));
+    // Past dares: every day since launch, newest first, done or missed. Read only, so the streak stays honest.
+    var pastList = $('daily-past'), wrap = $('daily-past-wrap');
+    wrap.hidden = d === 0; pastList.textContent = '';
+    for (var p = d - 1; p >= 0 && p >= d - 30; p--) {
+      var li = document.createElement('li'), ok = dailyDone.indexOf(p) >= 0;
+      li.className = ok ? 'is-on' : '';
+      li.innerHTML = '<span class="past__day"></span><span class="past__task"></span><span class="past__mark"></span>';
+      li.children[0].textContent = tr('Day {n}', { n: p + 1 });
+      li.children[1].textContent = tr(DAILY[p % DAILY.length]);
+      li.children[2].textContent = ok ? tr('done') : tr('missed');
+      pastList.appendChild(li);
+    }
     // The week row: the last 7 days, today last. Days before launch stay empty.
     var week = $('daily-week'); week.textContent = '';
     var names = [];
@@ -744,10 +834,41 @@
     count(); apply();
   }
 
+  // ---- backup file: the whole run as a small JSON file; loading one goes through the same restore as a progress link ----
+  function bindBackup() {
+    var save_ = $('backup-save'), load_ = $('backup-load'), file = $('backup-file');
+    if (!save_) return;
+    save_.addEventListener('click', function () {
+      var blob = new Blob([JSON.stringify({ app: 'vicecityhub', v: 1, saved: new Date().toISOString(), data: progressData() }, null, 1)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = 'vice-city-hub-backup.json'; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      toast(tr('Backup saved. Load it on any browser to pick up where you left off.'));
+    });
+    load_.addEventListener('click', function () { file.value = ''; file.click(); });
+    file.addEventListener('change', function () {
+      var f = file.files && file.files[0]; if (!f) return;
+      if (f.size > 20000) { toast(tr('That file is not a Vice City Hub backup.')); return; }
+      var r = new FileReader();
+      r.onload = function () {
+        try {
+          var o = JSON.parse(r.result), d = o && o.app === 'vicecityhub' && o.data, clean = {};
+          if (!d || typeof d !== 'object') throw new Error('not a backup');
+          Object.keys(d).forEach(function (k) { if (/^vch\.[a-zA-Z]+$/.test(k) && typeof d[k] === 'string' && d[k].length < 400) clean[k] = d[k]; });
+          if (!clean['vch.map']) throw new Error('no map');
+          location.hash = 'p=' + encodeProgress(clean); location.reload();
+        } catch (e) { toast(tr('That file is not a Vice City Hub backup.')); }
+      };
+      r.readAsText(f);
+    });
+  }
+
   // ---- the "saved" line: reassure, and offer a progress link that works in any browser ----
   function bindSaveLine() {
     document.querySelectorAll('[data-saveline]').forEach(function (line) {
       var note = line.querySelector('.saveline__note'), btn = line.querySelector('button');
+      var iosSafari = /iPhone|iPad|iPod/.test(navigator.userAgent || '') && !inApp && !navigator.standalone;
+      if (storageWorks && iosSafari) note.textContent = tr('Saved on this phone. Safari clears sites you skip for 7 days, so add the hub to your Home Screen or copy your progress link.');
       if (!storageWorks || inApp) {
         line.classList.add('is-warn');
         note.textContent = inApp ? tr('This in-app browser may forget your progress. Copy your progress link, or open the hub in Safari or Chrome.')
@@ -792,6 +913,17 @@
       ctx.fillText(l, x, y + k * lh);
     });
     return lines.length;
+  }
+
+  // Fits text into at most maxLines lines by stepping the size down, so a long line is never cut off with an ellipsis.
+  function wrapFit(ctx, text, x, y, maxW, size, minSize, maxLines, weight) {
+    for (var s = size; s >= minSize; s -= 2) {
+      ctx.font = weight + ' ' + s + 'px "DM Sans", sans-serif';
+      var words = String(text).split(' '), lines = 1, line = '';
+      words.forEach(function (w) { var t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { lines++; line = w; } else line = t; });
+      if (lines <= maxLines) return wrapText(ctx, text, x, y, maxW, Math.round(s * 1.22), maxLines);
+    }
+    return wrapText(ctx, text, x, y, maxW, Math.round(minSize * 1.22), maxLines);
   }
 
   // Card sizes: Square 1:1 for feeds, Story 9:16 for Stories, TikTok and Shorts. Painted at twice the layout size.
@@ -935,8 +1067,8 @@
     ctx.fillStyle = T.ink2; ctx.font = '600 40px "DM Sans", sans-serif';
     ctx.fillText(tr('of Leonida seen'), 64, 642);
     rankSign(ctx, T, rank(n), 64, 676, 48);
-    ctx.fillStyle = T.ink; ctx.font = '600 36px "DM Sans", sans-serif';
-    wrapText(ctx, verdict(), 64, 808, 460, 44, 2);
+    ctx.fillStyle = T.ink;
+    wrapFit(ctx, verdict(), 64, 808, 460, 36, 28, 2, '600');
     drawMap(ctx, T, 548, 172, 0.82, null, { labels: true });
     dare(ctx, T, W, H, 172, mapDare(p));
   }
@@ -950,8 +1082,8 @@
     ctx.fillStyle = T.ink2; ctx.font = '600 52px "DM Sans", sans-serif';
     ctx.fillText(tr('of Leonida seen'), 64, 834);
     rankSign(ctx, T, rank(n), 64, 876, 58);
-    ctx.fillStyle = T.ink; ctx.font = '600 44px "DM Sans", sans-serif';
-    wrapText(ctx, verdict(), 64, 1036, 952, 54, 2);
+    ctx.fillStyle = T.ink;
+    wrapFit(ctx, verdict(), 64, 1036, 952, 44, 34, 2, '600');
     var sc = 0.82; drawMap(ctx, T, (W - 600 * sc) / 2, 1080, sc, null, { labels: true });
     dare(ctx, T, W, H, 210, mapDare(p));
   }
@@ -1248,6 +1380,16 @@
         function () { status('The card could not be made in this browser. Try another browser.'); })
         .then(function () { btn.disabled = false; });
     });
+    var canCopyImage = false;
+    try { canCopyImage = !!(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem && window.isSecureContext) && !matchMedia('(pointer: coarse)').matches; } catch (e) { /* old browser */ }
+    $('copy-img').hidden = !canCopyImage;
+    $('copy-img').addEventListener('click', function () {
+      var btn = this; btn.disabled = true;
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': cardBlob() })])
+        .then(function () { status(tr('Image copied. Paste it into Discord or any chat.')); showThanks(); },
+          function () { status(tr('This browser would not copy the image, so use Download PNG.')); })
+        .then(function () { btn.disabled = false; });
+    });
     $('copy-link').addEventListener('click', function () {
       copy(shareText() + ' ' + challengeUrl()).then(function () { status(tr('Challenge copied. Paste it in your group chat.')); showThanks(); },
         function () { status(tr('Copy is blocked here. Your link:') + ' ' + challengeUrl()); });
@@ -1261,7 +1403,9 @@
       });
     });
     $('reset').addEventListener('click', function () {
-      levels = [0, 0, 0, 0, 0, 0]; save('vch.map', code()); render(); toast(tr('Map cleared.'));
+      if (!steps()) { toast(tr('Your map is already empty.')); return; }
+      remember(); levels = [0, 0, 0, 0, 0, 0]; save('vch.map', code()); render();
+      toast(tr('Map cleared.'), tr('Undo'), undoMap);
     });
   }
 
@@ -1269,7 +1413,7 @@
   function start() {
     translatePage(); bindLang(); bindSaveLine();
     if (!$('map')) { bindCheats(); return; } // the cheat code page has only the cheat list
-    buildMap(); bindList(); bindPick(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge();
+    buildMap(); bindList(); bindPick(); bindBackup(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge();
     if (steps() > 0) touched = true;
     buildBingo(); renderDaily(); renderTipped(); renderAlias(); render();
     document.addEventListener('visibilitychange', function () { if (!document.hidden) renderDaily(); });

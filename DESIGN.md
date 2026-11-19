@@ -108,6 +108,13 @@ friend's own score from their link.
 | Bingo: New board | Tap | New prompts, with Undo in the status line |
 | Card: Share card | Tap | Native share with the PNG where supported, otherwise download and copy the challenge text |
 | Card: challenge link | Tap (text button) | Copies the challenge text and link |
+| Map picker: Undo | Tap | Takes back the last map change (up to 30), from the map, the picker or the list |
+| Clear my map | Tap | Clears the map; the message offers Undo for 6 seconds. On an empty map it only says so |
+| Bingo size | 3×3 or 5×5 | Each size keeps its own board and ticks; switching back finds the old one |
+| Street name: Previous | Tap | Goes back one name; shown only after Another one |
+| Daily dare: Past dares | Open | Every day since launch, newest first, done or missed. Read only, so the streak stays honest |
+| Card: Copy image | Tap (desktop) | Copies the PNG to the clipboard for Discord and chats; hidden on touch screens and where the browser can't |
+| Save a backup / Load a backup | Tap (footer) | Saves the whole run as a small JSON file; loading one restores it through the progress-link restore |
 
 ### Flow helpers
 
@@ -137,3 +144,7 @@ friend's own score from their link.
 - No tap-highlight flash, and no text selection on the map, game squares, level buttons or buttons.
 - The toast never takes taps (`pointer-events: none`), so it can't swallow a tap on the map.
 - The phone next-step bar hides whenever any part of the map is on screen.
+- Bingo squares grow taller instead of spilling text; 5×5 on phones uses the card's full width with 10px words, and
+  long words may hyphenate below 380px. `tests/check.py` checks every language at 320px.
+- `tests/taps.py` taps and untaps every control as a phone, a tablet and a desktop (over 1,000 checks) and runs on
+  every pull request, in English and in Spanish from a challenge link.

@@ -72,6 +72,7 @@
       <li class="vs__row"><span class="vs__who" id="vs-them">A friend</span><span class="vs__bar" aria-hidden="true"><i id="vs-them-bar"></i></span><b id="challenge-score">0%</b></li>
       <li class="vs__row vs__row--you"><span class="vs__who">You</span><span class="vs__bar" aria-hidden="true"><i id="vs-you-bar"></i></span><b id="vs-you">0%</b></li>
     </ul>
+    <p class="vs__regions" id="vs-regions" hidden></p>
     <p class="challenge__msg" id="challenge-msg" aria-live="polite">Tap the regions you've seen to answer</p>
     <div class="challenge__actions">
       <a class="btn btn--primary" href="#map-wrap">Beat it</a>
@@ -116,7 +117,7 @@
     <figure class="map" id="map-wrap">
       <svg id="map" viewBox="0 0 600 740" role="group" aria-label="Map of Leonida. Select a region to raise its level."></svg>
       <div class="pick" id="pick" hidden>
-        <p class="pick__name"><span id="pick-name">Vice City</span><span class="pick__hint" id="pick-hint">Tap again to go deeper, or pick a level</span></p>
+        <p class="pick__name"><span id="pick-name">Vice City</span><span class="pick__hint" id="pick-hint">Tap again to go deeper, or pick a level</span><button class="linklike pick__undo" id="map-undo" type="button" hidden>Undo</button></p>
         <div class="pick__steps" role="group" aria-labelledby="pick-name">
           <button type="button" data-k="0">Not seen</button><button type="button" data-k="1">Passed</button><button type="button" data-k="2">Explored</button><button type="button" data-k="3">Finished</button>
         </div>
@@ -156,7 +157,7 @@
           <span>Download PNG</span>
         </button>
       </div>
-      <p class="actions--sub"><button class="btn btn--quiet" id="copy-link" type="button">Copy challenge link</button></p>
+      <p class="actions--sub"><button class="btn btn--quiet" id="copy-img" type="button" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg><span>Copy image</span></button> <button class="btn btn--quiet" id="copy-link" type="button">Copy challenge link</button></p>
       <p class="status" id="card-status" role="status"></p>
       <div class="thanks" id="thanks" hidden>
         <p><strong>Your card is ready.</strong> The hub is free. If you want to help, you can support it.</p>
@@ -221,6 +222,10 @@
           <ol class="week" id="daily-week" aria-label="Your last 7 days"></ol>
           <p class="daily__total" id="daily-total">0 dares done</p>
         </div>
+        <details class="daily__past" id="daily-past-wrap" hidden>
+          <summary>Past dares</summary>
+          <ol class="past" id="daily-past"></ol>
+        </details>
       </article>
 
       <article class="tool alias" aria-labelledby="alias-title">
@@ -239,6 +244,9 @@
           <button class="btn btn--primary" id="alias-copy" type="button">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg><span>Share my name</span>
           </button>
+          <button class="btn btn--quiet" id="alias-prev" type="button" hidden>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><span>Previous</span>
+          </button>
           <button class="btn btn--quiet" id="alias-roll" type="button">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg><span>Another one</span>
           </button>
@@ -248,7 +256,14 @@
 
       <article class="tool bingo" aria-labelledby="bingo-title">
         <h3 id="bingo-title">Launch-night bingo</h3>
-        <p class="tool__lede">Tap what happened to you. Three in a row is a bingo.</p>
+        <p class="tool__lede">Tap what happened to you. A full row, column or diagonal is a bingo.</p>
+        <fieldset class="field bingo__size">
+          <legend class="sr-only">Board size</legend>
+          <div class="seg">
+            <label><input type="radio" name="bingo-size" value="3" checked><span>3×3</span></label>
+            <label><input type="radio" name="bingo-size" value="5"><span>5×5</span></label>
+          </div>
+        </fieldset>
         <div class="bingo__board" id="bingo" role="group" aria-label="Bingo board"></div>
         <p class="bingo__score" id="bingo-score" aria-live="polite">2 more for a bingo</p>
         <div class="actions">
@@ -334,6 +349,9 @@
       <a href="/source" rel="noopener">Source on GitHub</a>
       <a href="/report" rel="noopener">Report a bug</a>
       <a href="/legal">Terms and privacy</a>
+      <button class="linklike" type="button" id="backup-save">Save a backup</button>
+      <button class="linklike" type="button" id="backup-load">Load a backup</button>
+      <input type="file" id="backup-file" accept="application/json,.json" hidden>
       <button class="linklike" type="button" id="reset">Clear my map</button>
     </nav>
     <nav class="langs" aria-label="Language"><a href="?lang=en" data-lang="en" hreflang="en" lang="en">English</a><a href="?lang=es" data-lang="es" hreflang="es" lang="es">Español</a><a href="?lang=pt" data-lang="pt" hreflang="pt" lang="pt">Português</a></nav>
