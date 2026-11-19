@@ -582,6 +582,9 @@ a, button, label, summary, .rg, .cell { -webkit-tap-highlight-color: transparent
   .bingo__board.is-big { margin-inline: calc(-1 * clamp(20px, 3vw, 32px) + 8px); gap: 3px; }
   .bingo__board.is-big .cell { padding: 3px 2px; font-size: 10px; letter-spacing: 0; min-height: 60px; }
 }
-@media (max-width: 379px) { .bingo__board.is-big .cell { hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; } }
 /* 3 x 3 on phones: squares grow taller for a long prompt instead of letting it spill out. */
-@media (max-width: 899px) { .bingo__board:not(.is-big) .cell { aspect-ratio: auto; min-height: 96px; } }
+@media (max-width: 899px) { .bingo__board:not(.is-big) .cell { aspect-ratio: auto; min-height: 96px; padding: 8px 4px; } }
+/* 5 x 5 is offered from 360px; the words are sized to fit whole there. As a last guard against an unexpected font,
+   a word may break rather than spill out of its square. */
+@media (max-width: 359px) { .bingo__size { display: none; } }
+.bingo__board.is-big .cell { overflow-wrap: anywhere; }

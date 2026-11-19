@@ -69,18 +69,30 @@ async def browser():
         await pg.fill('#cheat-q', 'ammo')
         if await pg.evaluate("[...document.querySelectorAll('#cheat-rows tr')].filter(r => !r.hidden).length") != 3: out.append('cheats: search for "ammo" should show 3')
         await ctx.close()
-        # Bingo squares: no prompt spills out of its square, on the smallest phone, at both sizes, in every language.
+        # Bingo squares: every word of every prompt fits whole in its square, and nothing spills, on small phones, at
+        # both sizes, in every language. Measured after the webfont has loaded, so a slow machine measures the real font.
+        WORDS = """async () => { await document.fonts.ready;
+          const cells = [...document.querySelectorAll('#bingo .cell')], c = cells[0], st = getComputedStyle(c);
+          const room = c.clientWidth - parseFloat(st.paddingLeft) - parseFloat(st.paddingRight);
+          const cv = document.createElement('canvas').getContext('2d'); cv.font = st.fontWeight + ' ' + st.fontSize + ' ' + st.fontFamily;
+          const tight = [];
+          cells.forEach(x => x.textContent.split(/\\s+/).forEach(w => { if (cv.measureText(w).width > room - 2) tight.push(w); }));
+          const spill = cells.filter(x => x.scrollWidth > x.clientWidth + 1 || x.scrollHeight > x.clientHeight + 1).map(x => x.textContent);
+          return { n: cells.length, tight, spill }; }"""
         for lang in ['en', 'es', 'pt']:
-            ctx = await b.new_context(viewport={'width': 320, 'height': 780}, has_touch=True, is_mobile=True)
-            pg = await ctx.new_page()
-            for size in ['3', '5']:
+            for w, size in [(320, '3'), (320, '5'), (360, '5'), (390, '5')]:
+                ctx = await b.new_context(viewport={'width': w, 'height': 780}, has_touch=True, is_mobile=True)
+                pg = await ctx.new_page()
                 for seed in ['11', '222', '3333']:
                     await pg.goto(base + '?lang=' + lang)
                     await pg.evaluate(f"localStorage.setItem('vch.bingoSize', '{size}'); localStorage.setItem('vch.bingoSeed', '{seed}')")
-                    await pg.reload(); await pg.wait_for_timeout(150)
-                    over = await pg.evaluate("[...document.querySelectorAll('#bingo .cell')].filter(c => c.scrollWidth > c.clientWidth + 1 || c.scrollHeight > c.clientHeight + 1).map(c => c.textContent)")
-                    out += [f'{lang} bingo {size}x{size}: "{o}" spills out of its square' for o in over]
-            await ctx.close()
+                    await pg.reload(); await pg.wait_for_timeout(100)
+                    r = await pg.evaluate(WORDS)
+                    want = 9 if (size == '3' or w < 360) else 25
+                    if r['n'] != want: out.append(f'{lang} {w}px: bingo should show {want} squares, shows {r["n"]}')
+                    out += [f'{lang} {w}px bingo: "{x}" spills out of its square' for x in r['spill']]
+                    out += [f'{lang} {w}px bingo: the word "{x}" does not fit whole in its square' for x in sorted(set(r['tight']))]
+                await ctx.close()
         # Spanish and Portuguese run longer than English: no script errors, no sideways scrolling, text translated.
         for lang, word in [('es', 'Herramientas'), ('pt', 'Ferramentas')]:
             ctx = await b.new_context(viewport={'width': 320, 'height': 780}, has_touch=True, is_mobile=True)

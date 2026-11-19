@@ -539,7 +539,7 @@
     'Stole a boat', 'Still playing at 3 AM', 'Lost a fight to a stranger', 'One radio station on repeat',
     'Followed the GPS into water', 'Fell off a roof', 'Hid from the cops in an alley', 'Texted the crew “it’s so good”',
     'Forgot to eat dinner', 'Drove to the Keys at night', 'Restarted a mission 3 times', '20 photos before mission 2',
-    'Honked at every car', 'Parked somewhere silly', 'Swam when you should have driven', 'Ran out of money already',
+    'Honked at every car', 'Parked in a silly spot', 'Swam when you should have driven', 'Ran out of money already',
     'Missed a turn on Ocean Drive'];
   // Rows, columns and both diagonals of an n x n board.
   function linesOf(n) {
@@ -551,7 +551,10 @@
     }
     return out.concat([d1, d2]);
   }
-  var bingo = { size: load('vch.bingoSize', '3') === '5' ? 5 : 3, seed: Number(load('vch.bingoSeed', '0')) || (Math.floor(Math.random() * 1e9) + 1) };
+  // 5 x 5 needs a screen at least 360px wide for its words to fit whole; narrower phones play 3 x 3 (the 5 x 5 board and
+  // its ticks stay saved for a wider screen).
+  function fitsBig() { try { return !matchMedia('(max-width: 359px)').matches; } catch (e) { return true; } }
+  var bingo = { size: load('vch.bingoSize', '3') === '5' && fitsBig() ? 5 : 3, seed: Number(load('vch.bingoSeed', '0')) || (Math.floor(Math.random() * 1e9) + 1) };
   function marksKey() { return bingo.size === 5 ? 'vch.bingoMarksBig' : 'vch.bingoMarks'; }
   function cellCount() { return bingo.size * bingo.size; }
   function centre() { return (cellCount() - 1) / 2; }

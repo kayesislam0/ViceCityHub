@@ -161,8 +161,10 @@ async def run(b, w, mob):
 
     # Copy and share buttons say something.
     for sel, out in [('#copy-link', '#card-status'), ('#bingo-copy', '#bingo-status'), ('#daily-copy', '#daily-status')]:
-        await tap_el(pg, mob, sel); await pg.wait_for_timeout(120)
-        check((await pg.evaluate(f"document.querySelector('{out}').textContent")).strip() != '', f'{tag} {sel} gave no feedback')
+        await tap_el(pg, mob, sel)
+        try: await pg.wait_for_function(f"document.querySelector('{out}').textContent.trim() !== ''", timeout=5000); ok = True
+        except Exception: ok = False
+        check(ok, f'{tag} {sel} gave no feedback')
 
     # Map undo: change a region twice, undo twice, and the map is back where it was.
     start = await mapv()
@@ -204,8 +206,11 @@ async def run(b, w, mob):
 
     # Copy image (desktop only).
     if not mob:
-        await tap_el(pg, mob, '#copy-img'); await pg.wait_for_timeout(600)
-        check(await pg.evaluate("document.getElementById('card-status').textContent.length > 5 && !document.getElementById('copy-img').disabled"), f'{tag} copy image')
+        await pg.evaluate("document.getElementById('card-status').textContent = ''")
+        await tap_el(pg, mob, '#copy-img')
+        try: await pg.wait_for_function("document.getElementById('card-status').textContent.length > 5 && !document.getElementById('copy-img').disabled", timeout=8000); ok = True
+        except Exception: ok = False
+        check(ok, f'{tag} copy image')
         check(await pg.evaluate("navigator.clipboard.read().then(items => items.some(i => i.types.includes('image/png')))"), f'{tag} copy image: no PNG on the clipboard')
 
     # Backup: save the file, change the map, load the file, and the map comes back.
@@ -219,7 +224,9 @@ async def run(b, w, mob):
         check(await mapv() == saved, f'{tag} backup restore gave {await mapv()} not {saved}')
         await pg.add_style_tag(content='html{scroll-behavior:auto!important}')
         bad = os.path.join(tempfile.gettempdir(), 'not-a-backup.json'); open(bad, 'w').write('{"hello": 1}')
-        await pg.set_input_files('#backup-file', bad); await pg.wait_for_timeout(300)
+        await pg.set_input_files('#backup-file', bad)
+        try: await pg.wait_for_function("!document.getElementById('toast').hidden", timeout=5000)
+        except Exception: pass
         check(await pg.evaluate("!document.getElementById('toast').hidden && document.getElementById('toast').textContent.length > 10"), f'{tag} bad backup file message')
         check(await mapv() == saved, f'{tag} a bad backup file changed the map')
 
