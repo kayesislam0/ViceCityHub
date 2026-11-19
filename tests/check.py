@@ -40,7 +40,7 @@ async def browser():
             await pg.click('details.list-toggle > summary')
             await pg.click('#region-list li:nth-child(4) button[data-k="2"]')
             await pg.click('#daily-done'); await pg.click('#tipped-btn')
-            if await pg.evaluate('document.documentElement.scrollWidth > innerWidth'): out.append(f'{w}px: sideways scrolling')
+            if await pg.evaluate(f'document.documentElement.scrollWidth > {w}'): out.append(f'{w}px: sideways scrolling')
             if touch:
                 small = await pg.evaluate("""[...document.querySelectorAll('button, a.btn, .seg label, input[type=checkbox]')].filter(e => { const r = e.getBoundingClientRect(); return r.width && (r.height < 43.5 && !e.closest('.cell')) && e.type !== 'checkbox'; }).map(e => (e.id || e.className || e.tagName) + ' ' + Math.round(e.getBoundingClientRect().height))""")
                 out += [f'{w}px: small tap target {s}' for s in small]
@@ -64,7 +64,7 @@ async def browser():
             pg = await ctx.new_page(); errors = []
             pg.on('pageerror', lambda e: errors.append(str(e)))
             await pg.goto(base + '?lang=' + lang); await pg.wait_for_timeout(300)
-            if await pg.evaluate('document.documentElement.scrollWidth > innerWidth'): out.append(f'{lang}: sideways scrolling')
+            if await pg.evaluate('document.documentElement.scrollWidth > 320'): out.append(f'{lang}: sideways scrolling')
             if word not in await pg.evaluate('document.body.textContent'): out.append(f'{lang}: page not translated')
             if await pg.evaluate('document.documentElement.lang') != lang: out.append(f'{lang}: html lang not set')
             out += [f'{lang}: script error {e}' for e in errors]

@@ -242,34 +242,62 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .pop-in { animation: pop-in .5s cubic-bezier(.16, 1, .3, 1); }
 @keyframes pop-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
-/* Tools */
+/* Tools: every card reads the same way. What it is, the one big thing, one primary action, one quiet one. */
 .tools__grid { display: grid; gap: 16px; margin-top: 32px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 900px) { .tools__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; } }
 .tool { padding: clamp(20px, 3vw, 32px); border-radius: 14px; background: var(--asphalt-2); border: 1px solid var(--line); min-width: 0; }
 .tool__lede { color: var(--chalk-2); margin-top: 8px; max-width: 46ch; }
+.tool__kicker { display: flex; align-items: baseline; gap: 12px; font: 400 28px/1.02 var(--display); }
+.tool__meta { font: 600 15px/1 var(--text); color: var(--chalk-2); font-variant-numeric: tabular-nums; }
 .tool .actions { margin-top: 20px; }
 .tool .check { margin-top: 12px; }
-.daily { grid-column: 1 / -1; }
-.daily__day { margin-top: 20px; color: var(--neon); font-weight: 600; }
-.daily__task { margin-top: 4px; font-family: Anton, Impact, sans-serif; font-size: clamp(28px, 4.5vw, 44px); line-height: 1.02; max-width: 24ch; }
-.daily__streak { margin-top: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--chalk-2); }
-.daily.is-done .daily__task { color: var(--sun); }
-.card-maker__form .linklike { margin-top: 8px; }
-.alias__out { display: grid; gap: 6px; margin-top: 20px; padding: 20px; border-radius: 12px; background: var(--asphalt); border: 1px dashed var(--line-strong); }
-.alias__name { font: 400 clamp(30px, 4.4vw, 42px)/1.05 var(--display); color: var(--neon); overflow-wrap: anywhere; }
-.alias__known { color: var(--chalk-2); }
+.btn--quiet { background: transparent; }
+
+/* Daily dare: the dare on the left, the streak on the right (stacked on phones). */
+.daily { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+.daily > * { min-width: 0; }
+.tool .btn { max-width: 100%; white-space: normal; text-align: start; }
+@media (min-width: 760px) { .daily { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 48px; } }
+.daily__task { margin-top: 16px; font: 400 clamp(32px, 4.6vw, 52px)/1.02 var(--display); max-width: 20ch; text-wrap: balance; }
+.daily__reset { margin-top: 12px; color: var(--chalk-2); font-variant-numeric: tabular-nums; }
+.daily.is-done .daily__task { color: var(--chalk-2); }
+.daily__check { display: none; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: var(--neon); color: var(--asphalt); font: 600 14px/1 var(--text); }
+.daily__check svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.daily.is-done .daily__check { display: inline-flex; }
+@media (max-width: 759px) { .daily__side { padding: 16px; } .streak b { font-size: 48px; } .week { gap: 6px; } }
+.daily__side { display: grid; gap: 14px; justify-items: start; padding: 20px 24px; border-radius: 12px; background: var(--asphalt); border: 1px solid var(--line); }
+.streak { display: flex; align-items: baseline; gap: 10px; }
+.streak b { font: 400 64px/1 var(--display); color: var(--neon); font-variant-numeric: tabular-nums; }
+.streak span { font-weight: 600; }
+.week { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; }
+.week__day { display: grid; justify-items: center; gap: 6px; }
+.week__dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line-strong); }
+.week__day.is-on .week__dot { background: var(--neon); border-color: var(--neon); }
+.week__day.is-today .week__dot { box-shadow: 0 0 0 3px var(--asphalt), 0 0 0 5px var(--chalk-2); }
+.week__day.is-before .week__dot { border-style: dashed; opacity: .4; }
+.week__name { font: 600 12px/1 var(--text); color: var(--chalk-2); }
+.daily__total { color: var(--chalk-2); font-size: 14px; font-variant-numeric: tabular-nums; }
+
+/* Street name: tag in, nickname out, big. */
+.alias__out { display: grid; gap: 6px; margin-top: 20px; padding: 20px 0 4px; border-top: 1px solid var(--line); }
+.alias__aka { color: var(--chalk-2); font-size: 15px; overflow-wrap: anywhere; }
+.alias__name { font: 400 clamp(36px, 5vw, 52px)/1.02 var(--display); color: var(--neon); overflow-wrap: anywhere; }
+.alias__known { color: var(--chalk); }
+
+/* Bingo: ticked squares in pink, finished lines edged in gold. */
 .bingo__board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 20px; }
 .cell { appearance: none; aspect-ratio: 1; min-height: 44px; padding: 8px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--asphalt);
   color: var(--chalk); font: 600 clamp(12px, 3.3vw, 15px)/1.25 var(--text); cursor: pointer; display: grid; place-items: center; text-align: center; overflow-wrap: anywhere;
-  transition: background .2s, color .2s, transform .15s; }
+  transition: background-color .2s, color .2s, border-color .2s, transform .15s; }
 @media (hover: hover) { .cell:hover { border-color: var(--chalk); } }
 .cell:active { transform: scale(.97); }
 .cell[aria-pressed="true"] { background: var(--neon); border-color: var(--neon); color: var(--asphalt); }
-.cell--free { background: var(--sign); border-color: var(--sign); color: #fff; cursor: default; }
-.cell--free[aria-pressed="true"] { background: var(--sign); border-color: var(--sign); color: #fff; }
+.cell--free, .cell--free[aria-pressed="true"] { background: var(--sign); border-color: var(--sign); color: #fff; cursor: default; }
+.cell.is-line { box-shadow: inset 0 0 0 3px var(--sun); }
 .bingo__board.win .cell[aria-pressed="true"] { animation: pop .5s cubic-bezier(.16, 1, .3, 1); }
 @media (min-width: 900px) { .cell { aspect-ratio: auto; min-height: 92px; } }
-.bingo__score { margin-top: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.bingo__score { margin-top: 14px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--chalk-2); }
+.bingo__score.is-bingo { color: var(--sun); }
 
 /* Trust */
 .promises { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 10px; }
@@ -448,7 +476,6 @@ p.cheat-more { margin-top: 16px; }
 
 /* Card maker: the few choices that matter up front, the rest folded. */
 .actions--sub { margin-top: 12px; }
-.btn--quiet { background: transparent; }
 .card-maker .actions { margin-top: 24px; }
 .card-maker .actions .btn--primary { min-height: 56px; padding-inline: 28px; font-size: 17px; }
 details.more, details.list-toggle { margin-top: 24px; border-top: 1px solid var(--line); }
@@ -477,11 +504,21 @@ details.list-toggle .regions-list { margin-top: 4px; }
 @media (max-width: 480px) { .legend { display: grid; grid-template-columns: repeat(2, max-content); justify-content: center; gap: 6px 24px; } }
 /* Empty status lines take no room. */
 .status:empty { min-height: 0; margin-top: 0; }
-/* Challenge from a friend's link: their %, then "Beat it". */
-.challenge { display: grid; gap: 8px; padding: 16px 20px; }
+/* Challenge from a friend's link: their score against yours, as two bars, then "Beat it". */
+.challenge { display: grid; justify-content: stretch; gap: 12px; padding: 18px 20px 20px; }
 .challenge__lead { font-size: 17px; }
-.challenge__lead b { font: 400 34px/1 var(--display); margin-inline: 2px; }
+.vs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, max-content) minmax(96px, 1fr) max-content; align-items: center; gap: 8px 14px; max-width: 720px; }
+.vs__row { display: contents; }
+.vs__who { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 10em; }
+.vs__bar { height: 12px; border-radius: 6px; background: rgba(0, 0, 0, .28); overflow: hidden; }
+.vs__bar i { display: block; height: 100%; background: #FFFFFF; transform-origin: left; transform: scaleX(0); transition: transform .6s cubic-bezier(.16, 1, .3, 1); }
+.vs__row--you .vs__bar i { background: var(--neon); }
+.vs__row b { font: 400 28px/1 var(--display); text-align: right; font-variant-numeric: tabular-nums; }
 .challenge__msg { font: 400 26px/1.1 var(--display); color: #FFFFFF; }
 .challenge__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .challenge.is-winning .challenge__msg { color: var(--asphalt); }
+.challenge.is-winning .vs__bar { background: rgba(14, 19, 17, .2); }
+.challenge.is-winning .vs__row--you .vs__bar i { background: var(--asphalt); }
 .challenge.is-winning .btn--primary { background: var(--asphalt); border-color: var(--asphalt); color: var(--chalk); }
+/* Narrow phones: the header keeps the two links that matter, so longer Spanish and Portuguese words still fit. */
+@media (max-width: 440px) { .top__more { display: none !important; } }

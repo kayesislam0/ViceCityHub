@@ -34,15 +34,15 @@ and challenge your crew with one link.
 | **Map card** | One tap makes a picture of your map to post, square (1:1) or story (9:16). Three looks, an optional date stamp. |
 | **Leonida Blend** | Open a friend's link and make a Blend: both maps on one card, how much of Leonida you covered together, your map match, and who carried. |
 | **Crew challenge** | A link that carries your score. Friends who open it see you versus them, live. |
-| **Leonida Daily** | One small in-game task a day, the same for everyone, with a streak you can send to the group chat. |
+| **Daily dare** | One small in-game dare a day, the same for everyone, with a 7-day streak row you can send to the group chat. |
 | **Leonida Wrapped** | A recap card of your whole launch run: final rank, best streak, regions finished. |
-| **Street name and bingo** | A Leonida street name from your gamer tag, and a day-one bingo board. |
+| **Street name and bingo** | A Leonida street name from your gamer tag, and a launch-night bingo board. |
 
 In English, Spanish and Portuguese. [Terms and privacy](https://vicecityhub.okenshop.com/legal). Everything runs in the visitor's browser. There is no sign-up, no server, no cookie banner because there are no cookies,
 and no request to any other site.
 
 <p align="center">
-  <img src="docs/img/phone-daily.png" width="300" alt="Leonida Daily: today's task, a streak counter and a button to copy your streak">
+  <img src="docs/img/phone-daily.png" width="300" alt="Daily dare: today's dare, a streak counter and a button to share your streak">
 </p>
 
 ## Run it on your computer
