@@ -54,7 +54,7 @@ html { scrollbar-color: var(--asphalt-3) var(--asphalt); }
 .top__nav .top__tip { display: inline-flex; align-items: center; gap: 8px; color: var(--asphalt); background: var(--neon); font-weight: 600; box-shadow: inset 0 0 0 1px rgba(14, 19, 17, .12); }
 .top__tip svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 @media (hover: hover) { .top__nav .top__tip:hover { background: var(--neon-hi); color: var(--asphalt); } }
-@media (max-width: 620px) { .top__nav a:not(.top__tip) { display: none; } }
+@media (max-width: 420px) { .top__nav a { padding: 0 8px; font-size: 14px; } .brand span { font-size: 19px; } }
 
 main { max-width: 1280px; margin: 0 auto; padding: 0 var(--gut); }
 section { padding-block: clamp(56px, 8vw, 104px); border-top: 1px solid var(--line); }

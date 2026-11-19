@@ -80,7 +80,7 @@
   var MAP_FILL = ['#26302B', '#3E2B40', '#5E2F55', '#7D3B62'];
 
   // Ranks by steps (6 regions x 3 levels = 18).
-  var RANKS = [[0, 'Still in the menu'], [1, 'Tourist'], [4, 'Local'], [9, 'Hustler'], [13, 'Kingpin'], [18, 'Leonida legend']];
+  var RANKS = [[0, 'Still in the menu'], [1, 'Tourist'], [6, 'Local'], [13, 'Legend']];
 
   // ---- storage (may be blocked: private mode, embedded previews) ----
   function load(key, fallback) { try { var v = localStorage.getItem(key); return v === null ? fallback : v; } catch (e) { return fallback; } }
@@ -198,13 +198,7 @@
     // Each region has its own colour; Vice City runs from neon pink to cyan.
     var vg = el('linearGradient', { id: 'g-vice', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
     el('stop', { offset: '0', 'stop-color': '#FF5FA2' }, vg); el('stop', { offset: '1', 'stop-color': '#3FD6E8' }, vg);
-    var stip = el('pattern', { id: 'stipple', width: 14, height: 14, patternUnits: 'userSpaceOnUse' }, defs);
-    el('circle', { cx: 3, cy: 3, r: 1.1, fill: 'rgba(143,179,191,.25)' }, stip);
     el('rect', { x: 0, y: 0, width: 600, height: 740, rx: 18, fill: '#0F1F25' }, svg);
-    el('rect', { x: 0, y: 0, width: 600, height: 740, rx: 18, fill: 'url(#stipple)' }, svg);
-    var grid = el('g', { stroke: 'rgba(244,241,234,.05)', 'stroke-width': 1 }, svg);
-    for (var x = 50; x < 600; x += 50) el('line', { x1: x, y1: 0, x2: x, y2: 740 }, grid);
-    for (var y = 50; y < 740; y += 50) el('line', { x1: 0, y1: y, x2: 600, y2: y }, grid);
     // The coastal shelf: a pale halo round the whole state, so its outline reads from across the room.
     var shelf = el('g', { 'pointer-events': 'none' }, svg);
     REGIONS.forEach(function (r) {
@@ -250,11 +244,6 @@
       el('circle', { r: 11 }, bd); el('path', { d: 'M-5 0.5l3.4 3.4 6.2-7' }, bd);
       labels.push(lg);
     });
-    var cp = el('g', { class: 'compass', transform: 'translate(552 684)' }, svg);
-    el('circle', { r: 24, fill: 'rgba(15,31,37,.85)', stroke: 'rgba(244,241,234,.35)', 'stroke-width': 1.5 }, cp);
-    el('path', { d: 'M0 -18L6 0L0 -4L-6 0Z', fill: '#FF5FA2' }, cp);
-    el('path', { d: 'M0 18L6 0L0 4L-6 0Z', fill: 'rgba(244,241,234,.5)' }, cp);
-    el('text', { x: 0, y: -30, 'text-anchor': 'middle' }, cp).textContent = 'N';
   }
 
   // Your route: a dashed neon line through every region you have touched, in map order.
@@ -293,7 +282,7 @@
     var after = steps();
     if (rankIndex(after) > rankIndex(before)) {
       buzz();
-      toast(after === 18 ? tr('Rank up: Leonida legend. You have seen it all.') : tr('Rank up: {rank}. {n}% of Leonida seen.', { rank: rank(after), n: score() }));
+      toast(after === 18 ? tr('Every region finished. You have seen all of Leonida.') : tr('Rank up: {rank}. {n}% of Leonida seen.', { rank: rank(after), n: score() }));
       var m = $('meter'); m.classList.remove('flash'); void m.offsetWidth; m.classList.add('flash');
     }
   }
@@ -330,7 +319,7 @@
     var next = RANKS[ri + 1];
     var from = RANKS[ri][0];
     $('xp').style.transform = 'scaleX(' + (next ? (n - from) / (next[0] - from) : 1) + ')';
-    $('next-rank').textContent = next ? tr(next[0] - n === 1 ? '1 step to {rank}' : '{n} steps to {rank}', { n: next[0] - n, rank: tr(next[1]) }) : tr('Every region done. Respect.');
+    $('next-rank').textContent = next ? tr(next[0] - n === 1 ? '1 step to {rank}' : '{n} steps to {rank}', { n: next[0] - n, rank: tr(next[1]) }) : tr('Top rank reached.');
     updateChallenge();
     updateNextbar();
     drawSoon();
@@ -470,9 +459,8 @@
     });
     $('alias-copy').addEventListener('click', function () {
       var a = alias();
-      copy(tr('My Leonida street name: {name}. {known} Get yours:', { name: a.name, known: a.known }) + ' ' + SITE).then(
-        function () { toast(tr('Street name copied. Drop it in the group chat.')); },
-        function () { toast(tr('Copy is blocked here. Select the name to copy it.')); });
+      shareOrCopy(tr('My Leonida street name:') + '\n' + a.name + '\n' + a.known + '\n' + tr('Get yours:') + ' ' + SITE,
+        function (m) { toast(m); }, tr('Street name copied. Paste it in the group chat.'));
     });
   }
 
@@ -525,7 +513,7 @@
         renderBingoScore();
         if (after > before) {
           buzz();
-          toast(after === 8 ? tr('Blackout. You did it all on night one.') : tr(after === 1 ? 'BINGO! 1 line. Copy your board for the chat.' : 'BINGO! {n} lines. Copy your board for the chat.', { n: after }));
+          toast(after === 8 ? tr('Every square ticked.') : tr(after === 1 ? 'Bingo: 1 line. Share your board.' : 'Bingo: {n} lines. Share your board.', { n: after }));
           box.classList.remove('win'); void box.offsetWidth; box.classList.add('win');
         }
         drawSoon();
@@ -625,15 +613,15 @@
   function renderTipped() {
     var b = $('tipped-btn');
     b.setAttribute('aria-pressed', String(tipped));
-    b.querySelector('span').textContent = tipped ? tr('Thank you!') : tr('I sent a tip');
+    b.querySelector('span').textContent = tipped ? tr('Tip sent') : tr('I sent a tip');
     $('tipped-msg').textContent = tipped
-      ? tr('You kept the hub running. Your map card now carries a gold Backed the hub line. Tap again to remove it.')
-      : tr('Sent one? Tap here and your map card gets a gold Backed the hub line. We trust you, so there is nothing to check.');
+      ? tr('Your card now shows a gold Backed the hub line. Tap again to remove it.')
+      : tr('Sent a tip? Tap here to add a gold "Backed the hub" line to your card.');
   }
   function bindTipped() {
     $('tipped-btn').addEventListener('click', function () {
       tipped = !tipped; save('vch.tipped', tipped ? '1' : '');
-      if (tipped) { buzz(); toast(tr('Thank you. That keeps the lights on in Leonida.')); }
+      if (tipped) { buzz(); toast(tr('Thank you. Your card now shows Backed the hub.')); }
       renderTipped(); drawSoon();
     });
   }
@@ -1173,7 +1161,8 @@
     document.addEventListener('visibilitychange', function () { if (!document.hidden) renderDaily(); });
     var cv = $('card-canvas');
     if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (es) { cardOnScreen = es[0].isIntersecting; updateNextbar(); }, { threshold: 0.15 }).observe($('card'));
+      // Away once the card is on screen or already scrolled past, so the bar never covers the tools, tips or footer.
+      new IntersectionObserver(function (es) { var e = es[0]; cardOnScreen = e.isIntersecting || e.boundingClientRect.top < 0; updateNextbar(); }, { threshold: 0.15 }).observe($('card'));
       new IntersectionObserver(function (es) {
         cardVisible = es[0].isIntersecting;
         if (cardVisible && cardDirty) drawSoon();
