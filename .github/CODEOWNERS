@@ -1,0 +1,6 @@
+# The owner reviews anything that touches the tip details, the security headers or the checks that guard them.
+site/index.html          @kayesislam0
+site/hub/img/qr-*.svg    @kayesislam0
+vercel.json              @kayesislam0
+tests/check.py           @kayesislam0
+.github/                 @kayesislam0

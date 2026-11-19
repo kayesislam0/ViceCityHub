@@ -30,7 +30,7 @@ body { margin: 0; background: var(--asphalt); color: var(--chalk); font: 400 16p
 ::selection { background: var(--neon); color: var(--asphalt); }
 img, svg, canvas { display: block; max-width: 100%; }
 a { color: var(--chalk); text-underline-offset: .2em; text-decoration-thickness: 1px; }
-a:hover { color: var(--neon-hi); }
+@media (hover: hover) { a:hover { color: var(--neon-hi); } }
 :focus-visible { outline: 3px solid var(--neon); outline-offset: 3px; border-radius: 4px; }
 h1, h2, h3 { font-family: var(--display); font-weight: 400; line-height: 1.02; letter-spacing: 0; margin: 0; text-wrap: balance; }
 h2 { font-size: clamp(34px, 5vw, 56px); }
@@ -50,9 +50,9 @@ html { scrollbar-color: var(--asphalt-3) var(--asphalt); }
 .brand__mark { width: 32px; height: 32px; }
 .top__nav { display: flex; align-items: center; gap: 4px; }
 .top__nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: 15px; color: var(--chalk-2); }
-.top__nav a:hover { color: var(--chalk); }
+@media (hover: hover) { .top__nav a:hover { color: var(--chalk); } }
 .top__nav .top__tip { color: var(--asphalt); background: var(--neon); }
-.top__nav .top__tip:hover { background: var(--neon-hi); color: var(--asphalt); }
+@media (hover: hover) { .top__nav .top__tip:hover { background: var(--neon-hi); color: var(--asphalt); } }
 @media (max-width: 620px) { .top__nav a:not(.top__tip) { display: none; } }
 
 main { max-width: 1280px; margin: 0 auto; padding: 0 var(--gut); }
@@ -97,7 +97,7 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .steps { display: flex; gap: 4px; }
 .steps button { appearance: none; border: 1px solid var(--line-strong); background: transparent; color: var(--chalk-2); font: 600 13px/1 var(--text);
   min-width: 44px; min-height: 44px; padding: 0 10px; border-radius: 8px; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
-.steps button:hover { border-color: var(--chalk); color: var(--chalk); }
+@media (hover: hover) { .steps button:hover { border-color: var(--chalk); color: var(--chalk); } }
 .steps button[aria-pressed="true"] { background: var(--neon); border-color: var(--neon); color: var(--asphalt); }
 .steps button.is-reached { background: rgba(255, 95, 162, .16); border-color: rgba(255, 95, 162, .5); color: var(--chalk); }
 .region-row[data-level="3"] { border-color: rgba(255, 195, 90, .55); }
@@ -132,7 +132,7 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .route { fill: none; stroke: var(--neon); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1 9; opacity: .95; }
 .route-dot { fill: var(--asphalt); stroke: var(--neon); stroke-width: 3; }
 .compass text { font: 600 12px var(--text); fill: var(--chalk); }
-.rg:hover .shape { stroke: var(--chalk); }
+@media (hover: hover) { .rg:hover .shape { stroke: var(--chalk); } }
 .rg:focus-visible .shape { stroke: var(--neon); stroke-width: 5; }
 .rl text { font: 400 22px var(--display); fill: var(--chalk); letter-spacing: .01em; paint-order: stroke; stroke: rgba(14, 19, 17, .55); stroke-width: 4px; stroke-linejoin: round; }
 
@@ -166,11 +166,11 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .btn { appearance: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px; border-radius: 10px;
   border: 1px solid var(--line-strong); background: var(--asphalt-3); color: var(--chalk); font: 600 16px/1 var(--text); text-decoration: none; cursor: pointer;
   transition: background .2s, transform .15s, border-color .2s; }
-.btn:hover { border-color: var(--chalk); color: var(--chalk); }
+@media (hover: hover) { .btn:hover { border-color: var(--chalk); color: var(--chalk); } }
 .btn:active { transform: translateY(1px); }
 .btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .btn--primary { background: var(--neon); border-color: var(--neon); color: var(--asphalt); }
-.btn--primary:hover { background: var(--neon-hi); border-color: var(--neon-hi); color: var(--asphalt); }
+@media (hover: hover) { .btn--primary:hover { background: var(--neon-hi); border-color: var(--neon-hi); color: var(--asphalt); } }
 .btn[disabled] { opacity: .55; cursor: progress; }
 .status { min-height: 24px; margin-top: 12px; color: var(--chalk-2); font-size: 15px; }
 
@@ -181,9 +181,9 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .way__who { color: #DDEFE4; }
 .way .qr { width: 200px; height: 200px; border-radius: 10px; background: #fff; padding: 6px; margin-block: 8px; }
 .way .btn { background: var(--asphalt); border-color: var(--asphalt); }
-.way .btn:hover { background: #000; border-color: #000; }
+@media (hover: hover) { .way .btn:hover { background: #000; border-color: #000; } }
 .way .btn--primary { background: var(--neon); border-color: var(--neon); color: var(--asphalt); }
-.way .btn--primary:hover { background: var(--neon-hi); border-color: var(--neon-hi); }
+@media (hover: hover) { .way .btn--primary:hover { background: var(--neon-hi); border-color: var(--neon-hi); } }
 .way__note { font-size: 14px; color: #DDEFE4; }
 .way__note.warn { color: #FFE2A8; }
 .addr { background: rgba(0, 0, 0, .28); border-radius: 8px; padding: 10px 12px; max-width: 100%; }
@@ -223,7 +223,7 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 
 .foot { max-width: 1280px; margin: 0 auto; padding: 32px var(--gut) calc(40px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); color: var(--chalk-2); font-size: 14px; display: grid; gap: 12px; }
 .linklike { appearance: none; background: none; border: 0; padding: 0; min-height: 44px; color: var(--chalk-2); font: inherit; text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
-.linklike:hover { color: var(--chalk); }
+@media (hover: hover) { .linklike:hover { color: var(--chalk); } }
 .noscript { padding: 16px var(--gut); background: var(--sign); }
 
 
@@ -258,7 +258,7 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .cell { appearance: none; aspect-ratio: 1; min-height: 44px; padding: 8px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--asphalt);
   color: var(--chalk); font: 600 clamp(12px, 3.3vw, 15px)/1.25 var(--text); cursor: pointer; display: grid; place-items: center; text-align: center; overflow-wrap: anywhere;
   transition: background .2s, color .2s, transform .15s; }
-.cell:hover { border-color: var(--chalk); }
+@media (hover: hover) { .cell:hover { border-color: var(--chalk); } }
 .cell:active { transform: scale(.97); }
 .cell[aria-pressed="true"] { background: var(--neon); border-color: var(--neon); color: var(--asphalt); }
 .cell--free { background: var(--sign); border-color: var(--sign); color: #fff; cursor: default; }

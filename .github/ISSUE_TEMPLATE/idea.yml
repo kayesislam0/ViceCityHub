@@ -1,0 +1,22 @@
+name: Idea
+description: A new tool, a better way to do something, or a missing GTA VI fact.
+labels: ["idea"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What should the hub do, and who is it for?
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source (for game facts)
+      description: Where a new region, place or feature was confirmed. Made-up details can't go on the hub.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Building it
+      options:
+        - label: I'd like to build this myself

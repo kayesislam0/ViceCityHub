@@ -1,44 +1,115 @@
-# Vice City Hub (vicecityhub.okenshop.com)
+<div align="center">
 
-A free fan tool for GTA VI players: mark the Leonida regions you have explored, get a shareable map card, challenge
-friends with a link (live you-vs-them score), get a Leonida street name, play day-one bingo, and tip the hub in crypto. Plain HTML, CSS and JavaScript, no build step, no requests to other sites.
-It is its own small site in its own repository, with no connection to the okenshop shop.
+<img src="site/hub/img/icon.svg" width="72" height="72" alt="">
+
+# Vice City Hub
+
+**How much of Leonida have you seen?**
+
+A free, fast fan tool for GTA VI players. Mark the regions you have explored, get a map card worth posting,
+and challenge your crew with one link.
+
+[**Open the hub →**](https://vicecityhub.okenshop.com) &nbsp;·&nbsp; [Report a bug](https://github.com/kayesislam0/ViceCityHub/issues/new?template=bug.yml) &nbsp;·&nbsp; [Suggest an idea](https://github.com/kayesislam0/ViceCityHub/issues/new?template=idea.yml) &nbsp;·&nbsp; [Tip the hub](https://vicecityhub.okenshop.com/#tip)
+
+[![Checks](https://github.com/kayesislam0/ViceCityHub/actions/workflows/check.yml/badge.svg)](https://github.com/kayesislam0/ViceCityHub/actions/workflows/check.yml)
+![No build step](https://img.shields.io/badge/build_step-none-0B6B3A)
+![No tracking](https://img.shields.io/badge/tracking-none-0B6B3A)
+[![MIT licence](https://img.shields.io/badge/licence-MIT-FF5FA2)](LICENSE)
+
+</div>
+
+<p align="center">
+  <img src="docs/img/card.png" width="360" alt="A Leonida map card: 72% of Leonida seen, rank Kingpin, each region marked by how far the player got">
+  &nbsp;&nbsp;
+  <img src="docs/img/phone-tracker.png" width="300" alt="The tracker on a phone: the Leonida map with explored regions lit in pink and finished ones edged in gold">
+</p>
+
+## What it does
+
+| | |
+|---|---|
+| **Map tracker** | Tap each of Leonida's six regions as you go: passed through, explored, done 100%. Your score and rank update live. |
+| **Map card** | One tap makes a 2160 × 2700 picture of your map to post. Three looks, an optional "Day one" stamp. |
+| **Crew challenge** | A link that carries your score. Friends who open it see you versus them, live. |
+| **Leonida Daily** | One small in-game task a day, the same for everyone, with a streak you can paste in the group chat. |
+| **Street name and bingo** | A Leonida street name from your gamer tag, and a day-one bingo board. |
+
+Everything runs in the visitor's browser. There is no sign-up, no server, no cookie banner because there are no cookies,
+and no request to any other site.
+
+<p align="center">
+  <img src="docs/img/phone-daily.png" width="300" alt="Leonida Daily: today's task, a streak counter and a button to copy your streak">
+</p>
+
+## Run it on your computer
+
+You need nothing but Python, which most computers already have.
+
+```sh
+git clone https://github.com/kayesislam0/ViceCityHub.git
+cd ViceCityHub/site
+python3 -m http.server 8000
+```
+
+Open <http://localhost:8000>. Edit a file, refresh the page. That is the whole workflow: plain HTML, CSS and
+JavaScript, no framework and no build step.
+
+## Help build it
+
+Bug fixes and small improvements are welcome from anyone, and every pull request gets a review.
+
+1. Pick an issue labelled [`good first issue`](https://github.com/kayesislam0/ViceCityHub/labels/good%20first%20issue), or open one.
+2. Fork, make your change, run the checks (below).
+3. Open a pull request. The checks run on it automatically.
+
+The details, including what makes a pull request easy to accept, are in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### Checks
+
+```sh
+pip install playwright && python3 -m playwright install chromium
+python3 tests/check.py
+```
+
+They confirm the page loads without script errors at four screen widths, nothing scrolls sideways, every button is
+big enough to tap, the map card draws, and the tip details are exact.
+
+## Where things are
 
 ```
-  vercel.json        Host settings for this site only: published folder (site/), security headers, caching
-  site/
-    index.html       The page, its title, description, sharing image and FAQ markup
-    404.html         Not-found page
-    robots.txt, sitemap.xml, favicon.ico
-    hub/hub.css      Styles (Leonida roadside at night: asphalt, sign green, one neon pink)
-    hub/hub.js       The map, scoring, the card (canvas), share/download/copy, the unlock clock
-    hub/fonts/       Anton and DM Sans, subset to Latin (SIL Open Font License, licences included)
-    hub/img/         QR codes (generated from the address and link, no logos), icons, og.png
-tests/check.py       Checks: files, exact tip details, no script errors, no sideways scrolling, tap targets, the card
+site/
+  index.html        The page: text, sections, FAQ and search-engine data
+  404.html          The "wrong turn" page
+  hub/hub.js        The map, scoring, card, challenge link, daily task, street name, bingo
+  hub/hub.css       All styles (see DESIGN.md for the design system)
+  hub/fonts/        Anton and DM Sans, subset to Latin (SIL Open Font License)
+  hub/img/          Icon, sharing image, tip QR codes
+tests/check.py      The checks above
+vercel.json         Redirects and security headers for the live site
+DESIGN.md           Colours, type, spacing and components
 ```
-
-## Put it live (once)
-
-1. Vercel → Add New → Project → import `kayesislam0/ViceCity-Hub`.
-2. Framework preset: Other. Build and install commands: empty. Output directory: `site`. Root directory: the repository root.
-3. Settings → Domains → add `vicecityhub.okenshop.com`.
-4. At your DNS provider keep (or add) the record Vercel shows, usually `CNAME vicecityhub → cname.vercel-dns.com`.
-
-## Take it down
-
-Delete the Vercel project, remove the `vicecityhub` DNS record, then archive or delete this repository. Nothing else depends on it.
-
-## Change things
 
 | To change | Edit |
 |---|---|
-| Tip details | `site/index.html` (tip section) and regenerate both QR SVGs from the exact text; `tests/check.py` checks the address and link |
-| Regions, map shapes, ranks, card looks | `site/hub/hub.js` (`REGIONS`, `RANKS`, `THEMES`) |
-| Street-name words, bingo prompts | `ALIAS_FIRST` / `ALIAS_TITLE` / `ALIAS_KNOWN`, `BINGO` in `site/hub/hub.js` |
-| Unlock times | `PLACES` in `site/hub/hub.js` |
-| Title, description, FAQ | `site/index.html` head and the FAQ section (keep the JSON-LD answers identical to the visible ones) |
+| Regions, map shapes, ranks, card looks | `REGIONS`, `RANKS`, `THEMES` in `site/hub/hub.js` |
+| Daily tasks | `DAILY` in `site/hub/hub.js` |
+| Street-name words, bingo prompts | `ALIAS_FIRST`, `ALIAS_TITLE`, `ALIAS_KNOWN`, `BINGO` in `site/hub/hub.js` |
+| Title, description, FAQ | `site/index.html` (keep the FAQ data in the head identical to the visible answers) |
 
-`python3 tests/check.py` (needs Python Playwright with Chromium) checks the files, the exact tip details, script errors,
-sideways scrolling, 44 px tap targets and that the card paints.
+## Support the hub
 
-Not affiliated with Rockstar Games or Take-Two. No Rockstar artwork, logos or fonts are used; the map is our own sketch.
+The hub is free and has no ads. If it made your launch week better, you can
+[send a tip](https://vicecityhub.okenshop.com/#tip) by Binance Pay or Bitcoin. Tips pay for the domain and the time
+behind each new tool. They are gifts: they cannot be refunded and do not buy anything.
+
+The tip details on the page are the only real ones. The project never asks for crypto in messages, and pull requests
+that change the tip details are not accepted.
+
+## Licence
+
+The code is under the [MIT licence](LICENSE). The fonts in `site/hub/fonts/` keep their own SIL Open Font License,
+included next to them.
+
+Vice City Hub is an independent fan project. It is not affiliated with or endorsed by Rockstar Games or Take-Two
+Interactive. Grand Theft Auto and GTA are their trademarks. No Rockstar artwork, logos or fonts are used, and the map is
+our own sketch, not to scale.

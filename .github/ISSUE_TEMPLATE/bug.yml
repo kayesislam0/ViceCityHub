@@ -1,0 +1,24 @@
+name: Bug
+description: Something on the hub looks wrong or doesn't work.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+      placeholder: I tapped "Download PNG" and nothing happened.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      placeholder: iPhone 15, Safari
+    validations:
+      required: true
+  - type: textarea
+    id: shot
+    attributes:
+      label: Screenshot
+      description: Drag a screenshot in here if you can. It saves a lot of guessing.
