@@ -915,6 +915,17 @@
     return lines.length;
   }
 
+  // Fits text into at most maxLines lines by stepping the size down, so a long line is never cut off with an ellipsis.
+  function wrapFit(ctx, text, x, y, maxW, size, minSize, maxLines, weight) {
+    for (var s = size; s >= minSize; s -= 2) {
+      ctx.font = weight + ' ' + s + 'px "DM Sans", sans-serif';
+      var words = String(text).split(' '), lines = 1, line = '';
+      words.forEach(function (w) { var t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > maxW && line) { lines++; line = w; } else line = t; });
+      if (lines <= maxLines) return wrapText(ctx, text, x, y, maxW, Math.round(s * 1.22), maxLines);
+    }
+    return wrapText(ctx, text, x, y, maxW, Math.round(minSize * 1.22), maxLines);
+  }
+
   // Card sizes: Square 1:1 for feeds, Story 9:16 for Stories, TikTok and Shorts. Painted at twice the layout size.
   var FORMATS = { square: [1080, 1080], story: [1080, 1920] };
   function draw() {
@@ -1056,8 +1067,8 @@
     ctx.fillStyle = T.ink2; ctx.font = '600 40px "DM Sans", sans-serif';
     ctx.fillText(tr('of Leonida seen'), 64, 642);
     rankSign(ctx, T, rank(n), 64, 676, 48);
-    ctx.fillStyle = T.ink; ctx.font = '600 36px "DM Sans", sans-serif';
-    wrapText(ctx, verdict(), 64, 808, 460, 44, 2);
+    ctx.fillStyle = T.ink;
+    wrapFit(ctx, verdict(), 64, 808, 460, 36, 28, 2, '600');
     drawMap(ctx, T, 548, 172, 0.82, null, { labels: true });
     dare(ctx, T, W, H, 172, mapDare(p));
   }
@@ -1071,8 +1082,8 @@
     ctx.fillStyle = T.ink2; ctx.font = '600 52px "DM Sans", sans-serif';
     ctx.fillText(tr('of Leonida seen'), 64, 834);
     rankSign(ctx, T, rank(n), 64, 876, 58);
-    ctx.fillStyle = T.ink; ctx.font = '600 44px "DM Sans", sans-serif';
-    wrapText(ctx, verdict(), 64, 1036, 952, 54, 2);
+    ctx.fillStyle = T.ink;
+    wrapFit(ctx, verdict(), 64, 1036, 952, 44, 34, 2, '600');
     var sc = 0.82; drawMap(ctx, T, (W - 600 * sc) / 2, 1080, sc, null, { labels: true });
     dare(ctx, T, W, H, 210, mapDare(p));
   }

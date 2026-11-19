@@ -64,7 +64,15 @@ async def browser():
         pg = await ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto(base + 'gta-6-cheat-codes.html'); await pg.wait_for_timeout(300)
         out += [f'cheat page: script error {e}' for e in errs]
-        if await pg.evaluate('document.documentElement.scrollWidth > innerWidth'): out.append('cheat page: sideways scrolling')
+        if await pg.evaluate('document.documentElement.scrollWidth > 390'): out.append('cheat page: sideways scrolling')
+        # Every page, at the smallest phone, in every language: nothing scrolls sideways.
+        for page in ['', 'gta-6-cheat-codes.html', 'legal.html', '404.html']:
+            for lang in ['en', 'es', 'pt']:
+                c2 = await b.new_context(viewport={'width': 320, 'height': 780}, has_touch=True, is_mobile=True)
+                p2 = await c2.new_page(); await p2.goto(base + page + '?lang=' + lang); await p2.wait_for_timeout(200)
+                sw = await p2.evaluate('document.documentElement.scrollWidth')
+                if sw > 320: out.append(f'{page or "home"} ({lang}) at 320px: {sw}px wide, scrolls sideways')
+                await c2.close()
         if await pg.evaluate("document.querySelectorAll('#cheat-rows tr').length") != 61: out.append('cheats: expected 61 rows')
         await pg.fill('#cheat-q', 'ammo')
         if await pg.evaluate("[...document.querySelectorAll('#cheat-rows tr')].filter(r => !r.hidden).length") != 3: out.append('cheats: search for "ammo" should show 3')

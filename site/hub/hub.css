@@ -257,14 +257,14 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .daily { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
 .daily > * { min-width: 0; }
 .tool .btn { max-width: 100%; white-space: normal; text-align: start; }
-@media (min-width: 760px) { .daily { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 48px; } }
+@media (min-width: 900px) { .daily { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 48px; } }
 .daily__task { margin-top: 16px; font: 400 clamp(32px, 4.6vw, 52px)/1.02 var(--display); max-width: 20ch; text-wrap: balance; }
 .daily__reset { margin-top: 12px; color: var(--chalk-2); font-variant-numeric: tabular-nums; }
 .daily.is-done .daily__task { color: var(--chalk-2); }
 .daily__check { display: none; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: var(--neon); color: var(--asphalt); font: 600 14px/1 var(--text); }
 .daily__check svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .daily.is-done .daily__check { display: inline-flex; }
-@media (max-width: 759px) { .daily__side { padding: 16px; } .streak b { font-size: 48px; } .week { gap: 6px; } }
+@media (max-width: 899px) { .daily__side { padding: 16px; } .streak b { font-size: 48px; } .week { gap: 6px; } }
 .daily__side { display: grid; gap: 14px; justify-items: start; padding: 20px 24px; border-radius: 12px; background: var(--asphalt); border: 1px solid var(--line); }
 .streak { display: flex; align-items: baseline; gap: 10px; }
 .streak b { font: 400 64px/1 var(--display); color: var(--neon); font-variant-numeric: tabular-nums; }
@@ -588,3 +588,6 @@ a, button, label, summary, .rg, .cell { -webkit-tap-highlight-color: transparent
    a word may break rather than spill out of its square. */
 @media (max-width: 359px) { .bingo__size { display: none; } }
 .bingo__board.is-big .cell { overflow-wrap: anywhere; }
+/* Card maker: the secondary buttons sit in one row and share the width on phones, like the buttons above them. */
+.actions--sub { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 899px) { .card-maker__form > .actions--sub .btn { flex: 1 1 auto; } }
