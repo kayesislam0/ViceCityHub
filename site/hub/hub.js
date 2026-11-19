@@ -312,10 +312,17 @@
     if (!c || !/^[0-3]{6}$/.test(c)) return;
     var t = 0; c.split('').forEach(function (d) { t += Number(d); });
     var n = (q.get('n') || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 24) || tr('Your friend');
-    rival = { name: n, pct: pctOf(t) };
+    rival = { name: n, pct: pctOf(t), levels: c.split('').map(Number) };
     $('challenge-name').textContent = n;
     $('challenge-score').textContent = rival.pct + '%';
     $('challenge').hidden = false;
+    $('kind-blend').hidden = false;
+    $('blend-go').addEventListener('click', function () {
+      settings.kind = 'blend';
+      document.querySelectorAll('input[name="kind"]').forEach(function (r) { r.checked = r.value === 'blend'; });
+      drawSoon();
+      $('card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }
   function updateChallenge() {
     if (!rival) return;
@@ -339,7 +346,7 @@
     // From 7 December the card opens on Wrapped, unless the visitor picked a card themselves.
     kind: load('vch.kind', Date.now() >= new Date(2026, 11, 7).getTime() ? 'wrapped' : 'map')
   };
-  if (settings.kind !== 'wrapped') settings.kind = 'map';
+  if (settings.kind !== 'wrapped') settings.kind = 'map'; // Blend is chosen per visit, from a friend's link
   if (!THEMES[settings.theme]) settings.theme = 'night';
   if (settings.platform !== 'PS5' && settings.platform !== 'Xbox Series') settings.platform = 'PS5';
 
@@ -367,7 +374,7 @@
     });
     document.querySelectorAll('input[name="kind"]').forEach(function (r) {
       r.checked = r.value === settings.kind;
-      r.addEventListener('change', function () { settings.kind = r.value; save('vch.kind', r.value); drawSoon(); });
+      r.addEventListener('change', function () { settings.kind = r.value; if (r.value !== 'blend') save('vch.kind', r.value); drawSoon(); });
     });
     var d = $('dayone');
     d.checked = settings.dayone;
@@ -610,6 +617,7 @@
     ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     if (settings.kind === 'wrapped') { drawWrapped(ctx, T, W, H); return; }
+    if (settings.kind === 'blend' && rival) { drawBlend(ctx, T, W, H); return; }
 
     ctx.fillStyle = T.ink2;
     ctx.font = '600 38px "DM Sans", sans-serif';
@@ -671,7 +679,9 @@
   }
 
   // The map as drawn on both cards, at (x, y) and scale sc of its 600 x 740 layout.
-  function drawMap(ctx, T, x, y, sc) {
+  // blend: { mine: [...], theirs: [...] } paints who explored each region instead of one player's levels.
+  function drawMap(ctx, T, x, y, sc, blend) {
+    var LV = blend ? blend.mine.map(function (m, i) { return Math.max(m, blend.theirs[i]); }) : levels;
     // The card map uses the same layers as the page map: sea, stipple, grid, coastal shelf, fog of war, route, compass.
     ctx.save();
     ctx.translate(x, y); ctx.scale(sc, sc);
@@ -691,18 +701,24 @@
     var fog = patternTile(12, function (p) { p.strokeStyle = 'rgba(244,241,234,.16)'; p.lineWidth = 3; p.beginPath(); p.moveTo(-2, 14); p.lineTo(14, -2); p.stroke(); p.beginPath(); p.moveTo(-2, 2); p.lineTo(2, -2); p.stroke(); p.beginPath(); p.moveTo(10, 14); p.lineTo(14, 10); p.stroke(); });
     REGIONS.forEach(function (r, i) {
       var path = new Path2D(r.d);
-      ctx.fillStyle = T.fill[levels[i]]; ctx.fill(path);
-      if (levels[i]) { var sh = ctx.createLinearGradient(0, 40, 0, 720); sh.addColorStop(0, 'rgba(255,255,255,.10)'); sh.addColorStop(1, 'rgba(0,0,0,.14)'); ctx.fillStyle = sh; ctx.fill(path); }
-      if (!levels[i] && fog) { ctx.fillStyle = fog; ctx.fill(path); }
+      ctx.fillStyle = T.fill[blend ? (blend.mine[i] && blend.theirs[i] ? 3 : LV[i] ? 2 : 0) : LV[i]]; ctx.fill(path);
+      if (LV[i]) { var sh = ctx.createLinearGradient(0, 40, 0, 720); sh.addColorStop(0, 'rgba(255,255,255,.10)'); sh.addColorStop(1, 'rgba(0,0,0,.14)'); ctx.fillStyle = sh; ctx.fill(path); }
+      if (!LV[i] && fog) { ctx.fillStyle = fog; ctx.fill(path); }
       ctx.strokeStyle = T.edge; ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.stroke(path);
-      if (levels[i] === 2) { ctx.strokeStyle = T.accent; ctx.lineWidth = 3; ctx.stroke(path); }
-      if (levels[i] === 3) { ctx.strokeStyle = T.done; ctx.lineWidth = 4; ctx.stroke(path); }
+      if (blend) {
+        // Only you: your accent. Only them: gold. Both of you: white.
+        var me = blend.mine[i] > 0, them = blend.theirs[i] > 0;
+        if (me || them) { ctx.strokeStyle = me && them ? T.ink : me ? T.accent : T.done; ctx.lineWidth = 4; ctx.stroke(path); }
+      } else {
+        if (LV[i] === 2) { ctx.strokeStyle = T.accent; ctx.lineWidth = 3; ctx.stroke(path); }
+        if (LV[i] === 3) { ctx.strokeStyle = T.done; ctx.lineWidth = 4; ctx.stroke(path); }
+      }
     });
     var lake = new Path2D(LAKE);
     ctx.fillStyle = T.lake; ctx.fill(lake); ctx.strokeStyle = T.edge; ctx.lineWidth = 4; ctx.stroke(lake);
     // your route
     var pts = [];
-    levels.forEach(function (l, i) { if (l) pts.push(anchorOf(REGIONS[i])); });
+    if (!blend) levels.forEach(function (l, i) { if (l) pts.push(anchorOf(REGIONS[i])); });
     if (pts.length > 1) {
       ctx.save(); ctx.strokeStyle = T.accent; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.setLineDash([1, 12]);
       ctx.beginPath(); pts.forEach(function (p, k) { k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }); ctx.stroke(); ctx.restore();
@@ -711,7 +727,7 @@
     // labels above the route, outlined so they read at feed size
     ctx.textAlign = 'center'; ctx.lineJoin = 'round';
     REGIONS.forEach(function (r, i) {
-      var dark = levels[i] >= T.darkFrom && r.id !== 'keys';
+      var dark = (blend ? (blend.mine[i] && blend.theirs[i] ? 3 : LV[i] ? 2 : 0) : LV[i]) >= T.darkFrom && r.id !== 'keys';
       ctx.font = '400 30px Anton, sans-serif';
       ctx.lineWidth = 6; ctx.strokeStyle = dark ? 'rgba(255,255,255,.35)' : 'rgba(14,19,17,.6)';
       ctx.fillStyle = dark ? T.onFull : T.ink;
@@ -791,6 +807,57 @@
     ctx.fillText(tr('Make yours:') + ' vicecityhub.okenshop.com', 64, H - 22);
   }
 
+  // Leonida Blend: your map and a friend's (from their challenge link) on one card, Spotify-Blend style.
+  function blendStats() {
+    var cover = 0, diff = 0;
+    levels.forEach(function (m, i) { cover += Math.max(m, rival.levels[i]); diff += Math.abs(m - rival.levels[i]); });
+    var mine = steps(), theirs = rival.levels.reduce(function (a, b) { return a + b; }, 0);
+    return { cover: pctOf(cover), match: Math.round(100 - diff / 18 * 100), carry: mine === theirs ? 0 : mine > theirs ? 1 : -1 };
+  }
+  function drawBlend(ctx, T, W, H) {
+    var st = blendStats(), me = (settings.tag || '').trim() || tr('You');
+    ctx.fillStyle = T.ink2; ctx.font = '600 38px "DM Sans", sans-serif';
+    ctx.fillText(tr('Our Leonida'), 64, 112);
+    ctx.fillStyle = T.accent; ctx.font = '400 196px Anton, sans-serif';
+    ctx.fillText(tr('BLEND'), 56, 304);
+    ctx.fillStyle = T.ink;
+    var pair = me + '  ×  ' + rival.name;
+    fitText(ctx, pair, W - 128, 64, '400 {s}px Anton, sans-serif');
+    ctx.fillText(pair, 64, 404);
+
+    drawMap(ctx, T, 40, 470, 0.84, { mine: levels, theirs: rival.levels });
+
+    var x = 600;
+    ctx.fillStyle = T.accent;
+    fitText(ctx, st.cover + '%', 420, 170, '400 {s}px Anton, sans-serif');
+    ctx.fillText(st.cover + '%', x - 4, 640);
+    ctx.fillStyle = T.ink2; ctx.font = '600 28px "DM Sans", sans-serif';
+    ctx.fillText(tr('of Leonida covered'), x, 686);
+    ctx.fillText(tr('together'), x, 722);
+    ctx.fillStyle = T.ink; ctx.font = '400 104px Anton, sans-serif';
+    ctx.fillText(st.match + '%', x - 2, 852);
+    ctx.fillStyle = T.ink2; ctx.font = '600 28px "DM Sans", sans-serif';
+    ctx.fillText(tr('map match'), x, 894);
+    ctx.fillStyle = T.ink;
+    var carry = st.carry === 0 ? tr('Dead even') : tr('{name} carried', { name: st.carry > 0 ? me : rival.name });
+    fitText(ctx, carry, 420, 56, '400 {s}px Anton, sans-serif');
+    ctx.fillText(carry, x, 990);
+    // legend
+    [[T.accent, me], [T.done, rival.name], [T.ink, tr('Both of you')]].forEach(function (l, k) {
+      var ly = 1060 + k * 48;
+      ctx.strokeStyle = l[0]; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(x, ly - 10); ctx.lineTo(x + 40, ly - 10); ctx.stroke();
+      ctx.fillStyle = T.ink2; ctx.font = '600 26px "DM Sans", sans-serif';
+      fitText(ctx, l[1], 360, 26, '600 {s}px "DM Sans", sans-serif');
+      ctx.fillText(l[1], x + 56, ly);
+    });
+
+    ctx.fillStyle = T.accent;
+    ctx.fillRect(0, H - 64, W, 64);
+    ctx.fillStyle = T.onFull;
+    ctx.font = '600 30px "DM Sans", sans-serif';
+    ctx.fillText(tr('Blend with me:') + ' vicecityhub.okenshop.com', 64, H - 22);
+  }
+
   function stamp(ctx, x, y, T) {
     ctx.save();
     ctx.translate(x, y); ctx.rotate(-0.21);
@@ -838,7 +905,7 @@
       $('card-canvas').toBlob(function (b) { b ? resolve(b) : reject(new Error('no image')); }, 'image/png');
     });
   }
-  function fileName() { return settings.kind === 'wrapped' ? 'leonida-wrapped.png' : 'leonida-' + score() + '-percent.png'; }
+  function fileName() { return settings.kind === 'blend' && rival ? 'leonida-blend.png' : settings.kind === 'wrapped' ? 'leonida-wrapped.png' : 'leonida-' + score() + '-percent.png'; }
 
   function challengeUrl() {
     var u = SITE + '?c=' + code();
@@ -846,7 +913,13 @@
     if (t) u += '&n=' + encodeURIComponent(t);
     return u;
   }
-  function shareText() { return tr('I have seen {n}% of Leonida ({rank}). How much have you seen?', { n: score(), rank: rank() }); }
+  function shareText() {
+    if (settings.kind === 'blend' && rival) {
+      var b = blendStats();
+      return tr('Our Leonida Blend with {name}: {c}% covered together, {m}% match. Blend with me:', { name: rival.name, c: b.cover, m: b.match });
+    }
+    return tr('I have seen {n}% of Leonida ({rank}). How much have you seen?', { n: score(), rank: rank() });
+  }
 
   function download(blob) {
     var url = URL.createObjectURL(blob);
@@ -983,6 +1056,8 @@
       li.appendChild(a); li.appendChild(b); frag.appendChild(li);
     });
     ul.textContent = ''; ul.appendChild(frag);
+    // After the last window everything is out: the per-window list has nothing left to count down.
+    ul.hidden = now >= LAST; $('clock-title').hidden = now >= LAST;
     Array.prototype.forEach.call(document.querySelectorAll('.markets .when[data-at]'), function (el) {
       var t = Date.parse(el.getAttribute('data-at'));
       el.textContent = now >= t ? tr('Out since {t}', { t: fmtTime(t) }) : tr('In {d}', { d: fmtLeft(t - now) }) + ' · ' + fmtTime(t);

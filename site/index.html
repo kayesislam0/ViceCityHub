@@ -24,12 +24,12 @@
 <meta property="og:image" content="https://vicecityhub.okenshop.com/hub/img/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="A drawn map of Leonida: explored regions lit, finished ones edged in gold, a dotted route between them">
+<meta property="og:image:alt" content="How much of Leonida have you seen? A Leonida map card and a Blend card for two friends">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="GTA 6: how much of Leonida have you seen?">
 <meta name="twitter:description" content="Mark your GTA 6 regions, keep your Leonida Daily streak, get your map card and challenge your crew.">
 <meta name="twitter:image" content="https://vicecityhub.okenshop.com/hub/img/og.png">
-<meta name="twitter:image:alt" content="A drawn map of Leonida: explored regions lit, finished ones edged in gold, a dotted route between them">
+<meta name="twitter:image:alt" content="How much of Leonida have you seen? A Leonida map card and a Blend card for two friends">
 <link rel="preload" href="hub/fonts/anton-400.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="hub/fonts/dmsans-400.woff" as="font" type="font/woff" crossorigin>
 <link rel="stylesheet" href="hub/hub.css">
@@ -66,7 +66,7 @@
     <a href="#tools">Tools</a>
     <a href="#unlock">Unlock times</a>
     <a href="#regions">Regions</a>
-    <a class="top__tip" href="#tip">Tip the hub</a>
+    <a class="top__tip" href="#tip"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M14.6 9.6c-.4-.9-1.4-1.4-2.6-1.4-1.5 0-2.6.8-2.6 1.9 0 2.6 5.4 1.3 5.4 3.9 0 1.1-1.1 1.9-2.8 1.9-1.3 0-2.4-.6-2.8-1.5"/></svg><span>Tip the hub</span></a>
   </nav>
 </header>
 
@@ -74,6 +74,7 @@
   <div class="challenge" id="challenge" hidden>
     <p class="challenge__vs"><span><strong id="challenge-name">A friend</strong> <b id="challenge-score">0%</b></span><span class="challenge__x">vs</span><span><strong>You</strong> <b id="challenge-you">0%</b></span></p>
     <p class="challenge__msg" id="challenge-msg">Mark your regions and beat their score.</p>
+    <button class="btn btn--blend" id="blend-go" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span>Make our Blend</span></button>
   </div>
 
   <section class="hero" id="tracker" aria-labelledby="hero-title">
@@ -124,6 +125,7 @@
         <div class="seg" id="kind">
           <label><input type="radio" name="kind" value="map" checked><span>Map</span></label>
           <label><input type="radio" name="kind" value="wrapped"><span>Leonida Wrapped</span></label>
+          <label id="kind-blend" hidden><input type="radio" name="kind" value="blend"><span>Blend</span></label>
         </div>
       </fieldset>
       <fieldset class="field">
@@ -153,7 +155,7 @@
           <span>Download PNG</span>
         </button>
       </div>
-      <p><button class="linklike" id="copy-link" type="button">Or copy a challenge link for your crew</button></p>
+      <p><button class="linklike" id="copy-link" type="button">Or copy your link: friends who open it can make a Blend with you</button></p>
       <p class="status" id="card-status" role="status"></p>
       <div class="thanks" id="thanks" hidden>
         <p><strong>Your card is on the house.</strong> No ads paid for it and nobody tracked you. If it made you grin, toss a coin in the jar so the next tool gets built.</p>
@@ -283,7 +285,7 @@
       <li><span class="place">Australia</span><span class="when-wrap"><span class="when" data-at="2026-11-18T13:00:00Z">Midnight AEDT</span><span class="note">Sydney, Melbourne</span></span></li>
       <li><span class="place">Japan and South Korea</span><span class="when-wrap"><span class="when" data-at="2026-11-18T15:00:00Z">Midnight JST</span><span class="note">Tokyo, Seoul</span></span></li>
     </ul>
-    <h3 class="markets__title">All listed windows</h3>
+    <h3 class="markets__title" id="clock-title">All listed windows</h3>
     <p class="clock__out" id="clock-out"></p>
     <ul class="clock" id="clock">
       <li><span class="place">New Zealand</span><span class="when when--static">Midnight NZDT · 11:00 UTC, Nov 18</span></li>
@@ -330,10 +332,17 @@
 </main>
 
 <footer class="foot">
-  <p>Vice City Hub is an independent fan tool. Not affiliated with or endorsed by Rockstar Games or Take-Two Interactive. Grand Theft Auto and GTA are trademarks of Take-Two Interactive Software. No Rockstar artwork is used.</p>
-  <p>Open source: <a href="https://github.com/kayesislam0/ViceCityHub" rel="noopener">fix a bug or suggest a tool on GitHub</a>.</p>
-  <nav class="langs" aria-label="Language"><a href="?lang=en" data-lang="en" hreflang="en" lang="en">English</a><a href="?lang=es" data-lang="es" hreflang="es" lang="es">Español</a><a href="?lang=pt" data-lang="pt" hreflang="pt" lang="pt">Português</a></nav>
-  <p><button class="linklike" type="button" id="reset">Clear my map</button></p>
+  <div class="foot__top">
+    <a class="foot__brand" href="#tracker"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#0B6B3A"/><path d="M7 19.6a9 9 0 0 1 18 0z" fill="#FF5FA2"/><path d="M6.5 19.6h19v1.2h-19z" fill="#F4F1EA"/></svg><span>Vice City Hub</span></a>
+    <nav class="foot__links" aria-label="More">
+      <a href="/source" rel="noopener">Source on GitHub</a>
+      <a href="/report" rel="noopener">Report a bug</a>
+      <a href="/legal">Terms and privacy</a>
+      <button class="linklike" type="button" id="reset">Clear my map</button>
+    </nav>
+    <nav class="langs" aria-label="Language"><a href="?lang=en" data-lang="en" hreflang="en" lang="en">English</a><a href="?lang=es" data-lang="es" hreflang="es" lang="es">Español</a><a href="?lang=pt" data-lang="pt" hreflang="pt" lang="pt">Português</a></nav>
+  </div>
+  <p class="foot__fine">Vice City Hub is an independent fan tool. Not affiliated with or endorsed by Rockstar Games or Take-Two Interactive. Grand Theft Auto and GTA are trademarks of Take-Two Interactive Software. No Rockstar artwork is used.</p>
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <noscript><p class="noscript">The map and card need JavaScript. Unlock times and region notes above work without it.</p></noscript>

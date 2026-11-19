@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="site/hub/img/icon.svg" width="72" height="72" alt="">
+<img src="docs/img/banner.png" alt="Vice City Hub: how much of Leonida have you seen? A map card and a Blend card for GTA VI">
 
 # Vice City Hub
 
@@ -9,9 +9,8 @@
 A free, fast fan tool for GTA VI players. Mark the regions you have explored, get a map card worth posting,
 and challenge your crew with one link.
 
-[**Open the hub →**](https://vicecityhub.okenshop.com) &nbsp;·&nbsp; [Report a bug](https://github.com/kayesislam0/ViceCityHub/issues/new?template=bug.yml) &nbsp;·&nbsp; [Suggest an idea](https://github.com/kayesislam0/ViceCityHub/issues/new?template=idea.yml) &nbsp;·&nbsp; [Tip the hub](https://vicecityhub.okenshop.com/#tip)
+[**Open the hub →**](https://vicecityhub.okenshop.com) &nbsp;·&nbsp; [Report a bug](https://vicecityhub.okenshop.com/report) &nbsp;·&nbsp; [Suggest an idea](https://vicecityhub.okenshop.com/idea) &nbsp;·&nbsp; [Tip the hub](https://vicecityhub.okenshop.com/#tip)
 
-[![Checks](https://github.com/kayesislam0/ViceCityHub/actions/workflows/check.yml/badge.svg)](https://github.com/kayesislam0/ViceCityHub/actions/workflows/check.yml)
 ![No build step](https://img.shields.io/badge/build_step-none-0B6B3A)
 ![No tracking](https://img.shields.io/badge/tracking-none-0B6B3A)
 [![MIT licence](https://img.shields.io/badge/licence-MIT-FF5FA2)](LICENSE)
@@ -19,7 +18,7 @@ and challenge your crew with one link.
 </div>
 
 <p align="center">
-  <img src="docs/img/card.png" width="300" alt="A Leonida map card: 72% of Leonida seen, rank Kingpin, each region marked by how far the player got">
+  <img src="docs/img/blend.png" width="300" alt="A Leonida Blend card: two players' maps on one card, 83% covered together, map match and who carried">
   &nbsp;&nbsp;
   <img src="docs/img/wrapped.png" width="300" alt="A Leonida Wrapped card: 72% seen, final rank Kingpin, best daily streak, daily tasks done and regions at 100%">
   &nbsp;&nbsp;
@@ -32,12 +31,13 @@ and challenge your crew with one link.
 |---|---|
 | **Map tracker** | Tap each of Leonida's six regions as you go: passed through, explored, done 100%. Your score and rank update live. |
 | **Map card** | One tap makes a 2160 × 2700 picture of your map to post. Three looks, an optional "Day one" stamp. |
+| **Leonida Blend** | Open a friend's link and make a Blend: both maps on one card, how much of Leonida you covered together, your map match, and who carried. |
 | **Crew challenge** | A link that carries your score. Friends who open it see you versus them, live. |
 | **Leonida Daily** | One small in-game task a day, the same for everyone, with a streak you can send to the group chat. |
 | **Leonida Wrapped** | A recap card of your whole launch run: final rank, best streak, regions finished. |
 | **Street name and bingo** | A Leonida street name from your gamer tag, and a day-one bingo board. |
 
-In English, Spanish and Portuguese. Everything runs in the visitor's browser. There is no sign-up, no server, no cookie banner because there are no cookies,
+In English, Spanish and Portuguese. [Terms and privacy](https://vicecityhub.okenshop.com/legal). Everything runs in the visitor's browser. There is no sign-up, no server, no cookie banner because there are no cookies,
 and no request to any other site.
 
 <p align="center">
@@ -49,7 +49,7 @@ and no request to any other site.
 You need nothing but Python, which most computers already have.
 
 ```sh
-git clone https://github.com/kayesislam0/ViceCityHub.git
+# fork the repository on GitHub, then clone your fork
 cd ViceCityHub/site
 python3 -m http.server 8000
 ```
@@ -61,7 +61,7 @@ JavaScript, no framework and no build step.
 
 Bug fixes and small improvements are welcome from anyone, and every pull request gets a review.
 
-1. Pick an issue labelled [`good first issue`](https://github.com/kayesislam0/ViceCityHub/labels/good%20first%20issue), or open one.
+1. Pick an issue labelled [`good first issue`](https://vicecityhub.okenshop.com/good-first-issues), or open one.
 2. Fork, make your change, run the checks (below).
 3. Open a pull request. The checks run on it automatically.
 

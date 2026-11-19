@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security problem
-    url: https://github.com/kayesislam0/ViceCityHub/security/advisories/new
+    url: https://vicecityhub.okenshop.com/security-report
     about: Report anything that could change the tip details or run script on the page, privately.
