@@ -147,7 +147,7 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .compass text { font: 600 12px var(--text); fill: var(--chalk); }
 @media (hover: hover) { .rg:hover .shape { stroke: var(--chalk); } }
 .rg:focus-visible .shape { stroke: var(--chalk); stroke-width: 5; }
-.rl text { font: 400 24px var(--display); fill: var(--chalk); paint-order: stroke; stroke: rgba(14, 19, 17, .5); stroke-width: 3px; stroke-linejoin: round; }
+.rl text { font: 400 24px var(--display); fill: var(--chalk); stroke: none; }
 
 .rl .lvl { font: 600 15px var(--text); fill: var(--chalk-2); }
 .rl[data-level="1"] .lvl { fill: var(--chalk); }
@@ -594,7 +594,7 @@ a, button, label, summary, .rg, .cell { -webkit-tap-highlight-color: transparent
 @media (max-width: 899px) { .card-maker__form > .actions--sub .btn { flex: 1 1 auto; } }
 .lg-fog-a { fill: var(--m-fog); } .lg-fog-b { fill: rgba(244, 241, 234, .28); }
 /* The Keys label sits on the sea beside the islands, so it stays light whatever the level. */
-.rl.out[data-level] text { fill: var(--chalk); stroke: rgba(14, 19, 17, .5); }
+.rl.out[data-level] text { fill: var(--chalk); }
 .rl.out[data-level] .lvl { fill: var(--chalk-2); }
 .rl.out[data-level="3"] .lvl { fill: var(--m-done); }
 /* Map colours: three equal tiles in one row, swatch above the name. */

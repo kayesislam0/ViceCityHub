@@ -1126,7 +1126,6 @@
   function drawMap(ctx, T, x, y, sc, blend, opts) {
     var labels = !!(opts && opts.labels);
     // Card label spots: Port Gellhorn and Ambrosia move apart so the bigger names never touch.
-    var SPOT = { gellhorn: [188, 240], ambrosia: [388, 212], vice: [505, 318], grass: [384, 506] };
     var LV = blend ? blend.mine.map(function (m, i) { return Math.max(m, blend.theirs[i]); }) : levels;
     var fog = stripes(ctx, T.fill[0], T.fog, 22);
     var both = blend ? stripes(ctx, T.accent, T.done, 26) : null;
@@ -1155,30 +1154,22 @@
     });
     ctx.fillStyle = T.lake; ctx.fill(new Path2D(LAKE));
     ctx.textAlign = 'center';
+    // Names sit at the same roomy spots as on the page map, sized to stay inside their region; a finished region gets
+    // its tick centred under the name, the same place every time.
     REGIONS.forEach(function (r, i) {
-      var lp = SPOT[r.id] || r.label;
-      var lines = r.two ? [r.name.split(' ')[0], r.name.split(' ').slice(1).join(' ')] : [r.name];
-      if (r.id === 'kalaga') lines = ['Mount Kalaga'];
-      var fs = 46, lh = 44;
+      var nudge = { gellhorn: [-10, 10], ambrosia: [8, 4] }[r.id] || [0, 0];
+      var lp = [r.label[0] + nudge[0], r.label[1] + nudge[1]], fs = 32, lines = r.two ? r.name.split(' ') : [r.id === 'kalaga' ? 'Mount Kalaga' : r.name];
+      var top = r.two ? lp[1] - 10 : lp[1], last = top + (lines.length - 1) * 28;
       if (labels) {
         ctx.font = '400 ' + fs + 'px Anton, sans-serif';
         lines.forEach(function (txt, k) {
-          var ly = lp[1] + (r.two ? (k ? lh / 2 + 4 : -lh / 2 + 4) : 10);
-          ctx.strokeStyle = 'rgba(14,19,17,.85)'; ctx.lineWidth = 10; ctx.strokeText(txt, lp[0], ly);
-          ctx.fillStyle = LV[i] ? '#FFFFFF' : T.ink2; ctx.fillText(txt, lp[0], ly);
+          var ly = top + k * 28;
+          // No outline effect: dark ink on bright fills, light ink on dark ones (the Keys label sits on the sea).
+          var bright = !r.out && (blend ? LV[i] > 0 : LV[i] >= 2);
+          ctx.fillStyle = bright ? T.onFull : LV[i] ? '#FFFFFF' : T.ink2; ctx.fillText(txt, lp[0], ly);
         });
       }
-      if (!blend && LV[i] === 3) {
-        // With names: the tick sits right of the name if it fits, otherwise under it. Without names: on the label spot.
-        var bx = lp[0], by = lp[1];
-        if (labels) {
-          ctx.font = '400 ' + fs + 'px Anton, sans-serif';
-          var tw = Math.max.apply(null, lines.map(function (l) { return ctx.measureText(l).width; }));
-          if (lp[0] + tw / 2 + 64 < 600) { bx = lp[0] + tw / 2 + 36; by = lp[1] - 6; } else { by = lp[1] + (r.two ? lh + 36 : 62); }
-        }
-        if (r.id === 'keys') { bx = 470; by = labels ? 600 : 610; }
-        tick(ctx, bx, by, 26, T);
-      }
+      if (!blend && LV[i] === 3) tick(ctx, r.id === 'keys' ? 470 : lp[0], r.id === 'keys' ? 610 : labels ? last + 26 : lp[1] - 8, 16, T);
     });
     ctx.restore();
     ctx.textAlign = 'left';
