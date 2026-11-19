@@ -388,3 +388,14 @@ kbd { display: inline-grid; place-items: center; min-width: 30px; height: 30px; 
 .cheat-tools .cheat-count { order: 4; }
 .cheat-more { margin-top: 12px; }
 .tbc { font-style: normal; }
+
+/* Printing the cheat list or the legal page: light paper, no buttons, every cheat shown. */
+@media print {
+  :root { color-scheme: light; }
+  body { background: #fff !important; color: #000 !important; }
+  .top, .jump, .hero, .card-maker, .tools, .tip, .unlock, .regions, .faq, .foot, .toast, .challenge, .cheat-tools, .cheat-more, .c-got { display: none !important; }
+  .cheat-table tbody tr[hidden] { display: table-row !important; }
+  .cheat-table, .cheat-table th, .cheat-table td, .legal p, .legal li, .section-lede, .c-how { color: #000 !important; background: none !important; }
+  kbd { background: #fff !important; color: #000 !important; border-color: #000 !important; box-shadow: none !important; }
+  .cheat-wrap { border-color: #000; }
+}
