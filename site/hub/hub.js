@@ -602,8 +602,8 @@
     b.setAttribute('aria-pressed', String(tipped));
     b.querySelector('span').textContent = tipped ? tr('Thank you!') : tr('I sent a tip');
     $('tipped-msg').textContent = tipped
-      ? tr('You kept the hub running. Your map card now says "Backed the hub" in gold. Tap again to remove it.')
-      : tr('Sent one? Tap this and your map card gets a gold "Backed the hub" line. We don\'t check, we trust you.');
+      ? tr('You kept the hub running. Your map card now carries a gold Backed the hub line. Tap again to remove it.')
+      : tr('Sent one? Tap here and your map card gets a gold Backed the hub line. We trust you, so there is nothing to check.');
   }
   function bindTipped() {
     $('tipped-btn').addEventListener('click', function () {
@@ -774,18 +774,22 @@
     ctx.translate(x, y); ctx.scale(sc, sc);
     roundRect(ctx, 0, 0, 600, 740, 22); ctx.fillStyle = T.sea; ctx.fill();
     ctx.save(); roundRect(ctx, 0, 0, 600, 740, 22); ctx.clip();
-    var stip = patternTile(14, function (p) { p.fillStyle = 'rgba(143,179,191,.22)'; p.beginPath(); p.arc(3, 3, 1.2, 0, Math.PI * 2); p.fill(); });
-    if (stip) { ctx.fillStyle = stip; ctx.fillRect(0, 0, 600, 740); }
-    ctx.strokeStyle = T.grid; ctx.lineWidth = 1;
-    for (var x = 50; x < 600; x += 50) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 740); ctx.stroke(); }
-    for (var y = 50; y < 740; y += 50) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(600, y); ctx.stroke(); }
+    // The card is built to survive social-media compression: no fine dots or hairlines, only shapes and bold lines
+    // that JPEG re-encoding on Instagram, X or WhatsApp can't smear. A soft sea gradient and a wide grid give depth.
+    var sea = ctx.createRadialGradient(300, 300, 40, 300, 360, 520);
+    sea.addColorStop(0, 'rgba(143,179,191,.10)'); sea.addColorStop(1, 'rgba(0,0,0,.18)');
+    ctx.fillStyle = sea; ctx.fillRect(0, 0, 600, 740);
+    ctx.strokeStyle = T.grid; ctx.lineWidth = 2;
+    for (var x = 100; x < 600; x += 100) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 740); ctx.stroke(); }
+    for (var y = 100; y < 740; y += 100) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(600, y); ctx.stroke(); }
     REGIONS.forEach(function (r) { // coastal shelf
       var sp = new Path2D(r.d);
       ctx.fillStyle = 'rgba(143,179,191,.10)'; ctx.fill(sp);
       ctx.strokeStyle = 'rgba(143,179,191,.22)'; ctx.lineWidth = 30; ctx.lineJoin = 'round'; ctx.stroke(sp);
     });
     ctx.restore();
-    var fog = patternTile(12, function (p) { p.strokeStyle = 'rgba(244,241,234,.16)'; p.lineWidth = 3; p.beginPath(); p.moveTo(-2, 14); p.lineTo(14, -2); p.stroke(); p.beginPath(); p.moveTo(-2, 2); p.lineTo(2, -2); p.stroke(); p.beginPath(); p.moveTo(10, 14); p.lineTo(14, 10); p.stroke(); });
+    // Unexplored regions: wide, bold diagonal bands (low detail, so they stay clean after compression).
+    var fog = patternTile(26, function (p) { p.strokeStyle = 'rgba(244,241,234,.11)'; p.lineWidth = 6; p.lineCap = 'square'; [-26, 0, 26].forEach(function (o) { p.beginPath(); p.moveTo(o - 2, 28); p.lineTo(o + 28, -2); p.stroke(); }); });
     REGIONS.forEach(function (r, i) {
       var path = new Path2D(r.d);
       ctx.fillStyle = T.fill[blend ? (blend.mine[i] && blend.theirs[i] ? 3 : LV[i] ? 2 : 0) : LV[i]]; ctx.fill(path);
@@ -830,7 +834,7 @@
     ctx.strokeStyle = 'rgba(244,241,234,.35)'; ctx.lineWidth = 1.5; ctx.stroke();
     ctx.fillStyle = T.accent; ctx.beginPath(); ctx.moveTo(0, -18); ctx.lineTo(6, 0); ctx.lineTo(0, -4); ctx.lineTo(-6, 0); ctx.closePath(); ctx.fill();
     ctx.fillStyle = 'rgba(244,241,234,.5)'; ctx.beginPath(); ctx.moveTo(0, 18); ctx.lineTo(6, 0); ctx.lineTo(0, 4); ctx.lineTo(-6, 0); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = T.ink; ctx.font = '600 14px "DM Sans", sans-serif'; ctx.fillText('N', 0, -32);
+    ctx.fillStyle = T.ink; ctx.font = '600 18px "DM Sans", sans-serif'; ctx.fillText('N', 0, -34);
     ctx.restore();
     ctx.restore();
     ctx.textAlign = 'left';

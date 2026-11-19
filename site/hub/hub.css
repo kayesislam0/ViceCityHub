@@ -437,3 +437,5 @@ p.cheat-more { margin-top: 16px; }
 .saveline .linklike { min-height: 44px; font-size: 14px; color: var(--chalk); }
 .saveline.is-warn { padding: 12px 14px; border-radius: 12px; background: rgba(255, 195, 90, .1); border: 1px solid rgba(255, 195, 90, .4); color: var(--chalk); }
 .saveline.is-warn svg { display: none; }
+
+.swatch { display: inline-block; width: 18px; height: 18px; margin-right: 8px; vertical-align: -3px; border-radius: 50%; background: linear-gradient(135deg, var(--a) 50%, var(--b) 50%); box-shadow: 0 0 0 1px rgba(244, 241, 234, .35); }
