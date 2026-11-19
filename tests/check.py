@@ -69,6 +69,18 @@ async def browser():
         await pg.fill('#cheat-q', 'ammo')
         if await pg.evaluate("[...document.querySelectorAll('#cheat-rows tr')].filter(r => !r.hidden).length") != 3: out.append('cheats: search for "ammo" should show 3')
         await ctx.close()
+        # Bingo squares: no prompt spills out of its square, on the smallest phone, at both sizes, in every language.
+        for lang in ['en', 'es', 'pt']:
+            ctx = await b.new_context(viewport={'width': 320, 'height': 780}, has_touch=True, is_mobile=True)
+            pg = await ctx.new_page()
+            for size in ['3', '5']:
+                for seed in ['11', '222', '3333']:
+                    await pg.goto(base + '?lang=' + lang)
+                    await pg.evaluate(f"localStorage.setItem('vch.bingoSize', '{size}'); localStorage.setItem('vch.bingoSeed', '{seed}')")
+                    await pg.reload(); await pg.wait_for_timeout(150)
+                    over = await pg.evaluate("[...document.querySelectorAll('#bingo .cell')].filter(c => c.scrollWidth > c.clientWidth + 1 || c.scrollHeight > c.clientHeight + 1).map(c => c.textContent)")
+                    out += [f'{lang} bingo {size}x{size}: "{o}" spills out of its square' for o in over]
+            await ctx.close()
         # Spanish and Portuguese run longer than English: no script errors, no sideways scrolling, text translated.
         for lang, word in [('es', 'Herramientas'), ('pt', 'Ferramentas')]:
             ctx = await b.new_context(viewport={'width': 320, 'height': 780}, has_touch=True, is_mobile=True)

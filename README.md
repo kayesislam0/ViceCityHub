@@ -30,13 +30,13 @@ and challenge your crew with one link.
 | | |
 |---|---|
 | **All 61 cheat codes** | [Its own page](https://vicecityhub.okenshop.com/gta-6-cheat-codes): every GTA VI cheat with its button code (where known) and how to unlock it. Search, filter by type, tick off the ones you have. |
-| **Map tracker** | Tap each of Leonida's six regions as you go: passed through, explored, finished. Your score and rank update live. |
+| **Map tracker** | Tap each of Leonida's six regions as you go: passed through, explored, finished. A picker under the map sets any level, and Undo takes back any change. |
 | **Map card** | One tap makes a picture of your map to post, square (1:1) or story (9:16). Three looks, an optional date stamp. |
 | **Leonida Blend** | Open a friend's link and make a Blend: both maps on one card, how much of Leonida you covered together, your map match, and who carried. |
 | **Crew challenge** | A link that carries your score. Friends who open it see you versus them, live. |
 | **Daily dare** | One small in-game dare a day, the same for everyone, with a 7-day streak row you can send to the group chat. |
 | **Leonida Wrapped** | A recap card of your whole launch run: final rank, best streak, regions finished. |
-| **Street name and bingo** | A Leonida street name from your gamer tag, and a launch-night bingo board. |
+| **Street name and bingo** | A Leonida street name from your gamer tag, and a launch-night bingo board in 3×3 or 5×5. |
 
 In English, Spanish and Portuguese. [Terms and privacy](https://vicecityhub.okenshop.com/legal). Everything runs in the visitor's browser. There is no sign-up, no server, no cookie banner because there are no cookies,
 and no request to any other site.
@@ -75,7 +75,9 @@ pip install playwright && python3 -m playwright install chromium
 python3 tests/check.py
 ```
 
-They confirm the page loads without script errors at four screen widths, nothing scrolls sideways, every button is
+`python3 tests/taps.py` taps and untaps every control on a phone, a tablet and a desktop.
+
+The checks confirm the page loads without script errors at four screen widths, nothing scrolls sideways, every button is
 big enough to tap, the map card draws, and the tip details are exact.
 
 ## Where things are

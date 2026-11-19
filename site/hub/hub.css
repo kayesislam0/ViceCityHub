@@ -285,7 +285,7 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .alias__known { color: var(--chalk); }
 
 /* Bingo: ticked squares in pink, finished lines edged in gold. */
-.bingo__board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 20px; }
+.bingo__board { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 6px; margin-top: 20px; }
 .cell { appearance: none; aspect-ratio: 1; min-height: 44px; padding: 8px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--asphalt);
   color: var(--chalk); font: 600 clamp(12px, 3.3vw, 15px)/1.25 var(--text); cursor: pointer; display: grid; place-items: center; text-align: center; overflow-wrap: anywhere;
   transition: background-color .2s, color .2s, border-color .2s, transform .15s; }
@@ -549,3 +549,39 @@ a, button, label, summary, .rg, .cell { -webkit-tap-highlight-color: transparent
 .daily__undo .linklike { color: var(--chalk); }
 /* Desktop: the sticky map, its picker and its key all fit on one screen. */
 @media (min-width: 960px) { .map svg { max-height: calc(100vh - 320px); } }
+
+/* The one button a message can carry (Undo); the message itself still never takes taps. */
+.toast__act { pointer-events: auto; appearance: none; border: 0; background: none; min-height: 44px; margin: -12px -8px -12px 4px; padding: 0 8px;
+  color: var(--asphalt); font: 600 15px/1 var(--text); text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
+.pick__undo { margin-left: auto; min-height: 44px; margin-block: -10px; font-size: 14px; color: var(--chalk); }
+
+/* Bingo size, and the 5 x 5 board: smaller words, same 44px squares at least. */
+.bingo__size { margin-top: 16px; }
+.bingo__board.is-big { gap: 4px; }
+.bingo__board.is-big .cell { padding: 4px; border-radius: 8px; font-size: clamp(10.5px, 2.7vw, 13px); line-height: 1.15; aspect-ratio: auto; min-height: 64px; }
+@media (min-width: 900px) { .bingo__board.is-big .cell { min-height: 84px; } }
+
+/* Daily: past dares, newest first. */
+.daily__past { grid-column: 1 / -1; border-top: 1px solid var(--line); }
+.daily__past > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; min-height: 48px; font-weight: 600; }
+.daily__past > summary::-webkit-details-marker { display: none; }
+.daily__past > summary::after { content: ""; width: 10px; height: 10px; border-right: 2px solid var(--chalk-2); border-bottom: 2px solid var(--chalk-2); transform: rotate(45deg) translateY(-3px); transition: transform .2s; }
+.daily__past[open] > summary::after { transform: rotate(225deg) translateY(-3px); }
+.past { list-style: none; margin: 0; padding: 0 0 8px; display: grid; gap: 2px; }
+.past li { display: grid; grid-template-columns: 4.5em minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.past__day { color: var(--chalk-2); font-variant-numeric: tabular-nums; }
+.past__mark { color: var(--chalk-2); font-weight: 600; font-size: 14px; }
+.past li.is-on .past__mark { color: var(--neon); }
+
+/* Challenge: where you are ahead and where to catch up. */
+.vs__regions { color: #DDEFE4; font-size: 15px; }
+.challenge.is-winning .vs__regions { color: var(--asphalt); }
+/* 5 x 5 on phones: the board takes the card's full width and words never break in the middle. */
+.bingo__board.is-big .cell { overflow-wrap: normal; word-break: normal; hyphens: manual; }
+@media (max-width: 479px) {
+  .bingo__board.is-big { margin-inline: calc(-1 * clamp(20px, 3vw, 32px) + 8px); gap: 3px; }
+  .bingo__board.is-big .cell { padding: 3px 2px; font-size: 10px; letter-spacing: 0; min-height: 60px; }
+}
+@media (max-width: 379px) { .bingo__board.is-big .cell { hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; } }
+/* 3 x 3 on phones: squares grow taller for a long prompt instead of letting it spill out. */
+@media (max-width: 899px) { .bingo__board:not(.is-big) .cell { aspect-ratio: auto; min-height: 96px; } }
