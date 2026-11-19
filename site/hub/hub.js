@@ -1,10 +1,10 @@
-/* Vice City Hub: the Leonida map tracker, the shareable card, the street-name and bingo tools, the unlock clock.
+/* Vice City Hub: the Leonida map tracker, the shareable card, the street-name and bingo tools.
    Everything runs on the visitor's device. No requests to other sites; progress is kept in localStorage. */
 (function () {
   'use strict';
 
   var SITE = 'https://vicecityhub.okenshop.com/';
-  var LEVELS = ['Not yet', 'Passed through', 'Explored', 'Done 100%'];
+  var LEVELS = ['Not yet', 'Passed through', 'Explored', 'Finished'];
 
   function ellipse(cx, cy, rx, ry) {
     return 'M' + (cx - rx) + ' ' + cy + 'a' + rx + ' ' + ry + ' 0 1 0 ' + (2 * rx) + ' 0a' + rx + ' ' + ry + ' 0 1 0 ' + (-2 * rx) + ' 0Z';
@@ -52,17 +52,17 @@
     return d + 'Z';
   }
   var REGIONS = [
-    { id: 'kalaga', name: 'Mount Kalaga', full: 'Mount Kalaga National Park', label: [300, 104],
+    { id: 'kalaga', color: '#1F7A4D', name: 'Mount Kalaga', full: 'Mount Kalaga National Park', label: [300, 104],
       d: outline(['kWest', 'kNorth', 'kEast', 'kV', 'kA', 'kG']) },
-    { id: 'gellhorn', name: 'Port Gellhorn', full: 'Port Gellhorn', label: [212, 238], two: true,
+    { id: 'gellhorn', color: '#C9A15B', name: 'Port Gellhorn', full: 'Port Gellhorn', label: [212, 238], two: true,
       d: outline(['-kG', 'gA', 'gGr', 'gCoast']) },
-    { id: 'ambrosia', name: 'Ambrosia', full: 'Ambrosia', label: [364, 226],
+    { id: 'ambrosia', color: '#E8762C', name: 'Ambrosia', full: 'Ambrosia', label: [364, 226],
       d: outline(['-kA', 'aV', 'aGr', '-gA']) },
-    { id: 'vice', name: 'Vice City', full: 'Vice City', label: [505, 318],
+    { id: 'vice', color: '#FF5FA2', color2: '#3FD6E8', name: 'Vice City', full: 'Vice City', label: [505, 318],
       d: outline(['-kV', 'vCoast', '-vGr', '-aV']) },
-    { id: 'grass', name: 'Grassrivers', full: 'Grassrivers', label: [384, 506],
+    { id: 'grass', color: '#3FAE5A', name: 'Grassrivers', full: 'Grassrivers', label: [384, 506],
       d: outline(['-gGr', '-aGr', 'vGr', 'grCoast']) },
-    { id: 'keys', name: 'Leonida Keys', full: 'Leonida Keys', label: [190, 690],
+    { id: 'keys', color: '#19B5A5', name: 'Leonida Keys', full: 'Leonida Keys', label: [190, 690],
       hit: 'M112 642L512 628L516 724L112 724Z',
       d: ellipse(474, 652, 28, 10) + ellipse(424, 672, 24, 9) + ellipse(376, 688, 22, 9) + ellipse(328, 699, 20, 8) + ellipse(282, 707, 18, 8) }
   ];
@@ -73,8 +73,8 @@
                fill: ['#26302B', '#3E2B40', '#5E2F55', '#7D3B62'], onFull: '#0E1311', lake: '#10232A', darkFrom: 4, done: '#FFC35A', line: 'rgba(244,241,234,.14)' },
     sunset:  { bg: '#2A0F22', bg2: '#5E1F2C', sea: '#3A1630', grid: 'rgba(255,214,170,.07)', ink: '#FFF3E4', ink2: '#F2C9B0', accent: '#FFC35A', edge: '#2A0F22',
                fill: ['#47243A', '#8A3A3E', '#D46A3C', '#FFC35A'], onFull: '#2A0F22', lake: '#3A1630', darkFrom: 3, done: '#FFF3E4', line: 'rgba(255,243,228,.16)' },
-    highway: { bg: '#0B6B3A', bg2: '#0B6B3A', sea: '#095A31', grid: 'rgba(255,255,255,.07)', ink: '#FFFFFF', ink2: '#D6EEDF', accent: '#FFFFFF', edge: '#0B6B3A',
-               fill: ['#0F7F46', '#3E9A68', '#9FCDB2', '#FFFFFF'], onFull: '#0B6B3A', lake: '#095A31', darkFrom: 2, done: '#FFC35A', line: 'rgba(255,255,255,.2)' }
+    highway: { bg: '#0B6B3A', bg2: '#0B6B3A', sea: '#063F22', grid: 'rgba(255,255,255,.07)', ink: '#FFFFFF', ink2: '#D6EEDF', accent: '#FFFFFF', edge: '#0B6B3A',
+               fill: ['#0E5434', '#3E9A68', '#9FCDB2', '#FFFFFF'], onFull: '#0B6B3A', lake: '#063F22', darkFrom: 2, done: '#FFC35A', line: 'rgba(255,255,255,.2)' }
   };
   // Dusk to deep berry: each step reads as progress, and a finished region is calm to look at, with a gold edge as the reward.
   var MAP_FILL = ['#26302B', '#3E2B40', '#5E2F55', '#7D3B62'];
@@ -195,8 +195,9 @@
   function buildMap() {
     var svg = $('map');
     var defs = el('defs', {}, svg);
-    var fog = el('pattern', { id: 'fog', width: 12, height: 12, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(40)' }, defs);
-    el('line', { x1: 0, y1: 0, x2: 0, y2: 12, stroke: 'rgba(244,241,234,.16)', 'stroke-width': 3 }, fog);
+    // Each region has its own colour; Vice City runs from neon pink to cyan.
+    var vg = el('linearGradient', { id: 'g-vice', x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+    el('stop', { offset: '0', 'stop-color': '#FF5FA2' }, vg); el('stop', { offset: '1', 'stop-color': '#3FD6E8' }, vg);
     var stip = el('pattern', { id: 'stipple', width: 14, height: 14, patternUnits: 'userSpaceOnUse' }, defs);
     el('circle', { cx: 3, cy: 3, r: 1.1, fill: 'rgba(143,179,191,.25)' }, stip);
     el('rect', { x: 0, y: 0, width: 600, height: 740, rx: 18, fill: '#0F1F25' }, svg);
@@ -213,8 +214,8 @@
     pctEl = el('text', { class: 'map-pct', x: 578, y: 40 }, svg);
     REGIONS.forEach(function (r, i) {
       var g = el('g', { class: 'rg', tabindex: 0, role: 'button', 'data-i': i }, svg);
+      g.style.setProperty('--c', r.color);
       el('path', { d: r.d, class: 'shape' }, g);
-      el('path', { d: r.d, class: 'fog', fill: 'url(#fog)' }, g);
       if (r.hit) el('path', { d: r.hit, class: 'hit' }, g);
       g.addEventListener('click', function () { deeper(i); });
       g.addEventListener('keydown', function (e) {
@@ -243,6 +244,10 @@
         el('text', { x: lx, y: ly, 'text-anchor': 'middle' }, lg).textContent = r.name;
         el('text', { class: 'lvl', x: lx, y: ly + 22, 'text-anchor': 'middle' }, lg);
       }
+      // Finished badge: a gold disc with a tick, just right of the name.
+      var bx = lx + (r.two ? 46 : r.name.length * 5.4 + 16), by = (r.two ? ly - 18 : ly - 8);
+      var bd = el('g', { class: 'badge', transform: 'translate(' + bx + ' ' + by + ')' }, lg);
+      el('circle', { r: 11 }, bd); el('path', { d: 'M-5 0.5l3.4 3.4 6.2-7' }, bd);
       labels.push(lg);
     });
     var cp = el('g', { class: 'compass', transform: 'translate(552 684)' }, svg);
@@ -273,7 +278,7 @@
 
   // A map tap goes one step deeper and stops at 100%, so a stray tap never wipes a finished region.
   function deeper(i) {
-    if (levels[i] === 3) { toast(tr('{name} is already 100%. To lower it, use the list.', { name: REGIONS[i].full })); return; }
+    if (levels[i] === 3) { toast(tr('{name} is already finished. To lower it, use the list.', { name: REGIONS[i].full })); return; }
     setLevel(i, levels[i] + 1);
   }
 
@@ -298,7 +303,7 @@
       var lvl = levels[i];
       var start = n === 0 && REGIONS[i].id === 'vice';
       g.dataset.level = lvl;
-      g.querySelector('.shape').setAttribute('fill', MAP_FILL[lvl]);
+      g.querySelector('.shape').setAttribute('fill', lvl ? (REGIONS[i].color2 ? 'url(#g-vice)' : REGIONS[i].color) : MAP_FILL[0]);
       labels[i].dataset.level = lvl;
       labels[i].classList.toggle('start', start);
       labels[i].querySelector('.lvl').textContent = lvl ? tr(LEVELS[lvl]) : (start ? tr('Tap to start') : '');
@@ -368,6 +373,7 @@
     dayone: load('vch.dayone', '1') === '1',
     useAlias: load('vch.useAlias', '0') === '1',
     aliasRoll: Number(load('vch.aliasRoll', '0')) || 0,
+    format: load('vch.format', 'square') === 'story' ? 'story' : 'square',
     // From 7 December the card opens on Wrapped, unless the visitor picked a card themselves.
     kind: load('vch.kind', Date.now() >= new Date(2026, 11, 7).getTime() ? 'wrapped' : 'map')
   };
@@ -392,6 +398,10 @@
     document.querySelectorAll('input[name="platform"]').forEach(function (r) {
       r.checked = r.value === settings.platform;
       r.addEventListener('change', function () { settings.platform = r.value; save('vch.platform', r.value); drawSoon(); });
+    });
+    document.querySelectorAll('input[name="format"]').forEach(function (r) {
+      r.checked = r.value === settings.format;
+      r.addEventListener('change', function () { settings.format = r.value; save('vch.format', r.value); drawSoon(); });
     });
     document.querySelectorAll('input[name="theme"]').forEach(function (r) {
       r.checked = r.value === settings.theme;
@@ -693,78 +703,101 @@
     return s;
   }
 
+  // Card sizes: Square 1:1 for feeds, Story 9:16 for Stories, TikTok and Shorts. Painted at twice the layout size.
+  var FORMATS = { square: [1080, 1080], story: [1080, 1920] };
   function draw() {
     cardDirty = false;
     var cv = $('card-canvas');
+    var F = FORMATS[settings.format] || FORMATS.square, W = F[0], H = F[1], T = THEMES[settings.theme];
+    if (cv.width !== W * 2 || cv.height !== H * 2) { cv.width = W * 2; cv.height = H * 2; }
+    cv.classList.toggle('is-story', settings.format === 'story');
     var ctx = cv.getContext('2d');
-    var W = 1080, H = 1350, T = THEMES[settings.theme];
-    // The card is laid out at 1080 x 1350 and painted at twice that, so downloads stay sharp on any phone.
-    ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
+    ctx.setTransform(2, 0, 0, 2, 0, 0);
     ctx.imageSmoothingQuality = 'high';
     var bg = ctx.createLinearGradient(0, 0, 0, H);
     bg.addColorStop(0, T.bg); bg.addColorStop(1, T.bg2);
     ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-    if (settings.kind === 'wrapped') { drawWrapped(ctx, T, W, H); return; }
-    if (settings.kind === 'blend' && rival) { drawBlend(ctx, T, W, H); return; }
+    // Wrapped and Blend keep their 1080 x 1350 layout, fitted into the chosen size.
+    if (settings.kind === 'wrapped' || (settings.kind === 'blend' && rival)) {
+      var k = Math.min(W / 1080, H / 1350), ox = (W - 1080 * k) / 2, oy = (H - 1350 * k) / 2;
+      ctx.save(); ctx.translate(ox, oy); ctx.scale(k, k);
+      if (settings.kind === 'wrapped') drawWrapped(ctx, T, 1080, 1350); else drawBlend(ctx, T, 1080, 1350);
+      ctx.restore();
+      return;
+    }
+    if (settings.format === 'story') drawStory(ctx, T, W, H); else drawSquare(ctx, T, W, H);
+  }
 
-    ctx.fillStyle = T.ink2;
-    ctx.font = '600 38px "DM Sans", sans-serif';
-    ctx.fillText(tr('Greetings from'), 64, 112);
-    ctx.fillStyle = T.ink;
-    ctx.font = '400 196px Anton, sans-serif';
-    ctx.fillText('LEONIDA', 56, 304);
-
-    drawMap(ctx, T, 44, 344, 0.96);
-
-    var cx = 640, n = steps(), p = pctOf(n);
+  // The % fills the width it is given: the number at full size, the % sign at half.
+  function bigPct(ctx, T, p, x, y, maxW, maxS) {
+    var s = maxS, num = String(p);
+    var fit = function () { ctx.font = '400 ' + s + 'px Anton, sans-serif'; var a = ctx.measureText(num).width; ctx.font = '400 ' + Math.round(s / 2) + 'px Anton, sans-serif'; return a + 8 + ctx.measureText('%').width; };
+    while (fit() > maxW && s > 60) s -= 6;
+    ctx.save();
+    ctx.shadowColor = T.accent; ctx.shadowBlur = 40;
     ctx.fillStyle = T.accent;
-    ctx.font = '400 230px Anton, sans-serif';
-    var num = String(p);
-    ctx.fillText(num, cx, 600);
+    ctx.font = '400 ' + s + 'px Anton, sans-serif'; ctx.fillText(num, x, y);
     var nw = ctx.measureText(num).width;
-    ctx.font = '400 110px Anton, sans-serif';
-    ctx.fillText('%', cx + nw + 6, 600);
-    ctx.fillStyle = T.ink2;
-    ctx.font = '600 32px "DM Sans", sans-serif';
-    ctx.fillText(tr('of Leonida seen'), cx + 4, 650);
-    ctx.fillStyle = T.ink;
-    fitText(ctx, rank(n), 400, 66, '400 {s}px Anton, sans-serif');
-    ctx.fillText(rank(n), cx, 744);
-
-    var ty = 812;
-    REGIONS.forEach(function (r, i) {
-      // three short bars per region: passed, explored, 100% (gold when finished)
-      for (var k = 0; k < 3; k++) {
-        roundRect(ctx, cx + k * 30, ty - 15, 24, 10, 5);
-        ctx.fillStyle = k < levels[i] ? (levels[i] === 3 ? T.done : T.accent) : T.line;
-        ctx.fill();
-      }
-      ctx.fillStyle = levels[i] ? T.ink : T.ink2;
-      ctx.font = '600 28px "DM Sans", sans-serif';
-      ctx.fillText(r.name, cx + 110, ty);
-      ty += 52;
-    });
-
-    var tag = (settings.tag || '').trim() || tr('Player one');
-    var title = settings.useAlias ? alias().name : tag;
-    ctx.fillStyle = T.ink;
-    fitText(ctx, title, W - 128, 84, '400 {s}px Anton, sans-serif');
-    ctx.fillText(title, 64, 1196);
-    ctx.fillStyle = T.ink2;
-    ctx.font = '600 32px "DM Sans", sans-serif';
+    ctx.font = '400 ' + Math.round(s / 2) + 'px Anton, sans-serif'; ctx.fillText('%', x + nw + 8, y);
+    ctx.restore();
+  }
+  // The rank on a green highway sign: the hub's one signature detail.
+  function rankSign(ctx, T, text, x, y, size) {
+    ctx.font = '400 ' + size + 'px Anton, sans-serif';
+    var w = ctx.measureText(text).width + size * 0.9, h = size * 1.5;
+    roundRect(ctx, x, y, w, h, 10); ctx.fillStyle = '#0B6B3A'; ctx.fill();
+    roundRect(ctx, x + 5, y + 5, w - 10, h - 10, 7); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#FFFFFF'; ctx.fillText(text, x + size * 0.45, y + h / 2 + size * 0.36);
+    return h;
+  }
+  function cardName() { var tag = (settings.tag || '').trim() || tr('Player one'); return settings.useAlias ? alias().name : tag; }
+  function metaLine() {
     var lines = bingoLines();
-    var meta = tr('Plays on {p}', { p: settings.platform }) + ' · GTA VI' + (lines ? ' · Bingo ×' + lines : '');
-    ctx.fillText(meta, 64, 1246);
-    if (tipped) { var fs = ctx.fillStyle; ctx.fillStyle = '#FFC35A'; ctx.fillText(' · ' + tr('Backed the hub'), 64 + ctx.measureText(meta).width, 1246); ctx.fillStyle = fs; }
-
-    ctx.fillStyle = T.accent;
-    ctx.fillRect(0, H - 64, W, 64);
+    return tr('Plays on {p}', { p: settings.platform }) + (lines ? '  ' + 'Bingo ×' + lines : '');
+  }
+  // Every card ends with the same band: what to do, then where.
+  function footer(ctx, T, W, H, h) {
+    ctx.fillStyle = T.accent; ctx.fillRect(0, H - h, W, h);
     ctx.fillStyle = T.onFull;
-    ctx.font = '600 30px "DM Sans", sans-serif';
-    ctx.fillText(tr('How much have you seen?') + ' vicecityhub.okenshop.com', 64, H - 22);
-
-    if (settings.dayone) stamp(ctx, 940, 170, T);
+    ctx.font = '400 ' + Math.round(h * 0.34) + 'px Anton, sans-serif';
+    ctx.fillText(tr('Make yours in 20 seconds'), 64, H - h * 0.5);
+    ctx.font = '600 ' + Math.round(h * 0.22) + 'px "DM Sans", sans-serif';
+    ctx.fillText('vicecityhub.okenshop.com', 64, H - h * 0.18);
+  }
+  function drawSquare(ctx, T, W, H) {
+    var n = steps(), p = pctOf(n);
+    drawMap(ctx, T, 556, 72, 0.7);
+    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
+    ctx.fillText(tr('I have seen'), 64, 110);
+    bigPct(ctx, T, p, 56, 420, 470, 330);
+    ctx.fillStyle = T.ink2; ctx.font = '600 36px "DM Sans", sans-serif';
+    ctx.fillText(tr('of Leonida'), 64, 478);
+    ctx.fillStyle = T.ink;
+    var nm = cardName(); fitText(ctx, nm, 470, 88, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 62, 600);
+    rankSign(ctx, T, rank(n), 64, 636, 44);
+    ctx.fillStyle = T.ink2; ctx.font = '600 28px "DM Sans", sans-serif';
+    ctx.fillText(metaLine(), 64, 790);
+    if (tipped) { ctx.fillStyle = '#FFC35A'; ctx.fillText(tr('Backed the hub'), 64, 830); }
+    if (settings.dayone) { ctx.save(); ctx.translate(820, 790); ctx.scale(0.8, 0.8); stamp(ctx, 0, 0, T); ctx.restore(); }
+    footer(ctx, T, W, H, 130);
+  }
+  function drawStory(ctx, T, W, H) {
+    var n = steps(), p = pctOf(n);
+    ctx.fillStyle = T.ink2; ctx.font = '600 44px "DM Sans", sans-serif';
+    ctx.fillText(tr('I have seen'), 64, 170);
+    bigPct(ctx, T, p, 56, 590, 700, 470);
+    ctx.fillStyle = T.ink2; ctx.font = '600 44px "DM Sans", sans-serif';
+    ctx.fillText(tr('of Leonida'), 64, 668);
+    ctx.fillStyle = T.ink;
+    var nm = cardName(); fitText(ctx, nm, W - 128, 120, '400 {s}px Anton, sans-serif'); ctx.fillText(nm, 60, 820);
+    rankSign(ctx, T, rank(n), 64, 862, 56);
+    ctx.fillStyle = T.ink2; ctx.font = '600 32px "DM Sans", sans-serif';
+    ctx.fillText(metaLine() + (tipped ? '' : ''), 64, 1004);
+    if (tipped) { ctx.fillStyle = '#FFC35A'; ctx.fillText(tr('Backed the hub'), 64, 1048); }
+    var sc = 0.86; drawMap(ctx, T, (W - 600 * sc) / 2, 1080, sc);
+    if (settings.dayone) stamp(ctx, 920, 230, T);
+    footer(ctx, T, W, H, 170);
   }
 
   // The map as drawn on both cards, at (x, y) and scale sc of its 600 x 740 layout.
@@ -774,7 +807,13 @@
     // ever means progress. No grid, hatching, route dots or compass: every pixel left is one that survives
     // Instagram, X and WhatsApp compression and reads at thumbnail size.
     var LV = blend ? blend.mine.map(function (m, i) { return Math.max(m, blend.theirs[i]); }) : levels;
-    var tone = function (i) { return blend ? (blend.mine[i] && blend.theirs[i] ? 3 : LV[i] ? 2 : 0) : LV[i]; };
+    var tone = function (i) { return blend ? (LV[i] ? 2 : 0) : LV[i]; };
+    // Not seen: the theme's quiet land. Passed through: the region's colour, softened. Explored and finished: full colour.
+    var paint = function (r, t) {
+      if (!t) return T.fill[0];
+      if (!r.color2) return r.color;
+      var g = ctx.createLinearGradient(0, 160, 0, 560); g.addColorStop(0, r.color); g.addColorStop(1, r.color2); return g;
+    };
     ctx.save();
     ctx.translate(x, y); ctx.scale(sc, sc);
     roundRect(ctx, 0, 0, 600, 740, 24); ctx.fillStyle = T.sea; ctx.fill();
@@ -791,7 +830,7 @@
     ctx.restore();
     REGIONS.forEach(function (r, i) {
       var path = new Path2D(r.d);
-      ctx.fillStyle = T.fill[tone(i)]; ctx.fill(path);
+      ctx.fillStyle = paint(r, tone(i)); ctx.globalAlpha = tone(i) === 1 ? 0.5 : 1; ctx.fill(path); ctx.globalAlpha = 1;
       ctx.strokeStyle = T.edge; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke(path);
     });
     // Edges carry one meaning each: gold for 100% on a map card; on a Blend, who explored the region.
@@ -799,17 +838,29 @@
       var path = new Path2D(r.d), col = null;
       if (blend) { var me = blend.mine[i] > 0, them = blend.theirs[i] > 0; if (me || them) col = me && them ? T.ink : me ? T.accent : T.done; }
       else if (LV[i] === 3) col = T.done;
-      if (col) { ctx.strokeStyle = col; ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.stroke(path); }
+      if (col) { ctx.strokeStyle = col; ctx.lineWidth = blend ? 5 : 7; ctx.lineJoin = 'round'; ctx.stroke(path); }
     });
     var lake = new Path2D(LAKE);
     ctx.fillStyle = T.sea; ctx.fill(lake);
     ctx.textAlign = 'center';
     REGIONS.forEach(function (r, i) {
-      var t = tone(i), dark = t >= T.darkFrom && r.id !== 'keys';
-      ctx.font = '400 30px Anton, sans-serif';
-      ctx.fillStyle = dark ? T.onFull : t ? T.ink : T.ink2;
+      var t = tone(i);
+      ctx.font = '400 30px Anton, sans-serif'; ctx.lineJoin = 'round';
       var lines = r.two ? [r.name.split(' ')[0], r.name.split(' ').slice(1).join(' ')] : [r.name];
-      lines.forEach(function (txt, k) { ctx.fillText(txt, r.label[0], r.label[1] + (r.two ? (k ? 20 : -12) : 0)); });
+      lines.forEach(function (txt, k) {
+        var ly = r.label[1] + (r.two ? (k ? 20 : -12) : 0);
+        ctx.strokeStyle = 'rgba(14,19,17,.75)'; ctx.lineWidth = 7; ctx.strokeText(txt, r.label[0], ly);
+        ctx.fillStyle = t ? '#FFFFFF' : T.ink2; ctx.fillText(txt, r.label[0], ly);
+      });
+      // A finished region gets a gold badge with a tick next to its name.
+      if (!blend && LV[i] === 3) {
+        ctx.font = '400 30px Anton, sans-serif';
+        var bw = Math.max.apply(null, lines.map(function (l) { return ctx.measureText(l).width; }));
+        var bx = r.label[0] + bw / 2 + 22, by = r.label[1] - (r.two ? 20 : 10);
+        ctx.beginPath(); ctx.arc(bx, by, 15, 0, Math.PI * 2); ctx.fillStyle = T.done; ctx.fill();
+        ctx.strokeStyle = '#0E1311'; ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(bx - 7, by + 1); ctx.lineTo(bx - 2, by + 6); ctx.lineTo(bx + 7, by - 5); ctx.stroke();
+      }
     });
     ctx.restore();
     ctx.textAlign = 'left';
@@ -871,7 +922,7 @@
     ctx.fillRect(0, H - 64, W, 64);
     ctx.fillStyle = T.onFull;
     ctx.font = '600 30px "DM Sans", sans-serif';
-    ctx.fillText(tr('Make yours:') + ' vicecityhub.okenshop.com', 64, H - 22);
+    ctx.fillText(tr('Make yours in 20 seconds') + '  vicecityhub.okenshop.com', 64, H - 22);
   }
 
   // Leonida Blend: your map and a friend's (from their challenge link) on one card, Spotify-Blend style.
@@ -1072,80 +1123,13 @@
     });
   }
 
-  // ---- unlock clock ----
-  // PS5 PlayStation Store windows reported from GTAVice.net's scrape (15 windows, 63 countries); the main 11.
-  var PLACES = [
-    ['New Zealand', '2026-11-18T11:00:00Z'], ['Australia', '2026-11-18T13:00:00Z'], ['Japan, South Korea', '2026-11-18T15:00:00Z'],
-    ['Hong Kong, Malaysia, Singapore, Taiwan', '2026-11-18T16:00:00Z'], ['Indonesia', '2026-11-18T17:00:00Z'],
-    ['India', '2026-11-18T18:30:00Z'], ['UAE', '2026-11-18T20:00:00Z'], ['Mainland Europe', '2026-11-18T23:00:00Z'],
-    ['UK and Ireland', '2026-11-19T00:00:00Z'], ['USA and Canada', '2026-11-19T05:00:00Z'], ['Mexico, Central America', '2026-11-19T06:00:00Z']
-  ];
-  var NA_ET = Date.parse('2026-11-19T05:00:00Z');
-  var LAST = Date.parse('2026-11-19T06:00:00Z'); // the last listed window
-
-  function myUnlock() {
-    var tz = '';
-    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* older browsers */ }
-    // The USA and Canada share one window at midnight Eastern; everywhere else, local midnight.
-    var na = /^America\/(New_York|Detroit|Chicago|Denver|Phoenix|Boise|Los_Angeles|Anchorage|Juneau|Indiana|Kentucky|North_Dakota|Menominee|Adak|Sitka|Nome|Yakutat|Metlakatla|Toronto|Montreal|Vancouver|Edmonton|Winnipeg|Regina|Halifax|St_Johns|Moncton|Glace_Bay|Goose_Bay|Whitehorse|Dawson|Yellowknife|Iqaluit|Rankin_Inlet|Cambridge_Bay|Swift_Current|Atikokan|Creston|Fort_Nelson|Dawson_Creek|Inuvik|Resolute|Nipigon|Thunder_Bay|Rainy_River|Pangnirtung|Blanc-Sablon|Puerto_Rico)/.test(tz) || tz === 'Pacific/Honolulu';
-    return na ? NA_ET : new Date(2026, 10, 19, 0, 0, 0).getTime();
-  }
-  var timeFmt;
-  function fmtTime(t) {
-    try { timeFmt = timeFmt || new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit' }); return timeFmt.format(new Date(t)); }
-    catch (e) { return new Date(t).toLocaleString(); }
-  }
-  function fmtLeft(ms) {
-    var m = Math.ceil(ms / 60000), h = Math.floor(m / 60);
-    return h ? h + 'h ' + (m % 60) + 'm' : m + 'm';
-  }
-
-  function tick() {
-    var now = Date.now(), ul = $('clock');
-    var mine = myUnlock();
-    var rows = PLACES.map(function (p) { return { place: p[0], t: Date.parse(p[1]) }; });
-    var out = rows.filter(function (r) { return now >= r.t; });
-    var soon = rows.filter(function (r) { return now < r.t; });
-    $('clock-out').textContent = now >= LAST
-      ? tr('Out in every PlayStation Store region with a listed time.')
-      : out.length ? tr('Out in {n} of these {m} windows:', { n: out.length, m: rows.length }) + ' ' + out.map(function (r) { return tr(r.place); }).join(', ') + '.'
-      : tr('Not out anywhere yet. New Zealand goes first.');
-    var youLabel = mine === NA_ET ? tr('You (USA and Canada window)') : tr('Midnight where you are');
-    var list = soon.concat([{ place: youLabel, t: mine, you: true }]).sort(function (a, b) { return a.t - b.t || (a.you ? -1 : 1); });
-    var frag = document.createDocumentFragment();
-    list.forEach(function (r) {
-      var li = document.createElement('li');
-      var live = now >= r.t;
-      li.className = (live ? 'is-live' : '') + (r.you ? ' is-you' : '');
-      var a = document.createElement('span'); a.className = 'place'; a.textContent = r.you ? r.place : tr(r.place);
-      var b = document.createElement('span'); b.className = 'when';
-      b.textContent = live ? tr('Out since {t}', { t: fmtTime(r.t) }) : tr('In {d}', { d: fmtLeft(r.t - now) }) + ' · ' + fmtTime(r.t);
-      li.appendChild(a); li.appendChild(b); frag.appendChild(li);
-    });
-    ul.textContent = ''; ul.appendChild(frag);
-    // After the last window everything is out: the per-window list has nothing left to count down.
-    ul.hidden = now >= LAST; $('clock-title').hidden = now >= LAST;
-    Array.prototype.forEach.call(document.querySelectorAll('.markets .when[data-at]'), function (el) {
-      var t = Date.parse(el.getAttribute('data-at'));
-      el.textContent = now >= t ? tr('Out since {t}', { t: fmtTime(t) }) : tr('In {d}', { d: fmtLeft(t - now) }) + ' · ' + fmtTime(t);
-      el.parentNode.parentNode.className = now >= t ? 'is-live' : '';
-    });
-    $('live-line').textContent = now >= LAST ? tr('GTA VI is out in every listed store. Leonida is open.')
-      : now >= mine ? (mine === NA_ET ? tr('The USA and Canada window is open. Leonida is open.') : tr('It’s past midnight where you are. If your store region matches, Leonida is open.'))
-      : tr(mine === NA_ET ? 'The USA and Canada window opens in {d}. Plan your route now.' : 'Midnight where you are is in {d}. Plan your route now.', { d: fmtLeft(mine - now) });
-  }
-
   // ---- start ----
   function start() {
     translatePage(); bindLang(); bindSaveLine();
     if (!$('map')) { bindCheats(); return; } // the cheat code page has only the cheat list
     buildMap(); bindList(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge();
-    buildBingo(); renderDaily(); renderTipped(); renderAlias(); render(); tick();
-    var clock = setInterval(tick, 30000);
-    document.addEventListener('visibilitychange', function () {
-      clearInterval(clock);
-      if (!document.hidden) { tick(); renderDaily(); clock = setInterval(tick, 30000); }
-    });
+    buildBingo(); renderDaily(); renderTipped(); renderAlias(); render();
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) renderDaily(); });
     var cv = $('card-canvas');
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (es) {

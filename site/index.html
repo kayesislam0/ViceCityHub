@@ -40,15 +40,11 @@
 {"@type":"WebSite","@id":"https://vicecityhub.okenshop.com/#site","name":"Vice City Hub","inLanguage":"en","url":"https://vicecityhub.okenshop.com/"},
 {"@type":"WebApplication","name":"Leonida Map Tracker","url":"https://vicecityhub.okenshop.com/","applicationCategory":"GameApplication","operatingSystem":"Any","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Mark the GTA 6 regions you have explored and download a shareable map card.","inLanguage":["en","es","pt"],"featureList":["Leonida map tracker","Shareable map card","Crew challenge link","Leonida Daily challenge","Leonida Wrapped recap card","Day-one bingo"]},
 {"@type":"FAQPage","mainEntity":[
-{"@type":"Question","name":"How do I track my GTA 6 map progress?","acceptedAnswer":{"@type":"Answer","text":"Tap each region of Leonida on the map as you go: passed through, explored, or done 100%. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session."}},
+{"@type":"Question","name":"How do I track my GTA 6 map progress?","acceptedAnswer":{"@type":"Answer","text":"Tap each region of Leonida on the map as you go: passed through, explored, or finished. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session."}},
 {"@type":"Question","name":"What is Leonida Wrapped?","acceptedAnswer":{"@type":"Answer","text":"A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best Leonida Daily streak and the regions you finished. Pick it under Card, then share or download it."}},
-{"@type":"Question","name":"What time does GTA 6 unlock?","acceptedAnswer":{"@type":"Answer","text":"GTA 6 unlocks at midnight local time on November 19, 2026, starting in New Zealand and ending in Mexico and Central America. On the PlayStation Store the USA and Canada share one unlock at midnight Eastern, so the US West Coast can play from 9 PM Pacific on November 18. The UK and Ireland unlock at midnight GMT and Mainland Europe at midnight CET. Your account region decides your unlock time."}},
-{"@type":"Question","name":"What time does GTA 6 unlock in the UK and Europe?","acceptedAnswer":{"@type":"Answer","text":"On the PlayStation Store, the UK and Ireland unlock at midnight GMT on November 19, 2026, and Mainland Europe at midnight CET, which is 11 PM GMT on November 18."}},
-{"@type":"Question","name":"What time does GTA 6 unlock in Australia?","acceptedAnswer":{"@type":"Answer","text":"Midnight AEDT on November 19, 2026, which is 1 PM UTC on November 18. Australia is one of the first regions to unlock, after New Zealand."}},
-{"@type":"Question","name":"Can I play GTA 6 early by changing my console clock?","acceptedAnswer":{"@type":"Answer","text":"No. Your unlock follows your PlayStation or Xbox account region, not the clock on your console."}},
 {"@type":"Question","name":"What are the regions of Leonida?","acceptedAnswer":{"@type":"Answer","text":"Rockstar has named six: Vice City, the Leonida Keys, Grassrivers, Port Gellhorn, Ambrosia and Mount Kalaga National Park."}},
 {"@type":"Question","name":"Is this the official GTA 6 map?","acceptedAnswer":{"@type":"Answer","text":"No. It is our own simplified drawing of where the regions sit, made for the card. It is not Rockstar's map and not to scale."}},
-{"@type":"Question","name":"Does my map leave my phone?","acceptedAnswer":{"@type":"Answer","text":"No. Your map is saved only in your browser and the card is drawn on your device. There is no sign-up and nothing is uploaded."}},
+{"@type":"Question","name":"Does my map leave my phone?","acceptedAnswer":{"@type":"Answer","text":"Your name, map and card stay on your device. Nothing is uploaded, and there is no sign-up."}},
 {"@type":"Question","name":"Do I get anything for a tip?","acceptedAnswer":{"@type":"Answer","text":"No. Tips are voluntary gifts that pay for the domain and the time to build new tools. They cannot be refunded and give no in-game items."}}
 ]}
 ]}
@@ -65,7 +61,6 @@
   <nav class="top__nav" aria-label="Sections">
     <a href="/gta-6-cheat-codes">Cheat codes</a>
     <a href="#tools">Tools</a>
-    <a href="#unlock">Unlock times</a>
     <a href="#regions">Regions</a>
     <a class="top__tip" href="#tip"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M14.6 9.6c-.4-.9-1.4-1.4-2.6-1.4-1.5 0-2.6.8-2.6 1.9 0 2.6 5.4 1.3 5.4 3.9 0 1.1-1.1 1.9-2.8 1.9-1.3 0-2.4-.6-2.8-1.5"/></svg><span>Tip the hub</span></a>
   </nav>
@@ -80,10 +75,11 @@
 
   <section class="hero" id="tracker" aria-labelledby="hero-title">
     <div class="hero__head">
-      <p class="live" id="live-line" aria-live="polite">GTA VI is out. Leonida is open.</p>
+      <p class="live">GTA 6 is out.</p>
       <h1 id="hero-title">How much of Leonida have you&nbsp;seen?</h1>
-      <p class="hero__lede">Tap the regions you have driven through. Tap again as you go deeper. Get your card, post it, and see who in your crew has really seen the state.</p>
-      <nav class="jump" aria-label="Jump to"><a href="#card">Make your card</a><a href="/gta-6-cheat-codes">All 61 cheat codes</a><a href="#tools">Leonida Daily</a></nav>
+      <p class="hero__lede">Tap the regions you've driven through. Get your card. Challenge your crew.</p>
+      <p class="hero__cta"><a class="btn btn--primary" href="#map-wrap" id="start">Mark where you've been</a></p>
+      <p class="trust">No ads. No sign-up. Your map and card stay on your device.</p>
     </div>
 
     <div class="hero__controls">
@@ -98,20 +94,25 @@
       </div>
 
       <ol class="regions-list" id="region-list" aria-label="Your regions">
-        <li class="region-row" data-level="0"><span class="region-row__name" id="rn-kalaga">Mount Kalaga National Park</span><div class="steps" role="group" aria-labelledby="rn-kalaga"><button type="button" data-k="1" aria-pressed="false" aria-label="Mount Kalaga National Park: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Mount Kalaga National Park: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Mount Kalaga National Park: Done 100%">100%</button></div></li>
-        <li class="region-row" data-level="0"><span class="region-row__name" id="rn-gellhorn">Port Gellhorn</span><div class="steps" role="group" aria-labelledby="rn-gellhorn"><button type="button" data-k="1" aria-pressed="false" aria-label="Port Gellhorn: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Port Gellhorn: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Port Gellhorn: Done 100%">100%</button></div></li>
-        <li class="region-row" data-level="0"><span class="region-row__name" id="rn-ambrosia">Ambrosia</span><div class="steps" role="group" aria-labelledby="rn-ambrosia"><button type="button" data-k="1" aria-pressed="false" aria-label="Ambrosia: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Ambrosia: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Ambrosia: Done 100%">100%</button></div></li>
-        <li class="region-row" data-level="0"><span class="region-row__name" id="rn-vice">Vice City</span><div class="steps" role="group" aria-labelledby="rn-vice"><button type="button" data-k="1" aria-pressed="false" aria-label="Vice City: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Vice City: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Vice City: Done 100%">100%</button></div></li>
-        <li class="region-row" data-level="0"><span class="region-row__name" id="rn-grass">Grassrivers</span><div class="steps" role="group" aria-labelledby="rn-grass"><button type="button" data-k="1" aria-pressed="false" aria-label="Grassrivers: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Grassrivers: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Grassrivers: Done 100%">100%</button></div></li>
-        <li class="region-row" data-level="0"><span class="region-row__name" id="rn-keys">Leonida Keys</span><div class="steps" role="group" aria-labelledby="rn-keys"><button type="button" data-k="1" aria-pressed="false" aria-label="Leonida Keys: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Leonida Keys: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Leonida Keys: Done 100%">100%</button></div></li>
+        <li class="region-row" data-level="0"><span class="region-row__name" id="rn-kalaga">Mount Kalaga National Park</span><div class="steps" role="group" aria-labelledby="rn-kalaga"><button type="button" data-k="1" aria-pressed="false" aria-label="Mount Kalaga National Park: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Mount Kalaga National Park: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Mount Kalaga National Park: Finished">Finished</button></div></li>
+        <li class="region-row" data-level="0"><span class="region-row__name" id="rn-gellhorn">Port Gellhorn</span><div class="steps" role="group" aria-labelledby="rn-gellhorn"><button type="button" data-k="1" aria-pressed="false" aria-label="Port Gellhorn: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Port Gellhorn: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Port Gellhorn: Finished">Finished</button></div></li>
+        <li class="region-row" data-level="0"><span class="region-row__name" id="rn-ambrosia">Ambrosia</span><div class="steps" role="group" aria-labelledby="rn-ambrosia"><button type="button" data-k="1" aria-pressed="false" aria-label="Ambrosia: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Ambrosia: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Ambrosia: Finished">Finished</button></div></li>
+        <li class="region-row" data-level="0"><span class="region-row__name" id="rn-vice">Vice City</span><div class="steps" role="group" aria-labelledby="rn-vice"><button type="button" data-k="1" aria-pressed="false" aria-label="Vice City: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Vice City: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Vice City: Finished">Finished</button></div></li>
+        <li class="region-row" data-level="0"><span class="region-row__name" id="rn-grass">Grassrivers</span><div class="steps" role="group" aria-labelledby="rn-grass"><button type="button" data-k="1" aria-pressed="false" aria-label="Grassrivers: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Grassrivers: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Grassrivers: Finished">Finished</button></div></li>
+        <li class="region-row" data-level="0"><span class="region-row__name" id="rn-keys">Leonida Keys</span><div class="steps" role="group" aria-labelledby="rn-keys"><button type="button" data-k="1" aria-pressed="false" aria-label="Leonida Keys: Passed through">Passed</button><button type="button" data-k="2" aria-pressed="false" aria-label="Leonida Keys: Explored">Explored</button><button type="button" data-k="3" aria-pressed="false" aria-label="Leonida Keys: Finished">Finished</button></div></li>
       </ol>
-      <p class="hint">Tap a region on the map to go one step deeper, or pick its step here.</p>
       <p class="saveline" data-saveline><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg><span class="saveline__note">Saved on this device as you go.</span> <button class="linklike" type="button">Copy my progress link</button></p>
     </div>
 
     <figure class="map" id="map-wrap">
       <svg id="map" viewBox="0 0 600 740" role="group" aria-label="Map of Leonida. Select a region to raise its level."></svg>
-      <figcaption>Our own sketch, not to scale and not Rockstar's map. Region positions are approximate and drawn from fan maps of the trailers.</figcaption>
+      <ul class="legend" aria-label="Map key">
+        <li><svg aria-hidden="true" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" class="lg-0"/></svg>Not seen</li>
+        <li><svg aria-hidden="true" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" class="lg-1"/></svg>Passed through</li>
+        <li><svg aria-hidden="true" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" class="lg-2"/></svg>Explored</li>
+        <li><svg aria-hidden="true" viewBox="0 0 20 20"><rect x="2" y="2" width="16" height="16" rx="4" class="lg-3"/><path d="M6.5 10.2l2.4 2.4 4.6-5" class="lg-tick"/></svg>Finished</li>
+      </ul>
+      <figcaption>Fan-made map. Not Rockstar's. Not to scale.</figcaption>
     </figure>
   </section>
 
@@ -129,6 +130,13 @@
           <label><input type="radio" name="kind" value="map" checked><span>Map</span></label>
           <label><input type="radio" name="kind" value="wrapped"><span>Leonida Wrapped</span></label>
           <label id="kind-blend" hidden><input type="radio" name="kind" value="blend"><span>Blend</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="field">
+        <legend>Size</legend>
+        <div class="seg" id="format">
+          <label><input type="radio" name="format" value="square" checked><span>Square 1:1</span></label>
+          <label><input type="radio" name="format" value="story"><span>Story 9:16</span></label>
         </div>
       </fieldset>
       <fieldset class="field">
@@ -166,7 +174,7 @@
       </div>
     </div>
     <div class="card-maker__preview">
-      <canvas id="card-canvas" width="2160" height="2700" aria-label="Preview of your Leonida card" role="img"></canvas>
+      <canvas id="card-canvas" width="2160" height="2160" aria-label="Preview of your Leonida card" role="img"></canvas>
     </div>
   </section>
 
@@ -295,34 +303,6 @@
     <p class="fine">Tips are voluntary gifts. They can't be refunded and don't buy anything: no in-game money, items or perks. Nothing here is a purchase.</p>
   </section>
 
-  <section class="unlock" id="unlock" aria-labelledby="unlock-title">
-    <h2 id="unlock-title">GTA 6 unlock times by country</h2>
-    <p class="section-lede">GTA VI unlocks at midnight local time on November 19, 2026, on PS5 and Xbox Series X|S. Your unlock follows your PlayStation or Xbox account’s region, not where you are, and changing the console clock does nothing. Times below are on your clock.</p>
-    <h3 class="markets__title">Main markets: USA, Canada and Europe</h3>
-    <ul class="clock markets">
-      <li><span class="place">USA and Canada</span><span class="when-wrap"><span class="when" data-at="2026-11-19T05:00:00Z">Midnight Eastern</span><span class="note">West Coast: 9 PM Pacific, November 18</span></span></li>
-      <li><span class="place">UK and Ireland</span><span class="when-wrap"><span class="when" data-at="2026-11-19T00:00:00Z">Midnight GMT</span><span class="note">London, Dublin</span></span></li>
-      <li><span class="place">Mainland Europe</span><span class="when-wrap"><span class="when" data-at="2026-11-18T23:00:00Z">Midnight CET</span><span class="note">Paris, Berlin, Madrid, Rome</span></span></li>
-      <li><span class="place">Australia</span><span class="when-wrap"><span class="when" data-at="2026-11-18T13:00:00Z">Midnight AEDT</span><span class="note">Sydney, Melbourne</span></span></li>
-      <li><span class="place">Japan and South Korea</span><span class="when-wrap"><span class="when" data-at="2026-11-18T15:00:00Z">Midnight JST</span><span class="note">Tokyo, Seoul</span></span></li>
-    </ul>
-    <h3 class="markets__title" id="clock-title">All listed windows</h3>
-    <p class="clock__out" id="clock-out"></p>
-    <ul class="clock" id="clock">
-      <li><span class="place">New Zealand</span><span class="when when--static">Midnight NZDT · 11:00 UTC, Nov 18</span></li>
-      <li><span class="place">Australia</span><span class="when when--static">Midnight AEDT · 13:00 UTC, Nov 18</span></li>
-      <li><span class="place">Japan, South Korea</span><span class="when when--static">Midnight JST / KST · 15:00 UTC, Nov 18</span></li>
-      <li><span class="place">Hong Kong, Malaysia, Singapore, Taiwan</span><span class="when when--static">Midnight local (UTC+8) · 16:00 UTC, Nov 18</span></li>
-      <li><span class="place">Indonesia</span><span class="when when--static">Midnight WIB · 17:00 UTC, Nov 18</span></li>
-      <li><span class="place">India</span><span class="when when--static">Midnight IST · 18:30 UTC, Nov 18</span></li>
-      <li><span class="place">UAE</span><span class="when when--static">Midnight GST · 20:00 UTC, Nov 18</span></li>
-      <li><span class="place">Mainland Europe</span><span class="when when--static">Midnight CET · 23:00 UTC, Nov 18</span></li>
-      <li><span class="place">UK and Ireland</span><span class="when when--static">Midnight GMT · 00:00 UTC, Nov 19</span></li>
-      <li><span class="place">USA and Canada</span><span class="when when--static">Midnight ET (9 PM PT, Nov 18) · 05:00 UTC, Nov 19</span></li>
-      <li><span class="place">Mexico, Central America</span><span class="when when--static">Midnight CST · 06:00 UTC, Nov 19</span></li>
-    </ul>
-    <p class="fine">From the PS5 PlayStation Store listings collected by GTAVice.net: 15 windows across 63 countries and regions, of which the main 11 are shown. The USA and Canada share one window at midnight Eastern, so the US West Coast plays from 9 PM Pacific on November 18. Rockstar says midnight local on both consoles, but Microsoft hasn't published per-country Xbox times.</p>
-  </section>
 
   <section class="regions" id="regions" aria-labelledby="regions-title">
     <h2 id="regions-title">GTA 6 map: the six regions of Leonida</h2>
@@ -339,15 +319,11 @@
 
   <section class="faq" aria-labelledby="faq-title">
     <h2 id="faq-title">Questions</h2>
-    <details><summary>How do I track my GTA 6 map progress?</summary><p>Tap each region of Leonida on the map as you go: passed through, explored, or done 100%. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session.</p></details>
+    <details><summary>How do I track my GTA 6 map progress?</summary><p>Tap each region of Leonida on the map as you go: passed through, explored, or finished. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session.</p></details>
     <details><summary>What is Leonida Wrapped?</summary><p>A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best Leonida Daily streak and the regions you finished. Pick it under Card, then share or download it.</p></details>
-    <details><summary>What time does GTA 6 unlock?</summary><p>GTA 6 unlocks at midnight local time on November 19, 2026, starting in New Zealand and ending in Mexico and Central America. On the PlayStation Store the USA and Canada share one unlock at midnight Eastern, so the US West Coast can play from 9 PM Pacific on November 18. The UK and Ireland unlock at midnight GMT and Mainland Europe at midnight CET. Your account region decides your unlock time.</p></details>
-    <details><summary>What time does GTA 6 unlock in the UK and Europe?</summary><p>On the PlayStation Store, the UK and Ireland unlock at midnight GMT on November 19, 2026, and Mainland Europe at midnight CET, which is 11 PM GMT on November 18.</p></details>
-    <details><summary>What time does GTA 6 unlock in Australia?</summary><p>Midnight AEDT on November 19, 2026, which is 1 PM UTC on November 18. Australia is one of the first regions to unlock, after New Zealand.</p></details>
-    <details><summary>Can I play GTA 6 early by changing my console clock?</summary><p>No. Your unlock follows your PlayStation or Xbox account region, not the clock on your console.</p></details>
     <details><summary>What are the regions of Leonida?</summary><p>Rockstar has named six: Vice City, the Leonida Keys, Grassrivers, Port Gellhorn, Ambrosia and Mount Kalaga National Park.</p></details>
     <details><summary>Is this the official GTA 6 map?</summary><p>No. It is our own simplified drawing of where the regions sit, made for the card. It is not Rockstar's map and not to scale.</p></details>
-    <details><summary>Does my map leave my phone?</summary><p>No. Your map is saved only in your browser and the card is drawn on your device. There is no sign-up and nothing is uploaded.</p></details>
+    <details><summary>Does my map leave my phone?</summary><p>Your name, map and card stay on your device. Nothing is uploaded, and there is no sign-up.</p></details>
     <details><summary>Do I get anything for a tip?</summary><p>No. Tips are voluntary gifts that pay for the domain and the time to build new tools. They cannot be refunded and give no in-game items.</p></details>
   </section>
 </main>
@@ -366,6 +342,5 @@
   <p class="foot__fine">Vice City Hub is an independent fan tool. Not affiliated with or endorsed by Rockstar Games or Take-Two Interactive. Grand Theft Auto and GTA are trademarks of Take-Two Interactive Software. No Rockstar artwork is used.</p>
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
-<noscript><p class="noscript">The map and card need JavaScript. Unlock times and region notes above work without it.</p></noscript>
 </body>
 </html>

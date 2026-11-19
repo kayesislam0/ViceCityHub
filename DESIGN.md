@@ -37,11 +37,10 @@ Rules: one accent. Neon marks the primary action and the live state. Surfaces st
 | Component | States | Notes |
 |---|---|---|
 | Button (`.btn`, `.btn--primary`) | default, hover, focus, disabled | Primary is neon with asphalt text. Secondary is raised with a hairline. |
-| Region step (`.steps button`) | off, pressed (`aria-pressed`), focus | Three steps: Passed, Explored, 100%. |
-| Market row (`.markets li`) | upcoming (muted dot), out (neon dot and neon time) | The dot and the time are set live from the visitor's clock. |
+| Region step (`.steps button`) | off, pressed (`aria-pressed`), focus | Three steps: Passed, Explored, Finished. |
 | Highway sign (`.sign`) | static | Region names. |
 | Tip card (`.way`) | static | Green sign, white QR on a white frame. |
-| Live line (`.live`) | static, live | A neon dot aligned to the first line. |
+| Live line (`.live`) | static | "GTA 6 is out." with a neon dot. |
 
 ## Motion
 
@@ -50,25 +49,31 @@ One curve and short durations: colour and border changes take .2s, the segmented
 ## Accessibility
 
 - Every interactive control has a visible focus ring.
-- Market state is shown by text, not only by colour (the time reads "Out since" or "In …").
+- Region state is shown by text under each name and in the list, not only by colour.
 - Touch targets are at least 44px. `tests/check.py` enforces this.
 
 ## Handoff: map and tools
 
 ### Map region levels
 
-| Level | Label | Fill | Edge | Label colour | Why |
-|---|---|---|---|---|---|
-| 0 | (none) | #26302B with a diagonal hatch (`#fog`) | asphalt 3px | chalk | Fog of war: unexplored |
-| 1 | Passed through | #3E2B40 dusk plum | asphalt 3px | chalk | First step, quiet |
-| 2 | Explored | #5E2F55 | neon 3px | chalk | Lit edge shows progress |
-| 3 | Done 100% | #7D3B62 deep berry | sun 3.5px | chalk name, sun level | Calm to look at over a large area; gold edge is the reward |
+Each region has its own colour: Vice City #FF5FA2 to #3FD6E8 (top to bottom), Leonida Keys #19B5A5, Grassrivers #3FAE5A,
+Port Gellhorn #C9A15B, Ambrosia #E8762C, Mount Kalaga #1F7A4D. A legend under the map shows the four states.
 
-Contrast: chalk on #7D3B62 is 6.9:1; sun on #7D3B62 is 4.8:1.
+| Level | Label | Fill | Edge | Extra |
+|---|---|---|---|---|
+| 0 | Not seen | #26302B | chalk at 28%, 1.5px (dim outline) | none |
+| 1 | Passed through | region colour at 50% | asphalt 3px | none |
+| 2 | Explored | region colour | asphalt 3px | glow in the region colour |
+| 3 | Finished | region colour | sun 5px | gold badge with a tick by the name |
 
-The share card draws the same map layers (stipple sea, coastal shelf, fog hatch on level 0, neon edge on level 2, gold edge on level 3, dotted route, compass) on a 1080 x 1350 canvas. Its labels are 30px Anton with a 6px dark outline so they read in a social feed. In the side list, a finished region's three dots are gold.
+Map labels are white Anton with a dark outline (`paint-order: stroke`), so they read on every region colour.
 
-Layers, bottom to top: sea, stipple, grid, coastal shelf, region shapes and fog, lake, route, labels, compass. Labels sit above the route and carry a 4px dark outline (`paint-order: stroke`) so the dotted route never cuts through text.
+### Card
+
+Two sizes: Square 1:1 (1080 x 1080) and Story 9:16 (1080 x 1920), painted at 2x. Order of weight: the % (largest, neon,
+soft glow), then the name, then the rank on a green highway sign. The map uses the same region colours and states.
+Every card ends with a neon band: "Make yours in 20 seconds" and vicecityhub.okenshop.com. Wrapped and Blend keep their
+1080 x 1350 layout, fitted and centred in the chosen size.
 
 ### Interactions
 
