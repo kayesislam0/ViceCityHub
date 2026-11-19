@@ -322,7 +322,21 @@ window.VCH_I18N = {
   "How do I track my GTA 6 map progress?": "¿Cómo registro mi progreso en el mapa de GTA 6?",
   "Tap each region of Leonida on the map as you go: passed through, explored, or done 100%. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session.": "Toca cada región de Leonida en el mapa a medida que avanzas: de paso, explorada o 100% completada. Tu porcentaje y tu rango se actualizan al momento y se guardan en tu navegador, así que puedes volver después de cada sesión.",
   "What is Leonida Wrapped?": "¿Qué es Leonida Wrapped?",
-  "A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best Leonida Daily streak and the regions you finished. Pick it under Card, then share or download it.": "Una tarjeta resumen de todo tu lanzamiento: cuánto de Leonida viste, tu rango final, tu mejor racha de Leonida Daily y las regiones que completaste. Elígela en Tarjeta y luego compártela o descárgala."
+  "A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best Leonida Daily streak and the regions you finished. Pick it under Card, then share or download it.": "Una tarjeta resumen de todo tu lanzamiento: cuánto de Leonida viste, tu rango final, tu mejor racha de Leonida Daily y las regiones que completaste. Elígela en Tarjeta y luego compártela o descárgala.",
+  "Make our Blend": "Hacer nuestro Blend",
+  "Blend": "Blend",
+  "Or copy your link: friends who open it can make a Blend with you": "O copia tu enlace: quien lo abra podrá hacer un Blend contigo",
+  "Our Leonida": "Nuestra Leonida",
+  "BLEND": "BLEND",
+  "of Leonida covered": "de Leonida cubierta",
+  "together": "entre los dos",
+  "map match": "de coincidencia",
+  "Dead even": "Empate total",
+  "{name} carried": "{name} llevó al equipo",
+  "Both of you": "Los dos",
+  "Blend with me:": "Haz un Blend conmigo:",
+  "Our Leonida Blend with {name}: {c}% covered together, {m}% match. Blend with me:": "Nuestro Blend de Leonida con {name}: {c}% cubierto entre los dos, {m}% de coincidencia. Haz un Blend conmigo:",
+  "Terms and privacy": "Términos y privacidad"
  },
  "pt": {
   "@title": "Rastreador do mapa do GTA 6, desafio diário e bingo | Vice City Hub",
@@ -645,6 +659,20 @@ window.VCH_I18N = {
   "How do I track my GTA 6 map progress?": "Como acompanho meu progresso no mapa do GTA 6?",
   "Tap each region of Leonida on the map as you go: passed through, explored, or done 100%. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session.": "Toque em cada região de Leonida no mapa conforme avança: de passagem, explorada ou 100% concluída. Sua porcentagem e seu nível atualizam na hora e ficam salvos no navegador, então você pode voltar depois de cada sessão.",
   "What is Leonida Wrapped?": "O que é o Leonida Wrapped?",
-  "A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best Leonida Daily streak and the regions you finished. Pick it under Card, then share or download it.": "Um card-resumo de todo o seu lançamento: quanto de Leonida você viu, seu nível final, sua melhor sequência no Leonida Daily e as regiões que concluiu. Escolha em Card e depois compartilhe ou baixe."
+  "A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best Leonida Daily streak and the regions you finished. Pick it under Card, then share or download it.": "Um card-resumo de todo o seu lançamento: quanto de Leonida você viu, seu nível final, sua melhor sequência no Leonida Daily e as regiões que concluiu. Escolha em Card e depois compartilhe ou baixe.",
+  "Make our Blend": "Fazer nosso Blend",
+  "Blend": "Blend",
+  "Or copy your link: friends who open it can make a Blend with you": "Ou copie seu link: quem abrir pode fazer um Blend com você",
+  "Our Leonida": "Nossa Leonida",
+  "BLEND": "BLEND",
+  "of Leonida covered": "de Leonida coberta",
+  "together": "juntos",
+  "map match": "de afinidade",
+  "Dead even": "Empate total",
+  "{name} carried": "{name} carregou o time",
+  "Both of you": "Vocês dois",
+  "Blend with me:": "Faça um Blend comigo:",
+  "Our Leonida Blend with {name}: {c}% covered together, {m}% match. Blend with me:": "Nosso Blend de Leonida com {name}: {c}% coberto juntos, {m}% de afinidade. Faça um Blend comigo:",
+  "Terms and privacy": "Termos e privacidade"
  }
 };

@@ -15,7 +15,7 @@ def static():
     for want in ['<link rel="canonical" href="https://vicecityhub.okenshop.com/">', BTC, BINANCE, '"@type":"FAQPage"', 'og:image']:
         if want not in html: out.append(f'index.html is missing {want}')
     if '<script>' in html: out.append('inline script (the security policy blocks it)')
-    for f in ['robots.txt', 'sitemap.xml', '404.html', 'hub/hub.js', 'hub/i18n.js', 'hub/hub.css', 'hub/img/og.png', 'hub/img/qr-btc.svg', 'hub/img/qr-binance.svg']:
+    for f in ['robots.txt', 'sitemap.xml', '404.html', 'legal.html', 'hub/hub.js', 'hub/i18n.js', 'hub/hub.css', 'hub/img/og.png', 'hub/img/qr-btc.svg', 'hub/img/qr-binance.svg']:
         if not (SITE / f).is_file(): out.append(f'{f} is missing')
     return out
 

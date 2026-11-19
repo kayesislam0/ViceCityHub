@@ -32,12 +32,13 @@ and challenge your crew with one link.
 |---|---|
 | **Map tracker** | Tap each of Leonida's six regions as you go: passed through, explored, done 100%. Your score and rank update live. |
 | **Map card** | One tap makes a 2160 × 2700 picture of your map to post. Three looks, an optional "Day one" stamp. |
+| **Leonida Blend** | Open a friend's link and make a Blend: both maps on one card, how much of Leonida you covered together, your map match, and who carried. |
 | **Crew challenge** | A link that carries your score. Friends who open it see you versus them, live. |
 | **Leonida Daily** | One small in-game task a day, the same for everyone, with a streak you can send to the group chat. |
 | **Leonida Wrapped** | A recap card of your whole launch run: final rank, best streak, regions finished. |
 | **Street name and bingo** | A Leonida street name from your gamer tag, and a day-one bingo board. |
 
-In English, Spanish and Portuguese. Everything runs in the visitor's browser. There is no sign-up, no server, no cookie banner because there are no cookies,
+In English, Spanish and Portuguese. [Terms and privacy](https://vicecityhub.okenshop.com/legal). Everything runs in the visitor's browser. There is no sign-up, no server, no cookie banner because there are no cookies,
 and no request to any other site.
 
 <p align="center">
