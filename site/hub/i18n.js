@@ -455,7 +455,11 @@ window.VCH_I18N = {
   "This browser is not keeping your progress. Copy your progress link to keep it.": "Este navegador no guarda tu progreso. Copia tu enlace de progreso para no perderlo.",
   "Progress link copied. Open it on any browser or phone to pick up where you left off.": "Enlace de progreso copiado. Ábrelo en cualquier navegador o móvil para seguir donde lo dejaste.",
   "Copy is blocked here. Bookmark this page after tapping again.": "Aquí no se puede copiar. Guarda esta página en marcadores.",
-  "Progress restored from your link.": "Progreso recuperado desde tu enlace."
+  "Progress restored from your link.": "Progreso recuperado desde tu enlace.",
+  "Add today's date stamp": "Añadir el sello con la fecha de hoy",
+  "Add today's stamp: {day}, {date}": "Añadir el sello de hoy: {day}, {date}",
+  "Day one": "Día uno",
+  "DAY {n}": "DÍA {n}"
  },
  "pt": {
   "@title": "Rastreador do mapa do GTA 6, desafio diário e bingo | Vice City Hub",
@@ -911,6 +915,10 @@ window.VCH_I18N = {
   "This browser is not keeping your progress. Copy your progress link to keep it.": "Este navegador não guarda seu progresso. Copie seu link de progresso para não perder.",
   "Progress link copied. Open it on any browser or phone to pick up where you left off.": "Link de progresso copiado. Abra em qualquer navegador ou celular para continuar de onde parou.",
   "Copy is blocked here. Bookmark this page after tapping again.": "Não dá para copiar aqui. Salve esta página nos favoritos.",
-  "Progress restored from your link.": "Progresso recuperado pelo seu link."
+  "Progress restored from your link.": "Progresso recuperado pelo seu link.",
+  "Add today's date stamp": "Adicionar o selo com a data de hoje",
+  "Add today's stamp: {day}, {date}": "Adicionar o selo de hoje: {day}, {date}",
+  "Day one": "Dia um",
+  "DAY {n}": "DIA {n}"
  }
 };

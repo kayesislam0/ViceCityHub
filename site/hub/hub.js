@@ -365,7 +365,7 @@
     tag: load('vch.tag', ''),
     platform: load('vch.platform', 'PS5'),
     theme: load('vch.theme', 'night'),
-    dayone: load('vch.dayone', Date.now() < Date.UTC(2026, 10, 22) ? '1' : '0') === '1',
+    dayone: load('vch.dayone', '1') === '1',
     useAlias: load('vch.useAlias', '0') === '1',
     aliasRoll: Number(load('vch.aliasRoll', '0')) || 0,
     // From 7 December the card opens on Wrapped, unless the visitor picked a card themselves.
@@ -401,6 +401,8 @@
       r.checked = r.value === settings.kind;
       r.addEventListener('change', function () { settings.kind = r.value; if (r.value !== 'blend') save('vch.kind', r.value); drawSoon(); });
     });
+    var dLabel = $('dayone').parentNode.querySelector('span');
+    dLabel.textContent = tr('Add today\'s stamp: {day}, {date}', { day: startDay() === 0 ? tr('Day one') : tr('Day {n}', { n: startDay() + 1 }), date: stampDate() });
     var d = $('dayone');
     d.checked = settings.dayone;
     d.addEventListener('change', function () { settings.dayone = d.checked; save('vch.dayone', d.checked ? '1' : '0'); drawSoon(); });
@@ -949,6 +951,16 @@
     ctx.fillText(tr('Blend with me:') + ' vicecityhub.okenshop.com', 64, H - 22);
   }
 
+  // The date stamp: today's date and the day count since launch (19 Nov 2026 = Day one), on the visitor's own clock.
+  function startDay() { return dayIndex(); }
+  function stampLabel() { var d = startDay(); return d === 0 ? tr('DAY ONE') : tr('DAY {n}', { n: d + 1 }); }
+  // Day-month-year in every language ("19 Nov 2026"), upper case on the stamp itself.
+  function stampDate(upper) {
+    var dt = new Date(), out;
+    try { out = new Intl.DateTimeFormat(LANG === 'en' ? 'en-GB' : LANG, { day: 'numeric', month: 'short', year: 'numeric' }).format(dt).replace(/\./g, ''); }
+    catch (e) { out = dt.toDateString().slice(4); }
+    return upper ? out.toUpperCase() : out;
+  }
   function stamp(ctx, x, y, T) {
     ctx.save();
     ctx.translate(x, y); ctx.rotate(-0.21);
@@ -956,9 +968,11 @@
     ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, 0, 92, 0, Math.PI * 2); ctx.stroke();
     ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 80, 0, Math.PI * 2); ctx.stroke();
     ctx.textAlign = 'center';
-    ctx.font = '400 48px Anton, sans-serif'; ctx.fillText(tr('DAY ONE'), 0, 12);
-    ctx.font = '600 20px "DM Sans", sans-serif'; ctx.fillText('19 NOV 2026', 0, 44);
-    ctx.fillText('LEONIDA', 0, -38);
+    var lab = stampLabel();
+    fitText(ctx, lab, 140, 48, '400 {s}px Anton, sans-serif'); ctx.fillText(lab, 0, 14);
+    var dt = stampDate(true);
+    fitText(ctx, dt, 120, 20, '600 {s}px "DM Sans", sans-serif'); ctx.fillText(dt, 0, 46);
+    ctx.font = '600 20px "DM Sans", sans-serif'; ctx.fillText(tr('LEONIDA'), 0, -38);
     ctx.restore();
   }
 
