@@ -1056,6 +1056,8 @@
       li.appendChild(a); li.appendChild(b); frag.appendChild(li);
     });
     ul.textContent = ''; ul.appendChild(frag);
+    // After the last window everything is out: the per-window list has nothing left to count down.
+    ul.hidden = now >= LAST; $('clock-title').hidden = now >= LAST;
     Array.prototype.forEach.call(document.querySelectorAll('.markets .when[data-at]'), function (el) {
       var t = Date.parse(el.getAttribute('data-at'));
       el.textContent = now >= t ? tr('Out since {t}', { t: fmtTime(t) }) : tr('In {d}', { d: fmtLeft(t - now) }) + ' · ' + fmtTime(t);

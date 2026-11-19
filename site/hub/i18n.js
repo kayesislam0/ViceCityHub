@@ -336,7 +336,10 @@ window.VCH_I18N = {
   "Both of you": "Los dos",
   "Blend with me:": "Haz un Blend conmigo:",
   "Our Leonida Blend with {name}: {c}% covered together, {m}% match. Blend with me:": "Nuestro Blend de Leonida con {name}: {c}% cubierto entre los dos, {m}% de coincidencia. Haz un Blend conmigo:",
-  "Terms and privacy": "Términos y privacidad"
+  "Terms and privacy": "Términos y privacidad",
+  "Source on GitHub": "Código en GitHub",
+  "Report a bug": "Informar de un fallo",
+  "More": "Más"
  },
  "pt": {
   "@title": "Rastreador do mapa do GTA 6, desafio diário e bingo | Vice City Hub",
@@ -673,6 +676,9 @@ window.VCH_I18N = {
   "Both of you": "Vocês dois",
   "Blend with me:": "Faça um Blend comigo:",
   "Our Leonida Blend with {name}: {c}% covered together, {m}% match. Blend with me:": "Nosso Blend de Leonida com {name}: {c}% coberto juntos, {m}% de afinidade. Faça um Blend comigo:",
-  "Terms and privacy": "Termos e privacidade"
+  "Terms and privacy": "Termos e privacidade",
+  "Source on GitHub": "Código no GitHub",
+  "Report a bug": "Relatar um bug",
+  "More": "Mais"
  }
 };

@@ -285,7 +285,7 @@
       <li><span class="place">Australia</span><span class="when-wrap"><span class="when" data-at="2026-11-18T13:00:00Z">Midnight AEDT</span><span class="note">Sydney, Melbourne</span></span></li>
       <li><span class="place">Japan and South Korea</span><span class="when-wrap"><span class="when" data-at="2026-11-18T15:00:00Z">Midnight JST</span><span class="note">Tokyo, Seoul</span></span></li>
     </ul>
-    <h3 class="markets__title">All listed windows</h3>
+    <h3 class="markets__title" id="clock-title">All listed windows</h3>
     <p class="clock__out" id="clock-out"></p>
     <ul class="clock" id="clock">
       <li><span class="place">New Zealand</span><span class="when when--static">Midnight NZDT · 11:00 UTC, Nov 18</span></li>
@@ -332,11 +332,17 @@
 </main>
 
 <footer class="foot">
-  <p>Vice City Hub is an independent fan tool. Not affiliated with or endorsed by Rockstar Games or Take-Two Interactive. Grand Theft Auto and GTA are trademarks of Take-Two Interactive Software. No Rockstar artwork is used.</p>
-  <p>Open source: <a href="/source" rel="noopener">fix a bug or suggest a tool on GitHub</a>.</p>
-  <p><a href="/legal">Terms and privacy</a></p>
-  <nav class="langs" aria-label="Language"><a href="?lang=en" data-lang="en" hreflang="en" lang="en">English</a><a href="?lang=es" data-lang="es" hreflang="es" lang="es">Español</a><a href="?lang=pt" data-lang="pt" hreflang="pt" lang="pt">Português</a></nav>
-  <p><button class="linklike" type="button" id="reset">Clear my map</button></p>
+  <div class="foot__top">
+    <a class="foot__brand" href="#tracker"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#0B6B3A"/><path d="M7 19.6a9 9 0 0 1 18 0z" fill="#FF5FA2"/><path d="M6.5 19.6h19v1.2h-19z" fill="#F4F1EA"/></svg><span>Vice City Hub</span></a>
+    <nav class="foot__links" aria-label="More">
+      <a href="/source" rel="noopener">Source on GitHub</a>
+      <a href="/report" rel="noopener">Report a bug</a>
+      <a href="/legal">Terms and privacy</a>
+      <button class="linklike" type="button" id="reset">Clear my map</button>
+    </nav>
+    <nav class="langs" aria-label="Language"><a href="?lang=en" data-lang="en" hreflang="en" lang="en">English</a><a href="?lang=es" data-lang="es" hreflang="es" lang="es">Español</a><a href="?lang=pt" data-lang="pt" hreflang="pt" lang="pt">Português</a></nav>
+  </div>
+  <p class="foot__fine">Vice City Hub is an independent fan tool. Not affiliated with or endorsed by Rockstar Games or Take-Two Interactive. Grand Theft Auto and GTA are trademarks of Take-Two Interactive Software. No Rockstar artwork is used.</p>
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <noscript><p class="noscript">The map and card need JavaScript. Unlock times and region notes above work without it.</p></noscript>
