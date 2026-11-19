@@ -2,6 +2,9 @@
    Loaded by hub.js only for Spanish and Portuguese visitors. */
 window.VCH_I18N = {
  "es": {
+  "Tap again to go deeper, or pick a level": "Toca otra vez para avanzar, o elige un nivel",
+  "Finished. Pick a level to change it": "Terminado. Elige un nivel para cambiarlo",
+  "Marked by mistake?": "¿Lo marcaste por error?",
   "Tap the regions you've seen to answer": "Toca las regiones que ya viste para responder",
   "Show the day on my card: {day}": "Mostrar el día en mi tarjeta: {day}",
   "Show the day on my card": "Mostrar el día en mi tarjeta",
@@ -583,6 +586,9 @@ window.VCH_I18N = {
   "DAY {n}": "DÍA {n}"
  },
  "pt": {
+  "Tap again to go deeper, or pick a level": "Toque de novo para avançar, ou escolha um nível",
+  "Finished. Pick a level to change it": "Terminado. Escolha um nível para mudar",
+  "Marked by mistake?": "Marcou por engano?",
   "Tap the regions you've seen to answer": "Toque nas regiões que você já viu para responder",
   "Show the day on my card: {day}": "Mostrar o dia no meu card: {day}",
   "Show the day on my card": "Mostrar o dia no meu card",

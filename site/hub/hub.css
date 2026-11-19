@@ -96,7 +96,7 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .region-row[data-level="1"], .region-row[data-level="2"], .region-row[data-level="3"] { border-color: rgba(255, 95, 162, .45); }
 .region-row__name { font-weight: 600; font-size: 16px; }
 .steps { display: flex; gap: 4px; }
-.steps button { appearance: none; border: 1px solid var(--line-strong); background: transparent; color: var(--chalk-2); font: 600 13px/1 var(--text);
+.steps button, .pick__steps button { appearance: none; border: 1px solid var(--line-strong); background: transparent; color: var(--chalk-2); font: 600 13px/1 var(--text);
   min-width: 44px; min-height: 44px; padding: 0 10px; border-radius: 8px; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
 @media (hover: hover) { .steps button:hover { border-color: var(--chalk); color: var(--chalk); } }
 .steps button[aria-pressed="true"] { background: var(--neon); border-color: var(--neon); color: var(--asphalt); }
@@ -522,3 +522,30 @@ details.list-toggle .regions-list { margin-top: 4px; }
 .challenge.is-winning .btn--primary { background: var(--asphalt); border-color: var(--asphalt); color: var(--chalk); }
 /* Narrow phones: the header keeps the two links that matter, so longer Spanish and Portuguese words still fit. */
 @media (max-width: 440px) { .top__more { display: none !important; } }
+
+/* Taps: no grey or blue flash box on phones, and a long press on the map or a game square never selects its text. */
+a, button, label, summary, .rg, .cell { -webkit-tap-highlight-color: transparent; }
+.map svg, .cell, .steps, .pick__steps, .seg, .btn, .week { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+/* Messages never block a tap on what is under them. */
+.toast { pointer-events: none; }
+
+/* The picker under the map: the region you just tapped, and every level one tap away. */
+.pick { margin-top: 12px; padding: 12px; border-radius: var(--r); background: var(--asphalt-2); border: 1px solid var(--line); display: grid; gap: 10px; }
+.pick__name { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding-inline: 4px; }
+.pick__name span:first-child { font: 400 22px/1.1 var(--display); }
+.pick__hint { color: var(--chalk-2); font-size: 14px; }
+.pick__steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.pick__steps button { min-width: 0; padding: 0 6px; }
+@media (hover: hover) { .pick__steps button:hover { border-color: var(--chalk); color: var(--chalk); } }
+.pick__steps button[aria-pressed="true"] { background: var(--neon); border-color: var(--neon); color: var(--asphalt); }
+.pick__steps button.is-reached { background: rgba(255, 95, 162, .16); border-color: rgba(255, 95, 162, .5); color: var(--chalk); }
+.pick__steps button[data-k="3"][aria-pressed="true"] { background: var(--sun); border-color: var(--sun); }
+.steps button[data-k="0"][aria-pressed="true"], .pick__steps button[data-k="0"][aria-pressed="true"] { background: var(--chalk); border-color: var(--chalk); color: var(--asphalt); }
+
+/* Region list: name above four equal options until there is room for one line. */
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 619px) { .region-row { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 12px; } .steps button { padding: 0 4px; } }
+.daily__undo { margin-top: 4px; color: var(--chalk-2); font-size: 14px; }
+.daily__undo .linklike { color: var(--chalk); }
+/* Desktop: the sticky map, its picker and its key all fit on one screen. */
+@media (min-width: 960px) { .map svg { max-height: calc(100vh - 320px); } }

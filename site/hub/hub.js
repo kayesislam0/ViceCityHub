@@ -73,7 +73,7 @@
                fill: ['#26302B', '#3E2B40', '#5E2F55', '#7D3B62'], onFull: '#0E1311', lake: '#10232A', darkFrom: 4, done: '#FFC35A', line: 'rgba(244,241,234,.14)', fog: 'rgba(244,241,234,.08)' },
     sunset:  { bg: '#2A0F22', bg2: '#5E1F2C', sea: '#3A1630', grid: 'rgba(255,214,170,.07)', ink: '#FFF3E4', ink2: '#F2C9B0', accent: '#FFC35A', edge: '#2A0F22',
                fill: ['#47243A', '#8A3A3E', '#D46A3C', '#FFC35A'], onFull: '#2A0F22', lake: '#3A1630', darkFrom: 3, done: '#FFF3E4', line: 'rgba(255,243,228,.16)', fog: 'rgba(255,214,170,.12)' },
-    highway: { bg: '#0B6B3A', bg2: '#0B6B3A', sea: '#063F22', grid: 'rgba(255,255,255,.07)', ink: '#FFFFFF', ink2: '#D6EEDF', accent: '#FFFFFF', edge: '#FFFFFF',
+    highway: { bg: '#0B6B3A', bg2: '#0B6B3A', sea: '#063F22', grid: 'rgba(255,255,255,.07)', ink: '#FFFFFF', ink2: '#D6EEDF', accent: '#FFFFFF', edge: '#FFFFFF', signBg: '#0E1311',
                fill: ['#0E5434', '#3E9A68', '#9FCDB2', '#FFFFFF'], onFull: '#0B6B3A', lake: '#063F22', darkFrom: 2, done: '#FFC35A', line: 'rgba(255,255,255,.2)', fog: 'rgba(255,255,255,.12)' }
   };
   // Dusk to deep berry: each step reads as progress, and a finished region is calm to look at, with a gold edge as the reward.
@@ -263,15 +263,36 @@
     Array.prototype.forEach.call(rows, function (li, i) {
       li.querySelectorAll('button').forEach(function (b) {
         var k = Number(b.dataset.k);
-        b.addEventListener('click', function () { setLevel(i, levels[i] === k ? k - 1 : k); });
+        b.addEventListener('click', function () { setLevel(i, k); });
       });
     });
   }
 
-  // A map tap goes one step deeper and stops at 100%, so a stray tap never wipes a finished region.
+  // A map tap goes one step deeper and stops at Finished, so a stray tap never wipes a region. Every tap also
+  // selects the region in the picker under the map, where any level (Not seen included) is one tap away.
+  var picked = -1;
   function deeper(i) {
-    if (levels[i] === 3) { toast(tr('{name} is already finished. To lower it, use the list.', { name: REGIONS[i].full })); return; }
-    setLevel(i, levels[i] + 1);
+    picked = i;
+    if (levels[i] < 3) setLevel(i, levels[i] + 1); else render();
+  }
+  function bindPick() {
+    $('pick').querySelectorAll('button').forEach(function (b) {
+      b.addEventListener('click', function () { if (picked >= 0) setLevel(picked, Number(b.dataset.k)); });
+    });
+  }
+  function renderPick() {
+    var box = $('pick'); if (!box) return;
+    box.hidden = picked < 0;
+    if (picked < 0) return;
+    var l = levels[picked];
+    $('pick-name').textContent = REGIONS[picked].full;
+    $('pick-hint').textContent = l === 3 ? tr('Finished. Pick a level to change it') : tr('Tap again to go deeper, or pick a level');
+    box.querySelectorAll('button').forEach(function (b) {
+      var k = Number(b.dataset.k);
+      b.setAttribute('aria-pressed', String(k === l));
+      b.classList.toggle('is-reached', k > 0 && k < l);
+      b.setAttribute('aria-label', REGIONS[picked].full + ': ' + tr(LEVELS[k] === 'Not yet' ? 'Not seen' : LEVELS[k]));
+    });
   }
 
   function setLevel(i, lvl) {
@@ -311,7 +332,7 @@
       for (var j = 0; j < bs.length; j++) {
         var k = Number(bs[j].dataset.k);
         bs[j].setAttribute('aria-pressed', String(k === levels[i]));
-        bs[j].classList.toggle('is-reached', k < levels[i]);
+        bs[j].classList.toggle('is-reached', k > 0 && k < levels[i]);
       }
     }
     $('pct').textContent = p;
@@ -325,6 +346,7 @@
     $('next-rank').textContent = next ? tr(next[0] - n === 1 ? '1 step to {rank}' : '{n} steps to {rank}', { n: next[0] - n, rank: tr(next[1]) }) : tr('Top rank reached.');
     updateChallenge();
     updateNextbar();
+    renderPick();
     drawSoon();
   }
 
@@ -627,9 +649,8 @@
     }
     var b = $('daily-done'), s = $('daily-copy');
     b.setAttribute('aria-pressed', String(done));
-    b.querySelector('span').textContent = done ? tr('Done today') : tr('I did it');
-    // Before: "I did it" leads. After: sharing the streak leads, and "Done today" stays as a quiet undo.
-    b.classList.toggle('btn--primary', !done); b.classList.toggle('btn--quiet', done);
+    // Before: "I did it" leads. After: it goes away, sharing the streak leads, and undo is a separate, labelled link.
+    b.hidden = done; $('daily-undo-line').hidden = !done;
     s.classList.toggle('btn--primary', done); s.classList.toggle('btn--quiet', !done);
     b.closest('.daily').classList.toggle('is-done', done);
   }
@@ -640,11 +661,20 @@
     return tr('Leonida daily dare') + ' · ' + tr('Day {n}', { n: d + 1 }) + ' · ' + (st ? tr('{n}-day streak', { n: st }) : tr('starting my streak')) + '\n' + cells + '\n' + tr('Today\'s dare:') + ' ' + SITE + '#tools';
   }
   function bindDaily() {
-    $('daily-done').addEventListener('click', function () {
-      var d = dayIndex(), k = dailyDone.indexOf(d);
-      if (k >= 0) dailyDone.splice(k, 1); else { dailyDone.push(d); buzz(); toast(streak() > 1 ? tr('{n}-day streak. Copy it for the chat.', { n: streak() }) : tr('Done. Come back tomorrow for the next one.')); }
+    // Focus only moves for keyboard users (a keyboard "click" has detail 0), so touch never shows a stray focus ring.
+    $('daily-done').addEventListener('click', function (e) {
+      var d = dayIndex();
+      if (dailyDone.indexOf(d) < 0) { dailyDone.push(d); buzz(); }
       save('vch.daily', dailyDone.join(','));
       renderDaily();
+      if (!e.detail) $('daily-copy').focus({ preventScroll: true });
+    });
+    $('daily-undo').addEventListener('click', function (e) {
+      var k = dailyDone.indexOf(dayIndex());
+      if (k >= 0) dailyDone.splice(k, 1);
+      save('vch.daily', dailyDone.join(','));
+      renderDaily();
+      if (!e.detail) $('daily-done').focus({ preventScroll: true });
     });
     $('daily-copy').addEventListener('click', function () {
       shareOrCopy(dailyText(), function (m) { $('daily-status').textContent = m; }, tr('Streak copied. Paste it in the group chat.'));
@@ -834,14 +864,29 @@
     ctx.fillStyle = T.done; ctx.font = '600 ' + size + 'px "DM Sans", sans-serif';
     ctx.fillText(tr('Backed the hub'), x, y);
   }
-  // Every card ends with a dare: what to do (large), then where (smaller). Readable at a third of its size in a feed.
+  // Every card ends on an exit sign, like the ones on Leonida's highways: what to do (large), then where. It sits
+  // inside the card's margins with the same white inset border as the rank sign, so it reads as part of the world,
+  // not as a banner pasted on. h is the space it takes from the bottom of the card.
   function dare(ctx, T, W, H, h, big) {
-    ctx.fillStyle = T.accent; ctx.fillRect(0, H - h, W, h);
-    ctx.fillStyle = T.onFull;
-    fitText(ctx, big, W - 128, Math.round(h * 0.42), '400 {s}px Anton, sans-serif');
-    ctx.fillText(big, 64, H - h * 0.46);
-    ctx.font = '600 ' + Math.round(h * 0.24) + 'px "DM Sans", sans-serif';
-    ctx.fillText('vicecityhub.okenshop.com', 64, H - h * 0.16);
+    var m = 40, x = m, y = H - h, w = W - m * 2, sh = h - m, r = 16;
+    var green = T.signBg || '#0B6B3A';
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 24; ctx.shadowOffsetY = 8;
+    roundRect(ctx, x, y, w, sh, r); ctx.fillStyle = green; ctx.fill();
+    ctx.restore();
+    roundRect(ctx, x + 7, y + 7, w - 14, sh - 14, r - 6); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3; ctx.stroke();
+    // The exit arrow, top right, pointing up and to the right.
+    var a = sh * 0.36, ax = x + w - 36 - a, ay = y + (sh - a) / 2;
+    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = Math.max(6, sh * 0.075); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(ax, ay + a); ctx.lineTo(ax + a, ay); ctx.moveTo(ax + a * 0.35, ay); ctx.lineTo(ax + a, ay); ctx.lineTo(ax + a, ay + a * 0.65); ctx.stroke();
+    ctx.lineCap = 'butt';
+    var tx = x + 36, tw = w - 36 - (a + 72);
+    ctx.fillStyle = '#FFFFFF';
+    fitText(ctx, big, tw, Math.round(sh * 0.4), '400 {s}px Anton, sans-serif');
+    ctx.fillText(big, tx, y + sh * 0.52);
+    ctx.fillStyle = '#E3F2E8';
+    fitText(ctx, 'vicecityhub.okenshop.com', tw, Math.round(sh * 0.22), '600 {s}px "DM Sans", sans-serif');
+    ctx.fillText('vicecityhub.okenshop.com', tx, y + sh * 0.8);
   }
   function mapDare(p) {
     return p === 0 ? tr('How much have you seen?') : p === 100 ? tr('100%. Can you match it?') : tr('Can you beat {n}%?', { n: p });
@@ -891,9 +936,9 @@
     ctx.fillText(tr('of Leonida seen'), 64, 642);
     rankSign(ctx, T, rank(n), 64, 676, 48);
     ctx.fillStyle = T.ink; ctx.font = '600 36px "DM Sans", sans-serif';
-    wrapText(ctx, verdict(), 64, 820, 460, 44, 2);
+    wrapText(ctx, verdict(), 64, 808, 460, 44, 2);
     drawMap(ctx, T, 548, 172, 0.82, null, { labels: true });
-    dare(ctx, T, W, H, 156, mapDare(p));
+    dare(ctx, T, W, H, 172, mapDare(p));
   }
   function drawStory(ctx, T, W, H) {
     var n = steps(), p = pctOf(n);
@@ -907,8 +952,8 @@
     rankSign(ctx, T, rank(n), 64, 876, 58);
     ctx.fillStyle = T.ink; ctx.font = '600 44px "DM Sans", sans-serif';
     wrapText(ctx, verdict(), 64, 1036, 952, 54, 2);
-    var sc = 0.86; drawMap(ctx, T, (W - 600 * sc) / 2, 1086, sc, null, { labels: true });
-    dare(ctx, T, W, H, 190, mapDare(p));
+    var sc = 0.82; drawMap(ctx, T, (W - 600 * sc) / 2, 1080, sc, null, { labels: true });
+    dare(ctx, T, W, H, 210, mapDare(p));
   }
 
   // The map as drawn on the cards, at (x, y) and scale sc of its 600 x 740 layout. No frame: the state itself is the picture.
@@ -1018,9 +1063,9 @@
     ctx.fillText(tr('of Leonida seen'), 64, 614);
     rankSign(ctx, T, rank(n), 64, 646, 46);
     drawMap(ctx, T, 596, 316, 0.62);
-    ctx.fillStyle = T.line; ctx.fillRect(64, 766, W - 128, 2);
-    wrappedStats().forEach(function (st, k) { statCell(ctx, T, st, 64 + k * 238, 856, 238, 72, 30); });
-    dare(ctx, T, W, H, 124, tr('Get your Leonida Wrapped'));
+    ctx.fillStyle = T.line; ctx.fillRect(64, 746, W - 128, 2);
+    wrappedStats().forEach(function (st, k) { statCell(ctx, T, st, 64 + k * 238, 830, 238, 72, 30); });
+    dare(ctx, T, W, H, 156, tr('Get your Leonida Wrapped'));
   }
   function drawWrappedStory(ctx, T, W, H) {
     var n = steps(), p = pctOf(n);
@@ -1034,7 +1079,7 @@
     drawMap(ctx, T, 600, 470, 0.72);
     ctx.fillStyle = T.line; ctx.fillRect(64, 1060, W - 128, 2);
     wrappedStats().forEach(function (st, k) { statCell(ctx, T, st, 64 + (k % 2) * 476, 1230 + Math.floor(k / 2) * 250, 476, 140, 42); });
-    dare(ctx, T, W, H, 190, tr('Get your Leonida Wrapped'));
+    dare(ctx, T, W, H, 210, tr('Get your Leonida Wrapped'));
   }
 
   // Leonida Blend: your map and a friend's (from their challenge link) on one card. Pink is you, gold is them,
@@ -1078,8 +1123,8 @@
     ctx.fillStyle = T.ink; ctx.font = '400 72px Anton, sans-serif'; ctx.fillText(st.match + '%', x - 2, 664);
     ctx.fillStyle = T.ink2; ctx.font = '600 34px "DM Sans", sans-serif'; ctx.fillText(tr('map match'), x, 706);
     ctx.fillStyle = T.accent; fitText(ctx, blendCarry(st), 420, 56, '400 {s}px Anton, sans-serif'); ctx.fillText(blendCarry(st), x, 786);
-    blendKey(ctx, T, x, 846, 44, 30, false);
-    dare(ctx, T, W, H, 124, tr('Blend with me'));
+    blendKey(ctx, T, x, 830, 40, 30, false);
+    dare(ctx, T, W, H, 156, tr('Blend with me'));
   }
   function drawBlendStory(ctx, T, W, H) {
     var st = blendStats();
@@ -1091,7 +1136,7 @@
     statCell(ctx, T, [st.cover + '%', tr('covered together')], 64, 1410, 476, 140, 42);
     statCell(ctx, T, [st.match + '%', tr('map match')], 540, 1410, 476, 140, 42);
     ctx.fillStyle = T.accent; fitText(ctx, blendCarry(st), W - 128, 96, '400 {s}px Anton, sans-serif'); ctx.fillText(blendCarry(st), 62, 1620);
-    dare(ctx, T, W, H, 190, tr('Blend with me'));
+    dare(ctx, T, W, H, 210, tr('Blend with me'));
   }
 
   // The day count since launch (19 Nov 2026 = Day one), on the visitor's own clock.
@@ -1224,7 +1269,7 @@
   function start() {
     translatePage(); bindLang(); bindSaveLine();
     if (!$('map')) { bindCheats(); return; } // the cheat code page has only the cheat list
-    buildMap(); bindList(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge();
+    buildMap(); bindList(); bindPick(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge();
     if (steps() > 0) touched = true;
     buildBingo(); renderDaily(); renderTipped(); renderAlias(); render();
     document.addEventListener('visibilitychange', function () { if (!document.hidden) renderDaily(); });
@@ -1232,7 +1277,7 @@
     var cv = $('card-canvas');
     if ('IntersectionObserver' in window) {
       // Away while you are still using the map, so the bar never covers a region you want to tap.
-      new IntersectionObserver(function (es) { mapOnScreen = es[0].intersectionRatio > 0.25; updateNextbar(); }, { threshold: [0, 0.25, 0.5] }).observe($('map-wrap'));
+      new IntersectionObserver(function (es) { mapOnScreen = es[0].isIntersecting; updateNextbar(); }, { threshold: 0 }).observe($('map-wrap'));
       // Away once the card is on screen or already scrolled past, so the bar never covers the tools, tips or footer.
       new IntersectionObserver(function (es) { var e = es[0]; cardOnScreen = e.isIntersecting || e.boundingClientRect.top < 0; updateNextbar(); }, { threshold: 0.15 }).observe($('card'));
       new IntersectionObserver(function (es) {
