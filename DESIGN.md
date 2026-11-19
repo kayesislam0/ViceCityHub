@@ -56,19 +56,29 @@ One curve and short durations: colour and border changes take .2s, the segmented
 
 ## Handoff: map and tools
 
-### Map region levels
+### Map region levels and colour schemes
 
-Each region has its own colour: Vice City #FF5FA2 to #3FD6E8 (top to bottom), Leonida Keys #19B5A5, Grassrivers #3FAE5A,
-Port Gellhorn #C9A15B, Ambrosia #E8762C, Mount Kalaga #1F7A4D. A legend under the map shows the four states.
+Colour on the map means progress, nothing else. Region names say which region is which; the fill says how far you got.
 
-| Level | Label | Fill | Edge | Extra |
-|---|---|---|---|---|
-| 0 | Not seen | #26302B | chalk at 28%, 1.5px (dim outline) | none |
-| 1 | Passed through | region colour at 50% | asphalt 3px | none |
-| 2 | Explored | region colour | asphalt 3px | glow in the region colour |
-| 3 | Finished | region colour | sun 5px | gold badge with a tick by the name |
+| Level | Label (short word under the name) | Fill | Name colour |
+|---|---|---|---|
+| 0 | none ("Tap to start" on Vice City at 0%) | Fog: fine diagonal lines | Light, thin dark outline |
+| 1 | Passed | The accent at 35% over the background | Light |
+| 2 | Explored | The accent | Dark |
+| 3 | Finished, with a tick in front | Gold #FFC35A | Dark |
 
-Map labels are white Anton with a dark outline (`paint-order: stroke`), so they read on every region colour.
+No glows and no per-region colours. The Keys label sits on the sea, so it stays light. Labels sit at each region's
+roomiest spot (computed from the shapes), names in Anton 24, levels in DM Sans 600 15.
+
+Three colour schemes, picked under the map or in the card's Colours option (kept in step). Gold is Finished in all three.
+
+| Scheme | Accent | Background | Why |
+|---|---|---|---|
+| Neon night (default) | #FF5FA2 | #0E1311 | Pink reads as positive and energising, and against near-black it is the most eye-catching colour here; it is also Vice City's nightlife colour |
+| Golden hour | #FF6B5B | #2A0F22 | Warm coral: positive, high-energy, a Leonida sunset |
+| Ocean drive | #3FD6E8 | #08151F | Cyan: positive and calm; blue against gold is the pair colour-blind players tell apart best |
+
+Text on the accent and on gold is the scheme's dark background colour (6:1 or more).
 
 ### Card
 

@@ -117,10 +117,16 @@ async def run(b, w, mob):
 
     # Card options: every radio and checkbox, on and off.
     await pg.evaluate("document.querySelector('details.more').open = true")
-    for name, vals in [('format', ['story', 'square']), ('kind', ['wrapped', 'map']), ('platform', ['Xbox Series', 'PS5']), ('theme', ['sunset', 'highway', 'night'])]:
+    for name, vals in [('format', ['story', 'square']), ('kind', ['wrapped', 'map']), ('platform', ['Xbox Series', 'PS5']), ('theme', ['sunset', 'ocean', 'night'])]:
         for v in vals:
             await tap_el(pg, mob, f'input[name="{name}"][value="{v}"]')
             check(await pg.evaluate(f"document.querySelector('input[name=\"{name}\"][value=\"{v}\"]').checked"), f'{tag} card option {name}={v}')
+    # Map colours under the map: every scheme paints the map and stays in step with the card's Colours option.
+    for v, accent in [('ocean', '#3FD6E8'), ('sunset', '#FF6B5B'), ('night', '#FF5FA2')]:
+        await tap_el(pg, mob, f'input[name="map-theme"][value="{v}"]')
+        got = await pg.evaluate("getComputedStyle(document.getElementById('map-wrap')).getPropertyValue('--m-accent').trim()")
+        check(got.upper() == accent, f'{tag} map colours {v}: accent {got}')
+        check(await pg.evaluate(f"document.querySelector('input[name=\"theme\"][value=\"{v}\"]').checked"), f'{tag} map colours {v} not in step with the card')
     for cb in ['#dayone', '#use-alias']:
         for want in [True, False]:
             await tap_el(pg, mob, cb)

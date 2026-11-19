@@ -2,6 +2,10 @@
    Loaded by hub.js only for Spanish and Portuguese visitors. */
 window.VCH_I18N = {
  "es": {
+  "Golden hour": "Hora dorada",
+  "Ocean drive": "Ocean Drive",
+  "Map colours": "Colores del mapa",
+  "Colours": "Colores",
   "Ahead in {a} of 6 regions. Catch up in {list}": "Vas por delante en {a} de 6 regiones. Ponte al día en {list}",
   "Level with or ahead of {name} in every region": "Igual o por delante de {name} en todas las regiones",
   "{k} of {m} ticked": "{k} de {m} marcadas",
@@ -605,6 +609,10 @@ window.VCH_I18N = {
   "DAY {n}": "DÍA {n}"
  },
  "pt": {
+  "Golden hour": "Hora dourada",
+  "Ocean drive": "Ocean Drive",
+  "Map colours": "Cores do mapa",
+  "Colours": "Cores",
   "Ahead in {a} of 6 regions. Catch up in {list}": "Na frente em {a} de 6 regiões. Recupere em {list}",
   "Level with or ahead of {name} in every region": "Empatado ou na frente de {name} em todas as regiões",
   "{k} of {m} ticked": "{k} de {m} marcadas",
