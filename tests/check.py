@@ -15,7 +15,7 @@ def static():
     for want in ['<link rel="canonical" href="https://vicecityhub.okenshop.com/">', BTC, BINANCE, '"@type":"FAQPage"', 'og:image']:
         if want not in html: out.append(f'index.html is missing {want}')
     if '<script>' in html: out.append('inline script (the security policy blocks it)')
-    for f in ['robots.txt', 'sitemap.xml', '404.html', 'hub/hub.js', 'hub/hub.css', 'hub/img/og.png', 'hub/img/qr-btc.svg', 'hub/img/qr-binance.svg']:
+    for f in ['robots.txt', 'sitemap.xml', '404.html', 'hub/hub.js', 'hub/i18n.js', 'hub/hub.css', 'hub/img/og.png', 'hub/img/qr-btc.svg', 'hub/img/qr-binance.svg']:
         if not (SITE / f).is_file(): out.append(f'{f} is missing')
     return out
 
@@ -46,6 +46,17 @@ async def browser():
             await pg.evaluate("document.getElementById('card-canvas').scrollIntoView()"); await pg.wait_for_timeout(500)
             if not await pg.evaluate("document.getElementById('card-canvas').toDataURL('image/png').length > 50000"): out.append(f'{w}px: the card did not paint')
             out += [f'{w}px: script error {e}' for e in errors]
+            await ctx.close()
+        # Spanish and Portuguese run longer than English: no script errors, no sideways scrolling, text translated.
+        for lang, word in [('es', 'Herramientas'), ('pt', 'Ferramentas')]:
+            ctx = await b.new_context(viewport={'width': 320, 'height': 780}, has_touch=True, is_mobile=True)
+            pg = await ctx.new_page(); errors = []
+            pg.on('pageerror', lambda e: errors.append(str(e)))
+            await pg.goto(base + '?lang=' + lang); await pg.wait_for_timeout(300)
+            if await pg.evaluate('document.documentElement.scrollWidth > innerWidth'): out.append(f'{lang}: sideways scrolling')
+            if word not in await pg.evaluate('document.body.textContent'): out.append(f'{lang}: page not translated')
+            if await pg.evaluate('document.documentElement.lang') != lang: out.append(f'{lang}: html lang not set')
+            out += [f'{lang}: script error {e}' for e in errors]
             await ctx.close()
         await b.close()
     httpd.shutdown()

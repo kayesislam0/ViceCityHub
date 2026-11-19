@@ -19,9 +19,11 @@ and challenge your crew with one link.
 </div>
 
 <p align="center">
-  <img src="docs/img/card.png" width="360" alt="A Leonida map card: 72% of Leonida seen, rank Kingpin, each region marked by how far the player got">
+  <img src="docs/img/card.png" width="300" alt="A Leonida map card: 72% of Leonida seen, rank Kingpin, each region marked by how far the player got">
   &nbsp;&nbsp;
-  <img src="docs/img/phone-tracker.png" width="300" alt="The tracker on a phone: the Leonida map with explored regions lit in pink and finished ones edged in gold">
+  <img src="docs/img/wrapped.png" width="300" alt="A Leonida Wrapped card: 72% seen, final rank Kingpin, best daily streak, daily tasks done and regions at 100%">
+  &nbsp;&nbsp;
+  <img src="docs/img/phone-tracker.png" width="260" alt="The tracker on a phone: the Leonida map with explored regions lit in pink and finished ones edged in gold">
 </p>
 
 ## What it does
@@ -31,10 +33,11 @@ and challenge your crew with one link.
 | **Map tracker** | Tap each of Leonida's six regions as you go: passed through, explored, done 100%. Your score and rank update live. |
 | **Map card** | One tap makes a 2160 × 2700 picture of your map to post. Three looks, an optional "Day one" stamp. |
 | **Crew challenge** | A link that carries your score. Friends who open it see you versus them, live. |
-| **Leonida Daily** | One small in-game task a day, the same for everyone, with a streak you can paste in the group chat. |
+| **Leonida Daily** | One small in-game task a day, the same for everyone, with a streak you can send to the group chat. |
+| **Leonida Wrapped** | A recap card of your whole launch run: final rank, best streak, regions finished. |
 | **Street name and bingo** | A Leonida street name from your gamer tag, and a day-one bingo board. |
 
-Everything runs in the visitor's browser. There is no sign-up, no server, no cookie banner because there are no cookies,
+In English, Spanish and Portuguese. Everything runs in the visitor's browser. There is no sign-up, no server, no cookie banner because there are no cookies,
 and no request to any other site.
 
 <p align="center">
@@ -80,7 +83,8 @@ big enough to tap, the map card draws, and the tip details are exact.
 site/
   index.html        The page: text, sections, FAQ and search-engine data
   404.html          The "wrong turn" page
-  hub/hub.js        The map, scoring, card, challenge link, daily task, street name, bingo
+  hub/hub.js        The map, scoring, cards, challenge link, daily task, street name, bingo
+  hub/i18n.js       Spanish and Portuguese text
   hub/hub.css       All styles (see DESIGN.md for the design system)
   hub/fonts/        Anton and DM Sans, subset to Latin (SIL Open Font License)
   hub/img/          Icon, sharing image, tip QR codes
@@ -93,6 +97,7 @@ DESIGN.md           Colours, type, spacing and components
 |---|---|
 | Regions, map shapes, ranks, card looks | `REGIONS`, `RANKS`, `THEMES` in `site/hub/hub.js` |
 | Daily tasks | `DAILY` in `site/hub/hub.js` |
+| Translations | `site/hub/i18n.js` (keyed by the English text; add a language by adding an object) |
 | Street-name words, bingo prompts | `ALIAS_FIRST`, `ALIAS_TITLE`, `ALIAS_KNOWN`, `BINGO` in `site/hub/hub.js` |
 | Title, description, FAQ | `site/index.html` (keep the FAQ data in the head identical to the visible answers) |
 

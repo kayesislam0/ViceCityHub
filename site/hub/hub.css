@@ -299,3 +299,8 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .tipped { margin-top: 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
 .tipped__msg { color: var(--chalk-2); font-size: 14px; max-width: 52ch; }
 .tipped .btn[aria-pressed="true"] { background: var(--sun); border-color: var(--sun); color: var(--asphalt); }
+
+.langs { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 12px; }
+.langs a { display: inline-flex; align-items: center; min-height: 44px; color: var(--chalk-2); text-decoration: none; }
+.langs a[aria-current="true"] { color: var(--chalk); font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+@media (hover: hover) { .langs a:hover { color: var(--chalk); } }
