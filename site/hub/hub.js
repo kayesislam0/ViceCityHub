@@ -601,11 +601,12 @@
     function apply() {
       var q = norm($('cheat-q').value.trim()), known = $('cheat-known').checked, shown = 0;
       rows.forEach(function (tr_) {
-        var ok = (cat === 'all' || tr_.dataset.cat === cat) && (!known || tr_.hasAttribute('data-code')) &&
+        var ok = (cat === 'all' || tr_.dataset.cat === cat) && (!known || q || tr_.hasAttribute('data-code')) &&
           (!q || norm(tr_.textContent).indexOf(q) >= 0);
         tr_.hidden = !ok; if (ok) shown++;
       });
       $('cheat-empty').hidden = shown > 0;
+      $('cheat-more').hidden = !known || !!q;
     }
     rows.forEach(function (tr_) {
       var box = tr_.querySelector('input'), id = tr_.dataset.id;
@@ -621,6 +622,7 @@
     });
     $('cheat-q').addEventListener('input', apply);
     $('cheat-known').addEventListener('change', apply);
+    $('cheat-more').addEventListener('click', function () { $('cheat-known').checked = false; apply(); });
     document.querySelectorAll('.chips .chip').forEach(function (b) {
       b.addEventListener('click', function () {
         cat = b.dataset.cat;

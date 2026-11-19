@@ -366,7 +366,7 @@ kbd { display: inline-grid; place-items: center; min-width: 30px; height: 30px; 
 .got input { width: 22px; height: 22px; accent-color: var(--sun); }
 .is-got .got { color: var(--sun); }
 .cheat-empty { padding: 24px 16px; color: var(--chalk-2); }
-@media (max-width: 760px) {
+@media (max-width: 960px) {
   .cheat-table thead { display: none; }
   .cheat-table tbody tr { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; padding: 14px 16px; }
   .cheat-table th[scope="row"], .cheat-table td { padding: 0; white-space: normal; }
@@ -379,10 +379,12 @@ kbd { display: inline-grid; place-items: center; min-width: 30px; height: 30px; 
 }
 .field input[type="search"] { -webkit-appearance: none; appearance: none; }
 .cheat-tools .check { flex: 0 1 auto; }
-@media (min-width: 761px) {
+@media (min-width: 961px) {
   .c-code { white-space: nowrap; }
   .keys { flex-wrap: nowrap; }
 }
 .cheat-tools .chips { flex: 1 1 100%; order: 2; }
 .cheat-tools .check { order: 3; }
 .cheat-tools .cheat-count { order: 4; }
+.cheat-more { margin-top: 12px; }
+.tbc { font-style: normal; }
