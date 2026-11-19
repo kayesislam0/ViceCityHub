@@ -86,6 +86,29 @@
   function load(key, fallback) { try { var v = localStorage.getItem(key); return v === null ? fallback : v; } catch (e) { return fallback; } }
   function save(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* nothing to do */ } }
 
+  // ---- keeping progress: ask the browser to keep this site's storage, restore from a progress link, warn when it won't stick ----
+  var storageWorks = (function () { try { localStorage.setItem('vch.t', '1'); localStorage.removeItem('vch.t'); return true; } catch (e) { return false; } })();
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { /* not supported */ }
+  // In-app browsers (Instagram, Facebook, TikTok, Snapchat...) often throw away site data when you close them.
+  var inApp = /FBAN|FBAV|FB_IAB|Instagram|Messenger|Line\/|TikTok|musical_ly|Snapchat|Twitter|Pinterest|; wv\)/i.test(navigator.userAgent || '');
+  function progressCode() {
+    var o = {};
+    try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k.indexOf('vch.') === 0) o[k] = localStorage.getItem(k); } } catch (e) { /* blocked */ }
+    return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function progressLink() { return location.origin + location.pathname + '#p=' + progressCode(); }
+  // Opening a progress link (#p=...) copies that progress into this browser, then tidies the address.
+  var restored = (function () {
+    var m = /#p=([A-Za-z0-9_-]+)/.exec(location.hash || '');
+    if (!m) return false;
+    try {
+      var o = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, '+').replace(/_/g, '/')))));
+      Object.keys(o).forEach(function (k) { if (/^vch\.[a-zA-Z]+$/.test(k) && typeof o[k] === 'string' && o[k].length < 400) save(k, o[k]); });
+      history.replaceState(null, '', location.pathname + location.search);
+      return true;
+    } catch (e) { return false; }
+  })();
+
   var levels = (function () {
     var s = load('vch.map', '000000');
     return /^[0-3]{6}$/.test(s) ? s.split('').map(Number) : [0, 0, 0, 0, 0, 0];
@@ -635,6 +658,23 @@
     count(); apply();
   }
 
+  // ---- the "saved" line: reassure, and offer a progress link that works in any browser ----
+  function bindSaveLine() {
+    document.querySelectorAll('[data-saveline]').forEach(function (line) {
+      var note = line.querySelector('.saveline__note'), btn = line.querySelector('button');
+      if (!storageWorks || inApp) {
+        line.classList.add('is-warn');
+        note.textContent = inApp ? tr('This in-app browser may forget your progress. Copy your progress link, or open the hub in Safari or Chrome.')
+          : tr('This browser is not keeping your progress. Copy your progress link to keep it.');
+      }
+      btn.addEventListener('click', function () {
+        copy(progressLink()).then(function () { toast(tr('Progress link copied. Open it on any browser or phone to pick up where you left off.')); },
+          function () { toast(tr('Copy is blocked here. Bookmark this page after tapping again.')); location.hash = 'p=' + progressCode(); });
+      });
+    });
+    if (restored) toast(tr('Progress restored from your link.'));
+  }
+
   // ---- the card (1080 x 1350), drawn only near the screen or when exported ----
   var pending = false, cardVisible = false, cardDirty = true;
   function drawSoon() {
@@ -1117,7 +1157,7 @@
 
   // ---- start ----
   function start() {
-    translatePage(); bindLang();
+    translatePage(); bindLang(); bindSaveLine();
     if (!$('map')) { bindCheats(); return; } // the cheat code page has only the cheat list
     buildMap(); bindList(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge();
     buildBingo(); renderDaily(); renderTipped(); renderAlias(); render(); tick();

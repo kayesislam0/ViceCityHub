@@ -448,7 +448,14 @@ window.VCH_I18N = {
   "Track how much of Leonida you have seen, make a Blend with a friend, and get your Wrapped card. Free, no sign-up.": "Registra cuánto de Leonida has visto, haz un Blend con un amigo y consigue tu tarjeta Wrapped. Gratis y sin registro.",
   "Open the map tracker": "Abrir el rastreador del mapa",
   "Leonida map tracker": "Rastreador del mapa de Leonida",
-  "/ Cheat codes": "/ Trucos"
+  "/ Cheat codes": "/ Trucos",
+  "Saved on this device as you go.": "Se guarda en este dispositivo mientras juegas.",
+  "Copy my progress link": "Copiar mi enlace de progreso",
+  "This in-app browser may forget your progress. Copy your progress link, or open the hub in Safari or Chrome.": "Este navegador dentro de la app puede olvidar tu progreso. Copia tu enlace de progreso o abre el hub en Safari o Chrome.",
+  "This browser is not keeping your progress. Copy your progress link to keep it.": "Este navegador no guarda tu progreso. Copia tu enlace de progreso para no perderlo.",
+  "Progress link copied. Open it on any browser or phone to pick up where you left off.": "Enlace de progreso copiado. Ábrelo en cualquier navegador o móvil para seguir donde lo dejaste.",
+  "Copy is blocked here. Bookmark this page after tapping again.": "Aquí no se puede copiar. Guarda esta página en marcadores.",
+  "Progress restored from your link.": "Progreso recuperado desde tu enlace."
  },
  "pt": {
   "@title": "Rastreador do mapa do GTA 6, desafio diário e bingo | Vice City Hub",
@@ -897,6 +904,13 @@ window.VCH_I18N = {
   "Track how much of Leonida you have seen, make a Blend with a friend, and get your Wrapped card. Free, no sign-up.": "Acompanhe quanto de Leonida você já viu, faça um Blend com um amigo e pegue seu card Wrapped. Grátis e sem cadastro.",
   "Open the map tracker": "Abrir o rastreador do mapa",
   "Leonida map tracker": "Rastreador do mapa de Leonida",
-  "/ Cheat codes": "/ Cheats"
+  "/ Cheat codes": "/ Cheats",
+  "Saved on this device as you go.": "Fica salvo neste aparelho enquanto você joga.",
+  "Copy my progress link": "Copiar meu link de progresso",
+  "This in-app browser may forget your progress. Copy your progress link, or open the hub in Safari or Chrome.": "Este navegador dentro do app pode esquecer seu progresso. Copie seu link de progresso ou abra o hub no Safari ou Chrome.",
+  "This browser is not keeping your progress. Copy your progress link to keep it.": "Este navegador não guarda seu progresso. Copie seu link de progresso para não perder.",
+  "Progress link copied. Open it on any browser or phone to pick up where you left off.": "Link de progresso copiado. Abra em qualquer navegador ou celular para continuar de onde parou.",
+  "Copy is blocked here. Bookmark this page after tapping again.": "Não dá para copiar aqui. Salve esta página nos favoritos.",
+  "Progress restored from your link.": "Progresso recuperado pelo seu link."
  }
 };

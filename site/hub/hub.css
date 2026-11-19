@@ -431,3 +431,9 @@ p.cheat-more { margin-top: 16px; }
   .top__nav .top__tip { padding-inline: 12px; }
   .top__tip svg { width: 22px; height: 22px; }
 }
+
+.saveline { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 14px; font-size: 14px; color: var(--chalk-2); }
+.saveline svg { flex: none; width: 16px; height: 16px; fill: none; stroke: #6FD39B; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.saveline .linklike { min-height: 44px; font-size: 14px; color: var(--chalk); }
+.saveline.is-warn { padding: 12px 14px; border-radius: 12px; background: rgba(255, 195, 90, .1); border: 1px solid rgba(255, 195, 90, .4); color: var(--chalk); }
+.saveline.is-warn svg { display: none; }
