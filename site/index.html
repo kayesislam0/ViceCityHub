@@ -38,10 +38,10 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
 {"@type":"WebSite","@id":"https://vicecityhub.okenshop.com/#site","name":"Vice City Hub","inLanguage":"en","url":"https://vicecityhub.okenshop.com/"},
-{"@type":"WebApplication","name":"Leonida Map Tracker","url":"https://vicecityhub.okenshop.com/","applicationCategory":"GameApplication","operatingSystem":"Any","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Mark the GTA 6 regions you have explored and download a shareable map card.","inLanguage":["en","es","pt"],"featureList":["Leonida map tracker","Shareable map card","Crew challenge link","Leonida Daily challenge","Leonida Wrapped recap card","Day-one bingo"]},
+{"@type":"WebApplication","name":"Leonida Map Tracker","url":"https://vicecityhub.okenshop.com/","applicationCategory":"GameApplication","operatingSystem":"Any","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Mark the GTA 6 regions you have explored and download a shareable map card.","inLanguage":["en","es","pt"],"featureList":["Leonida map tracker","Shareable map card","Crew challenge link","Daily dare","Leonida Wrapped recap card","Launch-night bingo"]},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"How do I track my GTA 6 map progress?","acceptedAnswer":{"@type":"Answer","text":"Tap each region of Leonida on the map as you go: passed through, explored, or finished. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session."}},
-{"@type":"Question","name":"What is Leonida Wrapped?","acceptedAnswer":{"@type":"Answer","text":"A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best Leonida Daily streak and the regions you finished. Pick it under Card, then share or download it."}},
+{"@type":"Question","name":"What is Leonida Wrapped?","acceptedAnswer":{"@type":"Answer","text":"A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best daily dare streak and the regions you finished. Pick it under Card, then share or download it."}},
 {"@type":"Question","name":"What are the regions of Leonida?","acceptedAnswer":{"@type":"Answer","text":"Rockstar has named six: Vice City, the Leonida Keys, Grassrivers, Port Gellhorn, Ambrosia and Mount Kalaga National Park."}},
 {"@type":"Question","name":"Is this the official GTA 6 map?","acceptedAnswer":{"@type":"Answer","text":"No. It is our own simplified drawing of where the regions sit, made for the card. It is not Rockstar's map and not to scale."}},
 {"@type":"Question","name":"Does my map leave my phone?","acceptedAnswer":{"@type":"Answer","text":"Your name, map and card stay on your device. Nothing is uploaded, and there is no sign-up."}},
@@ -60,15 +60,19 @@
   </a>
   <nav class="top__nav" aria-label="Sections">
     <a href="#tools">Tools</a>
-    <a href="#regions">Regions</a>
+    <a class="top__more" href="#regions">Regions</a>
     <a href="#tip">Support</a>
   </nav>
 </header>
 
 <main id="main">
   <div class="challenge" id="challenge" hidden>
-    <p class="challenge__lead"><strong id="challenge-name">A friend</strong> has seen <b id="challenge-score">0%</b> of Leonida.</p>
-    <p class="challenge__msg" id="challenge-msg">Beat it.</p>
+    <p class="challenge__lead"><strong id="challenge-name">A friend</strong> dared you to beat their map</p>
+    <ul class="vs" aria-label="Score">
+      <li class="vs__row"><span class="vs__who" id="vs-them">A friend</span><span class="vs__bar" aria-hidden="true"><i id="vs-them-bar"></i></span><b id="challenge-score">0%</b></li>
+      <li class="vs__row vs__row--you"><span class="vs__who">You</span><span class="vs__bar" aria-hidden="true"><i id="vs-you-bar"></i></span><b id="vs-you">0%</b></li>
+    </ul>
+    <p class="challenge__msg" id="challenge-msg" aria-live="polite">Tap the regions you've seen to answer</p>
     <div class="challenge__actions">
       <a class="btn btn--primary" href="#map-wrap">Beat it</a>
       <button class="btn btn--blend" id="blend-go" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span>Make our Blend</span></button>
@@ -124,7 +128,7 @@
   <section class="card-maker" id="card" aria-labelledby="card-title">
     <div class="card-maker__form">
       <h2 id="card-title">Your Leonida card</h2>
-      <p class="section-lede">Your map as a picture to post. Made on your device; nothing is uploaded.</p>
+      <p class="section-lede">Post it anywhere. Your link dares friends to beat your %. Made on your device, nothing is uploaded.</p>
       <div class="field">
         <label for="tag">Name or gamer tag</label>
         <input id="tag" maxlength="24" autocomplete="nickname" spellcheck="false" placeholder="e.g. VicePrince99">
@@ -177,7 +181,7 @@
             <label><input type="radio" name="theme" value="highway"><span><i class="swatch" style="--a:#0B6B3A;--b:#FFFFFF" aria-hidden="true"></i>Highway</span></label>
           </div>
         </fieldset>
-        <label class="check"><input type="checkbox" id="dayone"><span>Add today's date stamp</span></label>
+        <label class="check"><input type="checkbox" id="dayone"><span>Show the day on my card</span></label>
       </details>
     </div>
     <div class="card-maker__preview">
@@ -186,58 +190,65 @@
   </section>
 
   <section class="tools" id="tools" aria-labelledby="tools-title">
-    <h2 id="tools-title">For your group chat</h2>
+    <h2 id="tools-title">Challenges for your crew</h2>
+    <p class="section-lede">A new dare every day, a street name and a launch-night bingo card. Each one ends in something to paste in the group chat.</p>
 
     <div class="tools__grid">
       <article class="tool daily" aria-labelledby="daily-title">
-        <h3 id="daily-title">Leonida Daily</h3>
-        <p class="tool__lede">One small thing to do in the game today. Everyone gets the same one, and a new one arrives at midnight. Keep your streak going.</p>
-        <p class="daily__day" id="daily-day">Day 1</p>
-        <p class="daily__task" id="daily-task" aria-live="polite">Loading today's task…</p>
-        <p class="daily__streak" id="daily-streak" aria-live="polite">No streak yet</p>
-        <div class="actions">
-          <button class="btn btn--primary" id="daily-done" type="button" aria-pressed="false">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg><span>I did it</span>
-          </button>
-          <button class="btn" id="daily-copy" type="button">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg><span>Share my streak</span>
-          </button>
+        <div class="daily__main">
+          <p class="tool__kicker"><span id="daily-title">Today's dare</span> <span class="tool__meta" id="daily-day">Day 1</span> <span class="daily__check"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg><span>Done</span></span></p>
+          <p class="daily__task" id="daily-task" aria-live="polite">Loading today's dare…</p>
+          <p class="daily__reset" id="daily-reset">Same dare for everyone today</p>
+          <div class="actions">
+            <button class="btn btn--primary" id="daily-done" type="button" aria-pressed="false">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg><span>I did it</span>
+            </button>
+            <button class="btn btn--quiet" id="daily-copy" type="button">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg><span>Share my streak</span>
+            </button>
+          </div>
+          <p class="status" id="daily-status" role="status"></p>
         </div>
-        <p class="status" id="daily-status" role="status"></p>
+        <div class="daily__side">
+          <p class="streak"><b id="daily-streak-n">0</b><span id="daily-streak">day streak</span></p>
+          <ol class="week" id="daily-week" aria-label="Your last 7 days"></ol>
+          <p class="daily__total" id="daily-total">0 dares done</p>
+        </div>
       </article>
 
       <article class="tool alias" aria-labelledby="alias-title">
         <h3 id="alias-title">Your Leonida street name</h3>
-        <p class="tool__lede">Type your name. Same name always gives the same street name, so nobody can fake theirs.</p>
+        <p class="tool__lede">Type your gamer tag. Get the name the streets know you by.</p>
         <div class="field">
-          <label for="alias-input">Your name</label>
+          <label for="alias-input">Gamer tag</label>
           <input id="alias-input" maxlength="24" autocomplete="nickname" spellcheck="false" placeholder="e.g. Rafi">
         </div>
         <output class="alias__out" id="alias-out" for="alias-input" aria-live="polite">
-          <span class="alias__name" id="alias-name">Static Player, the Toll Booth</span>
+          <span class="alias__aka" id="alias-aka">Player, known on the street as</span>
+          <span class="alias__name" id="alias-name">“Static Toll Booth”</span>
           <span class="alias__known" id="alias-known">Known for never using the brakes.</span>
         </output>
         <div class="actions">
           <button class="btn btn--primary" id="alias-copy" type="button">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg><span>Share my name</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg><span>Share my name</span>
           </button>
-          <button class="btn" id="alias-roll" type="button">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg><span>New name</span>
+          <button class="btn btn--quiet" id="alias-roll" type="button">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg><span>Another one</span>
           </button>
         </div>
-        <label class="check"><input type="checkbox" id="use-alias"><span>Show it on my map card</span></label>
+        <label class="check"><input type="checkbox" id="use-alias"><span>Put it on my card</span></label>
       </article>
 
       <article class="tool bingo" aria-labelledby="bingo-title">
-        <h3 id="bingo-title">Day-one bingo</h3>
-        <p class="tool__lede">Tick what happened on your first night. Three in a row is a bingo.</p>
+        <h3 id="bingo-title">Launch-night bingo</h3>
+        <p class="tool__lede">Tap what happened to you. Three in a row is a bingo.</p>
         <div class="bingo__board" id="bingo" role="group" aria-label="Bingo board"></div>
-        <p class="bingo__score" id="bingo-score" aria-live="polite">0 lines</p>
+        <p class="bingo__score" id="bingo-score" aria-live="polite">2 more for a bingo</p>
         <div class="actions">
           <button class="btn btn--primary" id="bingo-copy" type="button">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg><span>Share my board</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg><span>Share my board</span>
           </button>
-          <button class="btn" id="bingo-new" type="button">
+          <button class="btn btn--quiet" id="bingo-new" type="button">
             <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 14h6v6h-6zM14 4h6v6h-6zM4 14h6v6H4z"/></svg><span>New board</span>
           </button>
         </div>
@@ -245,9 +256,6 @@
       </article>
     </div>
   </section>
-
-
-
 
   <section class="regions" id="regions" aria-labelledby="regions-title">
     <h2 id="regions-title">GTA 6 map: the six regions of Leonida</h2>
@@ -265,7 +273,7 @@
   <section class="faq" aria-labelledby="faq-title">
     <h2 id="faq-title">Questions</h2>
     <details><summary>How do I track my GTA 6 map progress?</summary><p>Tap each region of Leonida on the map as you go: passed through, explored, or finished. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session.</p></details>
-    <details><summary>What is Leonida Wrapped?</summary><p>A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best Leonida Daily streak and the regions you finished. Pick it under Card, then share or download it.</p></details>
+    <details><summary>What is Leonida Wrapped?</summary><p>A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best daily dare streak and the regions you finished. Pick it under Card, then share or download it.</p></details>
     <details><summary>What are the regions of Leonida?</summary><p>Rockstar has named six: Vice City, the Leonida Keys, Grassrivers, Port Gellhorn, Ambrosia and Mount Kalaga National Park.</p></details>
     <details><summary>Is this the official GTA 6 map?</summary><p>No. It is our own simplified drawing of where the regions sit, made for the card. It is not Rockstar's map and not to scale.</p></details>
     <details><summary>Does my map leave my phone?</summary><p>Your name, map and card stay on your device. Nothing is uploaded, and there is no sign-up.</p></details>

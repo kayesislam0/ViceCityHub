@@ -70,18 +70,25 @@ Map labels are white Anton with a dark outline (`paint-order: stroke`), so they 
 
 ### Card
 
-Two sizes: Square 1:1 (1080 x 1080) and Story 9:16 (1080 x 1920), painted at 2x. A feed shows a card at about a third
-of its size, so no text on a card is below 40px (about 13px in a feed); key text is 50px and up.
+Two sizes: Square 1:1 (1080 x 1080) and Story 9:16 (1080 x 1920), painted at 2x. Every card type (Map, Wrapped, Blend)
+has its own layout in both sizes; nothing is letterboxed. A feed shows a card at about a third of its size, so text
+on a card stays at 30px and up, and key text at 50px and up.
 
-- Weight order: the % (Anton, 470 to 620px, solid theme accent, no glow so edges stay sharp), the name (Anton 100 to 130px), the rank on a
-  green highway sign.
-- Square: rank sign top left, map top right without labels, then the % across the lower half, "of Leonida seen", the name. Date stamp off by default.
-  colour at 45%, full colour, full colour with a gold edge and tick. Dark text on bright tiles, white on Mount Kalaga.
-- Story: rank sign, %, name, platform, then a large map with 46px region names and gold ticks.
-- The card map has no frame: one soft shadow, unseen regions outlined, the Keys drawn with a thick stroke.
-- The page map has no route line. Every card ends with a band in the accent: "Make yours in 20 seconds" and vicecityhub.okenshop.com.
-- Wrapped and Blend keep their 1080 x 1350 layout, fitted and centred; their smallest text is 36px.
-- Contrast on cards: lowest pair is white on Mount Kalaga at 5.3:1; all others 6:1 or more.
+Every card reads in the same order:
+
+1. **Top row:** the hub mark and "Vice City Hub" on the left; platform (and the day, if chosen) on the right.
+2. **Who:** the player's name or street name (Anton). A gold "Backed the hub" line under it for players who tipped.
+3. **The number:** the % in the theme accent, Anton, as large as the column allows. At 100% it turns gold.
+4. **The rank** on a green highway sign. Nine ranks by steps (0, 1, 3, 5, 7, 10, 13, 16, 18), so the next one is always close.
+5. **The verdict:** one true line only this player could have ("Has never set foot in Grassrivers",
+   "4 of 6 regions still under the fog", "Finished every region of Leonida").
+6. **The map** with names. Seen regions in their own colour; unseen regions under fog (diagonal stripes).
+7. **The dare band** in the accent: what to do, large ("Can you beat 50%?", "Get your Leonida Wrapped",
+   "Blend with me"), then vicecityhub.okenshop.com.
+
+Blend paints the map by who explored it: you in the accent, your friend in gold, regions you both explored in stripes
+of both. The site has no server, so cards never claim percentiles or "top X% of players"; the only comparison is the
+friend's own score from their link.
 
 ### Interactions
 
@@ -90,11 +97,12 @@ of its size, so no text on a card is below 40px (about 13px in a feed); key text
 | Map region | Tap, Enter or Space | One step deeper. At 100% it stays, and a toast says to use the list to lower it |
 | List step button | Tap a step | Region goes to that step. Steps below it show as reached (pink tint) |
 | List step button | Tap the current step | Region goes back one step |
-| Street name: Copy | Tap | Copies the name, the "known for" line, your unlock time and the link |
-| Street name: New name | Tap | Next name for the same input |
-| Street name: Show it on my map card | Check | The card title uses the street name |
-| Bingo cell | Tap | Ticks or unticks; the centre is free and fixed |
-| Bingo: Copy my board | Tap | Copies your name, platform, score and an emoji grid |
+| Street name: Share my name | Tap | Share sheet on phones, otherwise copies the nickname, the "known for" line and the link |
+| Street name: Another one | Tap | Next nickname for the same tag |
+| Street name: Put it on my card | Check | The card title uses the tag and nickname |
+| Bingo cell | Tap | Ticks or unticks; the centre is free and fixed. Finished lines get a gold edge; the score says how many ticks the next bingo needs |
+| Bingo: Share my board | Tap | Shares or copies your name, platform, score and an emoji grid |
+| Daily dare: I did it | Tap | Marks today; the 7-day row fills, and Share my streak becomes the primary button. Tap again to undo |
 | Bingo: New board | Tap | New prompts, with Undo in the status line |
 | Card: Share card | Tap | Native share with the PNG where supported, otherwise download and copy the challenge text |
 | Card: challenge link | Tap (text button) | Copies the challenge text and link |
@@ -112,7 +120,7 @@ of its size, so no text on a card is below 40px (about 13px in a feed); key text
 | Width | Changes |
 |---|---|
 | < 400px | Region rows stack: name above three full-width steps |
-| < 620px | Top nav shows only Tip the hub |
+| < 440px | Header hides the Regions link, so Spanish and Portuguese fit at 320px |
 | ≥ 900px | Hero is two columns with the map sticky; card maker and tools are two columns |
 
 ### Edge cases
