@@ -730,3 +730,8 @@ a, button, label, summary, .rg, .cell { -webkit-tap-highlight-color: transparent
 .card-maker__form > .actions--sub { display: flex; flex-wrap: wrap; gap: 10px; }
 .card-maker__form > .actions--sub .btn { flex: 1 1 0; min-width: 0; white-space: nowrap; }
 .card-maker__form > .actions--sub .btn[hidden] { display: none; }
+
+.whatsnew { margin-top: 8px; font-size: 14px; color: var(--chalk-2); }
+.whatsnew a { color: var(--chalk); font-weight: 600; text-underline-offset: 3px; }
+.daily__remind { margin-top: 12px; font-size: 14px; color: var(--chalk-2); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.daily__remind .linklike { min-height: 44px; font-weight: 600; color: var(--chalk); }
