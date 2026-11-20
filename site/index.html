@@ -33,8 +33,8 @@
 <meta name="twitter:image:alt" content="How much of Leonida have you seen? A Leonida map card and a Blend card for two friends">
 <link rel="preload" href="hub/fonts/anton-400.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="hub/fonts/dmsans-400.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="hub/hub.css?v=20261120d">
-<script src="hub/hub.js?v=20261120d" defer></script>
+<link rel="stylesheet" href="hub/hub.css?v=20261120e">
+<script src="hub/hub.js?v=20261120e" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
 {"@type":"WebSite","@id":"https://vicecityhub0.vercel.app/#site","name":"Vice City Hub","inLanguage":"en","url":"https://vicecityhub0.vercel.app/"},
@@ -43,6 +43,7 @@
 {"@type":"Question","name":"How do I track my GTA 6 map progress?","acceptedAnswer":{"@type":"Answer","text":"Tap each region of Leonida on the map as you go: passed through, explored, or finished. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session."}},
 {"@type":"Question","name":"What is Leonida Wrapped?","acceptedAnswer":{"@type":"Answer","text":"A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best daily dare streak and the regions you finished. Pick it under Card, then share or download it."}},
 {"@type":"Question","name":"What are the regions of Leonida?","acceptedAnswer":{"@type":"Answer","text":"Rockstar has named six: Vice City, the Leonida Keys, Grassrivers, Port Gellhorn, Ambrosia and Mount Kalaga National Park."}},
+{"@type":"Question","name":"Why does Rockstar's map show five counties?","acceptedAnswer":{"@type":"Answer","text":"Rockstar's official map of Leonida also splits the state into five counties: Lummox, Kelly, Leonard, Vice-Dale and Mariana. Counties are for addresses; this tracker uses the six named regions you explore."}},
 {"@type":"Question","name":"Is this the official GTA 6 map?","acceptedAnswer":{"@type":"Answer","text":"No. It is our own simplified drawing of where the regions sit, made for the card. It is not Rockstar's map and not to scale."}},
 {"@type":"Question","name":"Does my map leave my phone?","acceptedAnswer":{"@type":"Answer","text":"Your name, map and card stay on your device. Nothing is uploaded, and there is no sign-up."}},
 {"@type":"Question","name":"Do I get anything for a tip?","acceptedAnswer":{"@type":"Answer","text":"No. Tips are voluntary and can't be refunded. They give no in-game items."}}
@@ -86,6 +87,7 @@
   <section class="hero" id="tracker" aria-labelledby="hero-title">
     <div class="hero__head">
       <p class="live">GTA 6 is out.</p>
+      <p class="whatsnew">New: <a href="#tools">a monthly bingo card</a> and fresh share cards</p>
       <h1 id="hero-title">How much of Leonida have you&nbsp;seen?</h1>
       <p class="hero__lede">Mark the regions you've been to, then share your map with friends.</p>
       <p class="hero__cta"><a class="btn btn--primary" href="#map-wrap" id="start">Mark where you've been</a></p>
@@ -240,6 +242,7 @@
               <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg><span>Share my streak</span>
             </button>
           </div>
+          <p class="daily__remind"><button class="linklike" id="daily-remind" type="button">Remind me tomorrow</button> <span class="daily__remind-note">Adds an event to your calendar</span></p>
           <p class="daily__undo" id="daily-undo-line" hidden>Marked by mistake? <button class="linklike" id="daily-undo" type="button">Undo</button></p>
           <p class="status" id="daily-status" role="status"></p>
         </div>
@@ -340,6 +343,7 @@
     <details><summary>How do I track my GTA 6 map progress?</summary><p>Tap each region of Leonida on the map as you go: passed through, explored, or finished. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session.</p></details>
     <details><summary>What is Leonida Wrapped?</summary><p>A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best daily dare streak and the regions you finished. Pick it under Card, then share or download it.</p></details>
     <details><summary>What are the regions of Leonida?</summary><p>Rockstar has named six: Vice City, the Leonida Keys, Grassrivers, Port Gellhorn, Ambrosia and Mount Kalaga National Park.</p></details>
+    <details><summary>Why does Rockstar's map show five counties?</summary><p>Rockstar's official map of Leonida also splits the state into five counties: Lummox, Kelly, Leonard, Vice-Dale and Mariana. Counties are for addresses; this tracker uses the six named regions you explore.</p></details>
     <details><summary>Is this the official GTA 6 map?</summary><p>No. It is our own simplified drawing of where the regions sit, made for the card. It is not Rockstar's map and not to scale.</p></details>
     <details><summary>Does my map leave my phone?</summary><p>Your name, map and card stay on your device. Nothing is uploaded, and there is no sign-up.</p></details>
     <details><summary>Do I get anything for a tip?</summary><p>No. Tips are voluntary and can't be refunded. They give no in-game items.</p></details>

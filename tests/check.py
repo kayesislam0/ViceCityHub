@@ -181,7 +181,7 @@ async def browser():
         for lang in ['en', 'es', 'pt']:
             for w in [320, 360, 390]:
                 ctx = await b.new_context(viewport={'width': w, 'height': 780}, has_touch=True, is_mobile=True)
-                for month in [(2026, 10, 20), (2026, 11, 5)]:
+                for month in [(2026, 10, 20), (2026, 11, 5), (2027, 0, 10)]:
                     await ctx.clear_cookies()
                     pg = await ctx.new_page()
                     await pg.add_init_script("(() => { const R = Date, t = new R(%d, %d, %d, 12).getTime(); window.Date = class extends R { constructor(...a) { super(...(a.length ? a : [t])); } static now() { return t; } }; })()" % month)
@@ -192,6 +192,13 @@ async def browser():
                     out += [f'{lang} {w}px {month[1] + 1}/{month[0]} bingo: the word "{x}" does not fit whole in its square' for x in sorted(set(r['tight']))]
                     await pg.close()
                 await ctx.close()
+        # A player who starts on 20 November: their first day is day 1 (Wrapped says "since 20 Nov"), not launch day.
+        cs = await b.new_context(viewport={'width': 390, 'height': 844})
+        ps = await cs.new_page()
+        await ps.add_init_script("(() => { const R = Date, t = new R(2026, 10, 20, 12).getTime(); window.Date = class extends R { constructor(...a) { super(...(a.length ? a : [t])); } static now() { return t; } }; })()")
+        await ps.goto(base); await ps.wait_for_timeout(300)
+        if await ps.evaluate("localStorage.getItem('vch.since')") != '1': out.append('first day: a player starting on 20 Nov should start on day 1')
+        await cs.close()
         # Bingo compare link: a friend's card shows on yours, and a broken link is ignored.
         cb = await b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True)
         pb = await cb.new_page(); eb = []; pb.on('pageerror', lambda e: eb.append(str(e)))

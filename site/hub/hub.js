@@ -66,7 +66,8 @@
       hit: 'M112 642L512 628L516 724L112 724Z',
       d: ellipse(474, 652, 28, 10) + ellipse(424, 672, 24, 9) + ellipse(376, 688, 22, 9) + ellipse(328, 699, 20, 8) + ellipse(282, 707, 18, 8) }
   ];
-  var LAKE = ellipse(368, 296, 24, 34);
+  // Lake Leonida sits between Ambrosia and Mount Kalaga, on the border between them, as on Rockstar's map.
+  var LAKE_X = 305, LAKE_Y = 172, LAKE = ellipse(LAKE_X, LAKE_Y, 40, 19);
 
   // Three colour schemes for the map and the card. Colour means progress only, one step per level, the same way in each:
   // fog = not seen, a tint = passed through, full colour = explored, gold = finished (gold is the reward in every scheme).
@@ -269,7 +270,7 @@
       groups.push(g);
     });
     lakeEl = el('path', { d: LAKE, class: 'lake', 'pointer-events': 'none' }, svg);
-    el('text', { class: 'lake-name', x: 368, y: 300, 'text-anchor': 'middle', 'pointer-events': 'none' }, svg).textContent = tr('Lake');
+    el('text', { class: 'lake-name', x: LAKE_X, y: LAKE_Y + 4, 'text-anchor': 'middle', 'pointer-events': 'none' }, svg).textContent = tr('Lake');
     routeG = el('g', { 'pointer-events': 'none' }, svg);
     // Each label: the name, and under it the level in a short word. A finished region gets a tick in front of "Finished".
     REGIONS.forEach(function (r) {
@@ -377,6 +378,7 @@
     var p = groups[i].querySelector('.shape');
     p.classList.remove('pop'); void p.getBoundingClientRect(); p.classList.add('pop');
     var after = steps();
+    if (!before && after) { toast(tr('Your card is ready.'), tr('See it'), function () { var c = $('card'); if (c) c.scrollIntoView({ behavior: 'smooth' }); }); return; }
     if (rankIndex(after) > rankIndex(before)) {
       buzz();
       toast(after === 18 ? tr('Every region finished. You have seen all of Leonida.') : tr('Rank up: {rank}. {n}% of Leonida seen.', { rank: rank(after), n: score() }));
@@ -728,7 +730,12 @@
       ['Escaped 5 stars by boat', 'Boat escape', 'chaos'], ['Wrecked a car you just bought', 'New wreck', 'chaos'],
       ['Flew over Vice City', 'Fly-over', 'cruise'], ['Drove coast to coast', 'Coast run', 'cruise'],
       ['Repainted a room', 'Repaint', 'local'], ['Took 20 photos in one session', '20 photos', 'local'],
-      ['Explored a spot with no map marker', 'No marker', 'myth'], ['Saw an animal you could not name', 'Odd animal', 'myth']] }
+      ['Explored a spot with no map marker', 'No marker', 'myth'], ['Saw an animal you could not name', 'Odd animal', 'myth']] },
+    { id: 's3', month: '2027-01', squares: [
+      ['Lost a fight to a stranger', 'Lost fight', 'chaos'], ['Bailed out of a moving car', 'Bailed out', 'chaos'],
+      ['Sailed to the Keys', 'Sailed', 'cruise'], ['Drove the coast at sunrise', 'Sunrise', 'cruise'],
+      ['Spent a whole day on foot', 'On foot', 'local'], ['Bought something you will never use', 'Splurged', 'local'],
+      ['Found a view nobody talks about', 'Hidden view', 'myth'], ['Followed a strange noise', 'Odd noise', 'myth']] }
   ];
   var FREE = ['Played this month', 'Played', 'free'];
   // Rows, columns and both diagonals of an n x n board.
@@ -977,6 +984,7 @@
     });
   }
   function bingoStatus(msg) { var s = $('bingo-status'); s.textContent = ''; setTimeout(function () { s.textContent = msg; }, 30); }
+  function bindRemind() { var b = $('daily-remind'); if (b) b.addEventListener('click', remindTomorrow); }
   function bindBingo() {
     readBingoLink();
     $('bingo-share').addEventListener('click', function () {
@@ -1013,6 +1021,19 @@
   function dayIndex() {
     var n = new Date(); n = new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime();
     return Math.max(0, Math.round((n - LAUNCH) / 864e5));
+  }
+  // The player's own first day on the hub (players started on different days); Wrapped counts from it.
+  var firstDay = (function () {
+    var v = load('vch.since', ''), today = dayIndex();
+    if (/^\d{1,4}$/.test(v)) return Math.min(Number(v), today);
+    // Players from before this was saved: their first dare day if they have one, else today.
+    var days = load('vch.daily', '').split(',').filter(function (x) { return x !== ''; }).map(Number).filter(function (x) { return x >= 0 && x <= today; });
+    var first = days.length ? Math.min.apply(null, days) : today;
+    save('vch.since', String(first)); return first;
+  })();
+  function sinceText() {
+    var d = new Date(LAUNCH + firstDay * 864e5 + 432e5);
+    try { return d.toLocaleDateString(LANG, { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return d.toDateString(); }
   }
   var dailyDone = (function () { var v = load('vch.daily', ''); return v ? v.split(',').map(Number).filter(function (x) { return x >= 0; }) : []; })();
   // The streak counts back from today (or yesterday, if today isn't done yet). A shield covers one missed day in any
@@ -1077,6 +1098,19 @@
     b.hidden = done; $('daily-undo-line').hidden = !done;
     s.classList.toggle('btn--primary', done); s.classList.toggle('btn--quiet', !done);
     b.closest('.daily').classList.toggle('is-done', done);
+  }
+  // Remind me tomorrow: a calendar event for 8 pm tomorrow, made on the device. No account, nothing sent anywhere.
+  function remindTomorrow() {
+    var t = new Date(); t.setDate(t.getDate() + 1); t.setHours(20, 0, 0, 0);
+    var pad = function (n) { return ('0' + n).slice(-2); };
+    var stamp = function (d) { return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + '00Z'; };
+    var end = new Date(t.getTime() + 15 * 6e4);
+    var ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Vice City Hub//Daily dare//EN', 'BEGIN:VEVENT',
+      'UID:dare-' + stamp(t) + '@vicecityhub0.vercel.app', 'DTSTAMP:' + stamp(new Date()), 'DTSTART:' + stamp(t), 'DTEND:' + stamp(end),
+      'SUMMARY:' + tr('Leonida daily dare'), 'DESCRIPTION:' + tr('Today\'s dare:') + ' ' + SITE + '#tools', 'URL:' + SITE + '#tools',
+      'BEGIN:VALARM', 'TRIGGER:PT0M', 'ACTION:DISPLAY', 'DESCRIPTION:' + tr('Leonida daily dare'), 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    downloadAs(new Blob([ics], { type: 'text/calendar' }), 'leonida-daily-dare.ics');
+    var st = $('daily-status'); st.textContent = ''; setTimeout(function () { st.textContent = tr('Calendar event downloaded. Open it to add the reminder.'); }, 30);
   }
   function dailyText() {
     var d = dayIndex(), cells = '';
@@ -1540,9 +1574,9 @@
     ctx.fillStyle = T.lake; ctx.fill(lake);
     ctx.strokeStyle = T.edge; ctx.lineWidth = 3; ctx.stroke(lake);
     ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
-    [[-9, 290], [-3, 304]].forEach(function (w) {
-      ctx.beginPath(); ctx.moveTo(368 + w[0] - 6, w[1]); ctx.quadraticCurveTo(368 + w[0], w[1] - 5, 368 + w[0] + 6, w[1]);
-      ctx.quadraticCurveTo(368 + w[0] + 12, w[1] + 5, 368 + w[0] + 18, w[1]); ctx.stroke();
+    [[-16, LAKE_Y - 4], [-4, LAKE_Y + 6]].forEach(function (w) {
+      ctx.beginPath(); ctx.moveTo(LAKE_X + w[0] - 6, w[1]); ctx.quadraticCurveTo(LAKE_X + w[0], w[1] - 5, LAKE_X + w[0] + 6, w[1]);
+      ctx.quadraticCurveTo(LAKE_X + w[0] + 12, w[1] + 5, LAKE_X + w[0] + 18, w[1]); ctx.stroke();
     });
     ctx.lineCap = 'butt';
   }
@@ -1678,7 +1712,7 @@
     var aw = ctx.measureText(a + ' ').width;
     ctx.fillStyle = T.accent; ctx.fillText(tr('Wrapped'), x + aw, y);
   }
-  function wrappedSub() { return cardName() + '  ·  ' + tr('since 19 Nov 2026'); }
+  function wrappedSub() { return cardName() + '  ·  ' + tr('since {date}', { date: sinceText() }); }
   function wrappedGrid(ctx, T, st, x, y, cw, rh, vs, ls) {
     st.forEach(function (c, k) { statCell(ctx, T, c, x + (k % 2) * cw, y + Math.floor(k / 2) * rh, cw, vs, ls); });
   }
@@ -1942,7 +1976,7 @@
   function start() {
     translatePage(); bindLang(); bindSaveLine();
     if (!$('map')) { bindCheats(); bindHundred(); bindChapterOne(); return; } // cheat, checklist and help pages
-    buildMap(); bindList(); bindPick(); bindBackup(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); bindBoard(); readChallenge(); bindRematch();
+    buildMap(); bindList(); bindPick(); bindBackup(); bindSettings(); bindAlias(); bindBingo(); bindRemind(); bindDaily(); bindTipped(); bindCheats(); bindActions(); bindBoard(); readChallenge(); bindRematch();
     if (steps() > 0) touched = true;
     buildBingo(); renderDaily(); renderTipped(); renderAlias(); render();
     document.addEventListener('visibilitychange', function () { if (!document.hidden) renderDaily(); });
@@ -1965,7 +1999,7 @@
   function boot() {
     if (LANG === 'en' || window.VCH_I18N) { start(); return; }
     var sc = document.createElement('script');
-    sc.src = '/hub/i18n.js?v=20261120d'; sc.onload = start; sc.onerror = start;
+    sc.src = '/hub/i18n.js?v=20261120e'; sc.onload = start; sc.onerror = start;
     document.head.appendChild(sc);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
