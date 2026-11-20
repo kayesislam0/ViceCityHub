@@ -154,7 +154,7 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 /* Explored and finished regions are bright, so their words are dark, with no outline. */
 .rl[data-level="2"] text, .rl[data-level="3"] text { fill: var(--m-on); stroke: none; }
 .lake { stroke-width: 3; }
-.lake-name { font: 600 12px var(--text); fill: #8FB3BF; }
+.lake-name { font: 600 12px var(--text); fill: #EAF6FA; }
 .palette { margin: 16px 0 0; padding: 0; border: 0; min-width: 0; display: grid; justify-items: center; gap: 8px; }
 .palette legend { padding: 0; margin: 0 auto 8px; font-size: 14px; font-weight: 600; color: var(--chalk-2); text-align: center; }
 .palette .seg { justify-content: center; }
