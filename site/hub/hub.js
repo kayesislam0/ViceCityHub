@@ -78,11 +78,11 @@
   // passed is the accent at 35% over the background, so all four levels step clearly in lightness as well as colour.
   var THEMES = {
     night:  { name: 'Neon night', bg: '#0E1311', bg2: '#0E1311', ink: '#F4F1EA', ink2: '#B4BDB8', accent: '#FF5FA2', passed: '#622E44', done: '#FFC35A',
-              onFull: '#0E1311', edge: '#0E1311', lake: '#0F1F25', sea: '#0F1F25', line: 'rgba(244,241,234,.14)', fog: 'rgba(244,241,234,.09)', fill: ['#1A2420'] },
+              onFull: '#0E1311', edge: '#0E1311', lake: '#2C6E86', sea: '#0F1F25', line: 'rgba(244,241,234,.14)', fog: 'rgba(244,241,234,.09)', fill: ['#1A2420'] },
     sunset: { name: 'Golden hour', bg: '#2A0F22', bg2: '#4A1A2A', ink: '#FFF3E4', ink2: '#F2C9B0', accent: '#FF6B5B', passed: '#742F36', done: '#FFC35A',
-              onFull: '#2A0F22', edge: '#2A0F22', lake: '#3A1630', sea: '#341429', line: 'rgba(255,243,228,.16)', fog: 'rgba(255,214,170,.10)', fill: ['#3A1A30'] },
+              onFull: '#2A0F22', edge: '#2A0F22', lake: '#3B6C8C', sea: '#341429', line: 'rgba(255,243,228,.16)', fog: 'rgba(255,214,170,.10)', fill: ['#3A1A30'] },
     ocean:  { name: 'Ocean drive', bg: '#08151F', bg2: '#0B2233', ink: '#EEF7FA', ink2: '#A9C3CC', accent: '#3FD6E8', passed: '#1B5965', done: '#FFC35A',
-              onFull: '#08151F', edge: '#08151F', lake: '#06111A', sea: '#0A1C29', line: 'rgba(238,247,250,.14)', fog: 'rgba(238,247,250,.09)', fill: ['#14232E'] }
+              onFull: '#08151F', edge: '#08151F', lake: '#2A6F93', sea: '#0A1C29', line: 'rgba(238,247,250,.14)', fog: 'rgba(238,247,250,.09)', fill: ['#14232E'] }
   };
   function levelFill(T, l) { return [null, T.passed, T.accent, T.done][l]; }
   // Short level words on the map, so a label never runs past its region.
@@ -1336,11 +1336,70 @@
     dare(ctx, T, W, H, 210, mapDare(p));
   }
 
+  // The lake reads as water: a blue pool with a dark shore and two light ripples, never a black hole.
+  function drawLake(ctx, T) {
+    var lake = new Path2D(LAKE);
+    ctx.fillStyle = T.lake; ctx.fill(lake);
+    ctx.strokeStyle = T.edge; ctx.lineWidth = 3; ctx.stroke(lake);
+    ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+    [[-9, 290], [-3, 304]].forEach(function (w) {
+      ctx.beginPath(); ctx.moveTo(368 + w[0] - 6, w[1]); ctx.quadraticCurveTo(368 + w[0], w[1] - 5, 368 + w[0] + 6, w[1]);
+      ctx.quadraticCurveTo(368 + w[0] + 12, w[1] + 5, 368 + w[0] + 18, w[1]); ctx.stroke();
+    });
+    ctx.lineCap = 'butt';
+  }
+
+  // Finds where a region's name fits: the largest size (32 down to 18) at the spot nearest its label point where every
+  // edge of every line, and the tick under it, sits inside the region with a margin and away from the lake.
+  var fitCache = {}, fitCtx = null;
+  function fitLabel(r, labels, done) {
+    var lines = r.two ? r.name.split(' ') : [r.id === 'kalaga' ? 'Mount Kalaga' : r.name];
+    var key = r.id + '|' + labels + '|' + done + '|' + lines.join(' ');
+    if (fitCache[key]) return fitCache[key];
+    if (!fitCtx) { var c = document.createElement('canvas'); c.width = 600; c.height = 740; fitCtx = c.getContext('2d'); }
+    var g = fitCtx, path = new Path2D(r.d), lake = new Path2D(LAKE), pad = 4, TR = 16;
+    function ok(px, py) {
+      return g.isPointInPath(path, px, py) && !g.isPointInPath(lake, px, py) &&
+        !g.isPointInPath(lake, px - pad, py) && !g.isPointInPath(lake, px + pad, py) && !g.isPointInPath(lake, px, py - pad) && !g.isPointInPath(lake, px, py + pad);
+    }
+    function boxOk(x0, y0, x1, y1) {
+      for (var t = 0; t <= 4; t++) {
+        var fx = x0 + (x1 - x0) * t / 4, fy = y0 + (y1 - y0) * t / 4;
+        if (!ok(fx, y0) || !ok(fx, y1) || !ok(x0, fy) || !ok(x1, fy)) return false;
+      }
+      return true;
+    }
+    var offs = [];
+    for (var dx = -48; dx <= 48; dx += 6) for (var dy = -40; dy <= 40; dy += 6) offs.push([dx, dy]);
+    offs.sort(function (a, b) { return (a[0] * a[0] + a[1] * a[1]) - (b[0] * b[0] + b[1] * b[1]); });
+    var best = null;
+    for (var fs = labels ? 32 : 0; fs >= (labels ? 18 : 0) && !best; fs -= 2) {
+      g.font = '400 ' + fs + 'px Anton, sans-serif';
+      var widths = lines.map(function (t) { return g.measureText(t).width; });
+      var lh = fs * 0.92, cap = fs * 0.78, blockH = labels ? (lines.length - 1) * lh + cap : 0;
+      for (var o = 0; o < offs.length && !best; o++) {
+        var cx = r.label[0] + offs[o][0], cy = r.label[1] + offs[o][1] - (done && labels ? 14 : 0);
+        var top = cy - blockH / 2, base = [], fits = true;
+        for (var k = 0; k < (labels ? lines.length : 0) && fits; k++) {
+          var b = top + cap + k * lh; base.push(b);
+          fits = boxOk(cx - widths[k] / 2 - pad, b - cap - pad, cx + widths[k] / 2 + pad, b + pad);
+        }
+        var ty = labels ? top + blockH + 10 + TR : cy;
+        if (fits && done) {
+          for (var a = 0; a < 12 && fits; a++) fits = ok(cx + Math.cos(a * Math.PI / 6) * (TR + 4), ty + Math.sin(a * Math.PI / 6) * (TR + 4));
+        }
+        if (fits) best = { x: cx, base: base, fs: fs, lines: lines, tickY: ty };
+      }
+    }
+    // Never expected (every region has room at 18px), but keep the old spot rather than drawing nothing.
+    if (!best) best = { x: r.label[0], base: lines.map(function (t, k) { return r.label[1] + k * 20; }), fs: 18, lines: lines, tickY: r.label[1] + lines.length * 20 + 10 };
+    return (fitCache[key] = best);
+  }
+
   // The map as drawn on the cards, at (x, y) and scale sc of its 600 x 740 layout. No frame: the state itself is the picture.
   // Unseen regions sit under fog. blend: { mine: [...], theirs: [...] } paints who explored each region instead.
   function drawMap(ctx, T, x, y, sc, blend, opts) {
     var labels = !!(opts && opts.labels);
-    // Card label spots: Port Gellhorn and Ambrosia move apart so the bigger names never touch.
     var LV = blend ? blend.mine.map(function (m, i) { return Math.max(m, blend.theirs[i]); }) : levels;
     var fog = stripes(ctx, T.fill[0], T.fog, 22);
     var both = blend ? stripes(ctx, T.accent, T.done, 26) : null;
@@ -1367,24 +1426,28 @@
       var path = new Path2D(r.d);
       ctx.strokeStyle = LV[i] ? T.edge : T.line; ctx.lineWidth = LV[i] ? 5 : 2.5; ctx.stroke(path);
     });
-    ctx.fillStyle = T.lake; ctx.fill(new Path2D(LAKE));
+    drawLake(ctx, T);
     ctx.textAlign = 'center';
-    // Names sit at the same roomy spots as on the page map, sized to stay inside their region; a finished region gets
-    // its tick centred under the name, the same place every time.
+    // Every name is fitted inside its own region (and clear of the lake) at the largest size that fits; a finished
+    // region gets its tick centred under the name, also kept inside the region.
     REGIONS.forEach(function (r, i) {
-      var nudge = { gellhorn: [-10, 10], ambrosia: [8, 4] }[r.id] || [0, 0];
-      var lp = [r.label[0] + nudge[0], r.label[1] + nudge[1]], fs = 32, lines = r.two ? r.name.split(' ') : [r.id === 'kalaga' ? 'Mount Kalaga' : r.name];
-      var top = r.two ? lp[1] - 10 : lp[1], last = top + (lines.length - 1) * 28;
-      if (labels) {
-        ctx.font = '400 ' + fs + 'px Anton, sans-serif';
-        lines.forEach(function (txt, k) {
-          var ly = top + k * 28;
-          // No outline effect: dark ink on bright fills, light ink on dark ones (the Keys label sits on the sea).
-          var bright = !r.out && (blend ? LV[i] > 0 : LV[i] >= 2);
-          ctx.fillStyle = bright ? T.onFull : LV[i] ? '#FFFFFF' : T.ink2; ctx.fillText(txt, lp[0], ly);
-        });
+      var done = !blend && LV[i] === 3;
+      if (r.out) {
+        // The Keys' name sits on the sea, so its tick goes right after the name instead of on the mainland.
+        ctx.font = '400 32px Anton, sans-serif';
+        if (labels) { ctx.fillStyle = LV[i] ? '#FFFFFF' : T.ink2; ctx.fillText(r.name, r.label[0], r.label[1]); }
+        if (done) { if (labels) tick(ctx, r.label[0] + ctx.measureText(r.name).width / 2 + 26, r.label[1] - 12, 16, T); else tick(ctx, 449, 632, 16, T); }
+        return;
       }
-      if (!blend && LV[i] === 3) tick(ctx, r.id === 'keys' ? 470 : lp[0], r.id === 'keys' ? 610 : labels ? last + 26 : lp[1] - 8, 16, T);
+      var fit = fitLabel(r, labels, done);
+      if (labels) {
+        // No outline effect: dark ink on bright fills, light ink on dark ones.
+        var bright = blend ? LV[i] > 0 : LV[i] >= 2;
+        ctx.fillStyle = bright ? T.onFull : LV[i] ? '#FFFFFF' : T.ink2;
+        ctx.font = '400 ' + fit.fs + 'px Anton, sans-serif';
+        fit.lines.forEach(function (txt, k) { ctx.fillText(txt, fit.x, fit.base[k]); });
+      }
+      if (done) tick(ctx, fit.x, fit.tickY, 16, T);
     });
     ctx.restore();
     ctx.textAlign = 'left';
