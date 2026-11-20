@@ -117,7 +117,7 @@ async def run(b, w, mob):
 
     # Card options: every radio and checkbox, on and off.
     await pg.evaluate("document.querySelector('details.more').open = true")
-    for name, vals in [('format', ['story', 'square']), ('kind', ['wrapped', 'map']), ('platform', ['Xbox Series', 'PS5']), ('theme', ['sunset', 'ocean', 'night'])]:
+    for name, vals in [('format', ['story', 'square']), ('kind', ['wrapped', 'map']), ('platform', ['Xbox Series X|S', 'PS5']), ('theme', ['sunset', 'ocean', 'night'])]:
         for v in vals:
             await tap_el(pg, mob, f'input[name="{name}"][value="{v}"]')
             check(await pg.evaluate(f"document.querySelector('input[name=\"{name}\"][value=\"{v}\"]').checked"), f'{tag} card option {name}={v}')

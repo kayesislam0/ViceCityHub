@@ -170,7 +170,7 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .card-maker__preview canvas.is-story { max-width: 380px; }
 .field { margin: 22px 0 0; padding: 0; border: 0; min-width: 0; }
 .field label, .field legend { display: block; font-weight: 600; font-size: 15px; margin-bottom: 8px; padding: 0; }
-.field input[type="text"], .field input[type="search"], .field input:not([type]) { width: 100%; max-width: 420px; min-height: 48px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line-strong);
+.field input[type="text"], .field input[type="search"], .field input:not([type]), .field input[type="date"] { width: 100%; max-width: 420px; min-height: 48px; padding: 0 14px; border-radius: 8px; border: 1px solid var(--line-strong);
   background: var(--asphalt-2); color: var(--chalk); font: 400 16px var(--text); caret-color: var(--neon); }
 .field input::placeholder { color: #8F9A94; }
 .field input:focus { border-color: var(--neon); outline: none; box-shadow: 0 0 0 3px rgba(255, 95, 162, .25); }
@@ -735,3 +735,4 @@ a, button, label, summary, .rg, .cell { -webkit-tap-highlight-color: transparent
 .whatsnew a { color: var(--chalk); font-weight: 600; text-underline-offset: 3px; }
 .daily__remind { margin-top: 12px; font-size: 14px; color: var(--chalk-2); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
 .daily__remind .linklike { min-height: 44px; font-weight: 600; color: var(--chalk); }
+.field input[type="date"] { color-scheme: dark; font: inherit; }

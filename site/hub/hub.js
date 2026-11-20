@@ -608,7 +608,9 @@
   if (settings.kind !== 'wrapped') settings.kind = 'map'; // Blend is chosen per visit, from a friend's link
   if (settings.theme === 'highway') settings.theme = 'ocean'; // the old Highway look became Ocean drive
   if (!THEMES[settings.theme]) settings.theme = 'night';
-  if (settings.platform !== 'PS5' && settings.platform !== 'Xbox Series') settings.platform = 'PS5';
+  // GTA 6 is on PS5 and Xbox Series X|S. Older saves said 'Xbox Series'.
+  if (settings.platform === 'Xbox Series') { settings.platform = 'Xbox Series X|S'; save('vch.platform', settings.platform); }
+  if (settings.platform !== 'PS5' && settings.platform !== 'Xbox Series X|S') settings.platform = 'PS5';
 
   function setTag(v, from) {
     settings.tag = v.replace(/^\s+/, '').slice(0, 24);
@@ -619,7 +621,21 @@
     drawSoon();
   }
 
+  // "I started playing on": everyone started on a different day; Wrapped counts from the one the player picks.
+  function isoOf(day) { var d = new Date(LAUNCH + day * 864e5 + 432e5); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function bindSince() {
+    var i = $('since'); if (!i) return;
+    i.max = isoOf(dayIndex()); i.value = isoOf(firstDay);
+    i.addEventListener('change', function () {
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(i.value);
+      if (!m) { i.value = isoOf(firstDay); return; }
+      var day = Math.round((new Date(+m[1], +m[2] - 1, +m[3]).getTime() - LAUNCH) / 864e5);
+      firstDay = Math.max(0, Math.min(dayIndex(), day)); i.value = isoOf(firstDay);
+      save('vch.since', String(firstDay)); drawSoon();
+    });
+  }
   function bindSettings() {
+    bindSince();
     $('tag').value = settings.tag;
     $('alias-input').value = settings.tag;
     $('tag').addEventListener('input', function () { setTag(this.value, 'tag'); });
@@ -1999,7 +2015,7 @@
   function boot() {
     if (LANG === 'en' || window.VCH_I18N) { start(); return; }
     var sc = document.createElement('script');
-    sc.src = '/hub/i18n.js?v=20261120e'; sc.onload = start; sc.onerror = start;
+    sc.src = '/hub/i18n.js?v=20261120f'; sc.onload = start; sc.onerror = start;
     document.head.appendChild(sc);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
