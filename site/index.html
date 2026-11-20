@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Leonida Map Tracker &amp; Share Card for GTA 6 | Vice City Hub</title>
-<meta name="description" content="Track how much of Leonida you've seen. Get your card. Challenge your crew.">
+<meta name="description" content="A free GTA 6 map tracker. Mark the Leonida regions you've explored and share your map card.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="https://vicecityhub0.vercel.app/">
 <link rel="alternate" hreflang="en" href="https://vicecityhub0.vercel.app/">
@@ -20,7 +20,7 @@
 <meta property="og:site_name" content="Vice City Hub">
 <meta property="og:url" content="https://vicecityhub0.vercel.app/">
 <meta property="og:title" content="Leonida Map Tracker &amp; Share Card for GTA 6 | Vice City Hub">
-<meta property="og:description" content="Track how much of Leonida you've seen. Get your card. Challenge your crew.">
+<meta property="og:description" content="A free GTA 6 map tracker. Mark the Leonida regions you've explored and share your map card.">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://vicecityhub0.vercel.app/hub/img/og.png">
 <meta property="og:image:width" content="1200">
@@ -28,7 +28,7 @@
 <meta property="og:image:alt" content="How much of Leonida have you seen? A Leonida map card and a Blend card for two friends">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Leonida Map Tracker &amp; Share Card for GTA 6 | Vice City Hub">
-<meta name="twitter:description" content="Track how much of Leonida you've seen. Get your card. Challenge your crew.">
+<meta name="twitter:description" content="A free GTA 6 map tracker. Mark the Leonida regions you've explored and share your map card.">
 <meta name="twitter:image" content="https://vicecityhub0.vercel.app/hub/img/og.png">
 <meta name="twitter:image:alt" content="How much of Leonida have you seen? A Leonida map card and a Blend card for two friends">
 <link rel="preload" href="hub/fonts/anton-400.woff" as="font" type="font/woff" crossorigin>
@@ -86,9 +86,9 @@
     <div class="hero__head">
       <p class="live">GTA 6 is out.</p>
       <h1 id="hero-title">How much of Leonida have you&nbsp;seen?</h1>
-      <p class="hero__lede">Tap the regions you've driven through. Get your card. Challenge your crew.</p>
+      <p class="hero__lede">Mark the regions you've been to, then share your map with friends.</p>
       <p class="hero__cta"><a class="btn btn--primary" href="#map-wrap" id="start">Mark where you've been</a></p>
-      <p class="trust">No ads. No sign-up. Your map and card stay on your device.</p>
+      <p class="trust">No account needed. Your progress is saved on this device.</p>
     </div>
 
     <div class="hero__controls">
@@ -163,7 +163,7 @@
   <section class="card-maker" id="card" aria-labelledby="card-title">
     <div class="card-maker__form">
       <h2 id="card-title">Your Leonida card</h2>
-      <p class="section-lede">Post it anywhere. Your link dares friends to beat your %. Made on your device, nothing is uploaded.</p>
+      <p class="section-lede">Share it as an image. The challenge link lets friends compare their map with yours. Nothing is uploaded.</p>
       <div class="field">
         <label for="tag">Name or gamer tag</label>
         <input id="tag" maxlength="24" autocomplete="nickname" spellcheck="false" placeholder="e.g. VicePrince99">
@@ -188,7 +188,7 @@
       <p class="actions--sub"><button class="btn btn--quiet" id="copy-img" type="button" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg><span>Copy image</span></button> <button class="btn btn--quiet" id="copy-link" type="button">Copy challenge link</button></p>
       <p class="status" id="card-status" role="status"></p>
       <div class="thanks" id="thanks" hidden>
-        <p><strong>Your card is ready.</strong> The hub is free. If you want to help, you can support it.</p>
+        <p><strong>Your card is ready.</strong> The site is free. Tips are optional.</p>
         <a class="btn" href="#tip">Support the hub</a>
       </div>
       <details class="more">
@@ -226,7 +226,7 @@
 
   <section class="tools" id="tools" aria-labelledby="tools-title">
     <h2 id="tools-title">Challenges for your crew</h2>
-    <p class="section-lede">A new dare every day, a street name and a launch-night bingo card. Each one ends in something to paste in the group chat.</p>
+    <p class="section-lede">A daily dare, a street-name generator and launch-night bingo.</p>
 
     <div class="tools__grid">
       <article class="tool daily" aria-labelledby="daily-title">
@@ -259,7 +259,7 @@
 
       <article class="tool alias" aria-labelledby="alias-title">
         <h3 id="alias-title">Your Leonida street name</h3>
-        <p class="tool__lede">Type your gamer tag. Get the name the streets know you by.</p>
+        <p class="tool__lede">Type your gamer tag to get a street name.</p>
         <div class="field">
           <label for="alias-input">Gamer tag</label>
           <input id="alias-input" maxlength="24" autocomplete="nickname" spellcheck="false" placeholder="e.g. Rafi">
@@ -285,7 +285,7 @@
 
       <article class="tool bingo" aria-labelledby="bingo-title">
         <h3 id="bingo-title">Launch-night bingo</h3>
-        <p class="tool__lede">A keepsake from launch night 2026. Tap what happened to you; a full row, column or diagonal is a bingo.</p>
+        <p class="tool__lede">Tap what happened to you on launch night. A full row, column or diagonal is a bingo.</p>
         <fieldset class="field bingo__size">
           <legend class="sr-only">Board size</legend>
           <div class="seg">
@@ -319,14 +319,14 @@
 
   <section class="regions" id="regions" aria-labelledby="regions-title">
     <h2 id="regions-title">GTA 6 map: the six regions of Leonida</h2>
-    <p class="section-lede">Rockstar has named six parts of Leonida, its take on Florida.</p>
+    <p class="section-lede">Leonida is the game's version of Florida. Rockstar has named six regions.</p>
     <ul class="signs">
-      <li><p class="sign">Vice City</p><p>The Miami-inspired city: beaches, nightlife, Ocean Drive.</p></li>
-      <li><p class="sign">Leonida Keys</p><p>An island chain after the Florida Keys. Beautiful and risky water.</p></li>
-      <li><p class="sign">Grassrivers</p><p>Mangrove wetlands after the Everglades, with Vice City's skyline in sight.</p></li>
-      <li><p class="sign">Port Gellhorn</p><p>The forgotten coast: a faded resort town of cheap motels and dead attractions.</p></li>
-      <li><p class="sign">Ambrosia</p><p>The industrial heart of the state, built around a sugar refinery.</p></li>
-      <li><p class="sign">Mount Kalaga National Park</p><p>Forests and trails against the northern border. Hunting, fishing, wildlife.</p></li>
+      <li><p class="sign">Vice City</p><p>Leonida's main city, based on Miami.</p></li>
+      <li><p class="sign">Leonida Keys</p><p>An island chain based on the Florida Keys.</p></li>
+      <li><p class="sign">Grassrivers</p><p>Mangrove wetlands based on the Everglades.</p></li>
+      <li><p class="sign">Port Gellhorn</p><p>A run-down resort town on the coast.</p></li>
+      <li><p class="sign">Ambrosia</p><p>An industrial area built around a sugar refinery.</p></li>
+      <li><p class="sign">Mount Kalaga National Park</p><p>A national park in the north with forests, trails and wildlife.</p></li>
     </ul>
   </section>
 
@@ -342,24 +342,24 @@
   <section class="tip" id="tip" aria-labelledby="tip-title">
     <div class="tip__head">
       <h2 id="tip-title">Support the hub</h2>
-      <p class="section-lede">Vice City Hub is free, with no ads, no sign-up and nothing locked. It's made by one fan. If it helped your run, a tip keeps it online and updated every week.</p>
+      <p class="section-lede">Vice City Hub is free to use. If you'd like to help with hosting costs, you can send an optional tip.</p>
       <ul class="tip__facts">
-        <li><b>Where tips go:</b> the domain, hosting, and time for weekly updates and new tools.</li>
-        <li><b>What you get:</b> our thanks. Tips buy nothing and unlock nothing; every tool stays free either way.</li>
-        <li><b>Optional, always:</b> skip it and nothing changes.</li>
+        <li>A tip is an optional gift to the person who runs the site. It is not a purchase or a charity donation.</li>
+        <li>Tips don't buy or unlock anything. Every tool stays free.</li>
+        <li>Crypto payments can't be reversed, so tips can't be refunded.</li>
       </ul>
     </div>
     <div class="tip__ways">
       <article class="way">
         <h3>Binance Pay</h3>
-        <p class="way__who">Easiest if you have Binance. Sent from the app, with no fee between Binance users.</p>
+        <p class="way__who">Send from the Binance app.</p>
         <img class="qr" src="hub/img/qr-binance.svg" width="200" height="200" alt="QR code for the Binance Pay link">
         <a class="btn btn--primary" href="https://app.binance.com/uni-qr/K6RZ4d5G" target="_blank" rel="nofollow noopener noreferrer">Open in Binance</a>
         <p class="way__note">Scan with the Binance app, or open the link on the phone that has Binance. The link goes to app.binance.com and nowhere else.</p>
       </article>
       <article class="way">
         <h3>Bitcoin</h3>
-        <p class="way__who">From any wallet or exchange. Your wallet adds its network fee.</p>
+        <p class="way__who">Send from any Bitcoin wallet. Your wallet sets the network fee.</p>
         <img class="qr" src="hub/img/qr-btc.svg" width="200" height="200" alt="QR code for the Bitcoin address">
         <p class="addr"><span class="sr-only">Bitcoin address 1M16Rp5Hx7b5ax6w5knKmCNYQEfF3S5KeF</span><code aria-hidden="true"><b>1M16</b> Rp5H x7b5 ax6w 5knK mCNY QEfF 3S5K <b>eF</b></code></p>
         <p class="way__note">Before you send, check that your wallet shows the same first 4 and last 2 characters.</p>
@@ -385,7 +385,7 @@
       </button>
       <p class="tipped__msg" id="tipped-msg" aria-live="polite">Honor system: we can't see who tips. Tap to add a gold "Backed the hub" line to your card as a thank-you.</p>
     </div>
-    <p class="fine">Tips are voluntary and can't be refunded. They give no in-game items.</p>
+    <p class="fine">Tips are voluntary and can't be refunded. By sending one, you agree to the <a href="/legal#tips">tip terms</a>.</p>
   </section>
   <div class="nextbar" id="nextbar" hidden>
     <p class="nextbar__score"><b id="nb-pct">0%</b> <span id="nb-rank"></span></p>
