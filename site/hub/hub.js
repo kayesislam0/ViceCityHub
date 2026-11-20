@@ -433,7 +433,9 @@
   function parseBoard(s) {
     var out = [];
     String(s || '').split('|').forEach(function (p) {
-      var kv = p.split('~'), n = cleanName(decodeURIComponent(kv[0] || '')), c = kv[1] || '';
+      // A link cut short by a chat app can carry broken %-escapes: skip that entry instead of failing the page.
+      var kv = p.split('~'), raw = kv[0] || '', n, c = kv[1] || '';
+      try { n = cleanName(decodeURIComponent(raw)); } catch (e) { n = cleanName(raw.replace(/%/g, '')); }
       if (n && /^[0-3]{6}$/.test(c)) out.push({ n: n, c: c });
     });
     return out;

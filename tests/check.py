@@ -105,6 +105,14 @@ async def browser():
         await ps.click('#toast .toast__act')
         if await ps.evaluate("document.getElementById('board').hidden"): out.append('board: undo did not restore')
         for cx in (cr, cm, cs): await cx.close()
+        # Broken or hostile challenge links never stop the page from working.
+        for q in ['?c=123012&b=%%%', '?c=123012&n=%E0%A4&b=%E0%A4~111111', '?c=999999', '?b=' + 'x~111111|' * 80]:
+            c4 = await b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True)
+            p4 = await c4.new_page(); e4 = []; p4.on('pageerror', lambda e: e4.append(str(e)))
+            await p4.goto(base + q); await p4.wait_for_timeout(200)
+            if e4: out.append(f'challenge link {q[:30]}: {e4[0]}')
+            if not await p4.evaluate("document.querySelectorAll('#map .rg').length === 6"): out.append(f'challenge link {q[:30]}: the map did not load')
+            await c4.close()
         # Every page, at the smallest phone, in every language: nothing scrolls sideways.
         for page in ['', 'gta-6-cheat-codes.html', 'gta-6-100-percent-checklist.html', 'gta-6-guide.html', 'legal.html', '404.html']:
             for lang in ['en', 'es', 'pt']:
