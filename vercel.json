@@ -4,17 +4,6 @@
   "cleanUrls": true,
   "redirects": [
     {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.vicecityhub.okenshop.com"
-        }
-      ],
-      "destination": "https://vicecityhub0.vercel.app/:path*",
-      "permanent": true
-    },
-    {
       "source": "/source",
       "destination": "https://github.com/kayesislam0/ViceCityHub",
       "permanent": false

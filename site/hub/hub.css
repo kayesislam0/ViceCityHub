@@ -142,8 +142,6 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .lg-tick { fill: none; stroke: var(--m-on); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .map-title { font: 400 30px/1 var(--display); fill: var(--chalk); }
 .map-pct { font: 400 30px/1 var(--display); fill: var(--m-accent, var(--neon)); text-anchor: end; font-variant-numeric: tabular-nums; }
-.route { fill: none; stroke: var(--neon); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1 9; opacity: .95; }
-.route-dot { fill: var(--asphalt); stroke: var(--neon); stroke-width: 3; }
 .compass text { font: 600 12px var(--text); fill: var(--chalk); }
 @media (hover: hover) { .rg:hover .shape { stroke: var(--chalk); } }
 .rg:focus-visible .shape { stroke: var(--chalk); stroke-width: 5; }

@@ -95,8 +95,23 @@
     [10, 'Street regular'], [13, 'Kingpin'], [16, 'Leonida legend'], [18, 'Owns the map']];
 
   // ---- storage (may be blocked: private mode, embedded previews) ----
+  // Every real change to progress stamps vch.updated, so a progress link or a backup can tell whether it is older than
+  // what this browser already has. Keys that are not progress (language, the one-time move flag) leave the stamp alone,
+  // and saving a value that did not change is skipped, so opening a page never makes old progress look new.
+  var META = { 'vch.updated': 1, 'vch.moved': 1, 'vch.lang': 1 };
   function load(key, fallback) { try { var v = localStorage.getItem(key); return v === null ? fallback : v; } catch (e) { return fallback; } }
-  function save(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* nothing to do */ } }
+  function rawSave(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* nothing to do */ } }
+  function stamp() { rawSave('vch.updated', String(Date.now())); }
+  function save(key, value) {
+    try {
+      if (localStorage.getItem(key) === value) return;
+      localStorage.setItem(key, value);
+      if (!META[key]) stamp();
+    } catch (e) { /* nothing to do */ }
+  }
+  function drop(key) {
+    try { if (localStorage.getItem(key) === null) return; localStorage.removeItem(key); if (!META[key]) stamp(); } catch (e) { /* blocked */ }
+  }
 
   // ---- keeping progress: ask the browser to keep this site's storage, restore from a progress link, warn when it won't stick ----
   var storageWorks = (function () { try { localStorage.setItem('vch.t', '1'); localStorage.removeItem('vch.t'); return true; } catch (e) { return false; } })();
@@ -111,44 +126,68 @@
   function encodeProgress(o) {
     return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
-  function progressCode() {
-    var o = progressData();
-    return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  }
+  function progressCode() { return encodeProgress(progressData()); }
   function progressLink() { return location.origin + location.pathname + '#p=' + progressCode(); }
+  function validKey(k, v) { return /^vch\.[a-zA-Z]+$/.test(k) && typeof v === 'string' && v.length < 400; }
+  function hasProgress() { return Object.keys(progressData()).some(function (k) { return !META[k]; }); }
 
   // ---- moving from the old address: each browser keeps progress per address, so the old one carries it over once ----
   var OLD_HOSTS = { 'vicecityhub.okenshop.com': 1, 'www.vicecityhub.okenshop.com': 1 };
   if (OLD_HOSTS[location.hostname]) {
     var dest = SITE.replace(/\/$/, '') + location.pathname + location.search;
-    var hash = location.hash || '';
+    var frag = location.hash || '';
     var data = progressData(); delete data['vch.moved'];
     // A progress link (#p=) travels as it is. Otherwise local progress moves once, as #m=, keeping any section anchor.
-    if (!/^#[pb]=/.test(hash) && load('vch.moved', '') !== '1' && Object.keys(data).length) {
-      var anchor = /^#[A-Za-z][\w-]*$/.test(hash) ? '.' + hash.slice(1) : '';
-      hash = '#m=' + encodeProgress(data) + anchor;
+    if (!/^#[pb]=/.test(frag) && load('vch.moved', '') !== '1' && Object.keys(data).length) {
+      var anchor = /^#[A-Za-z][\w-]*$/.test(frag) ? '.' + frag.slice(1) : '';
+      frag = '#m=' + encodeProgress(data) + anchor;
     }
     save('vch.moved', '1');
-    location.replace(dest + hash);
+    location.replace(dest + frag);
     return;
   }
 
-  // Opening a progress link (#p=...) copies that progress into this browser, then tidies the address.
+  // Opening a progress link (#p=...) copies that progress into this browser, then tidies the address. It never quietly
+  // replaces newer progress: a link older than this browser's progress changes nothing until the visitor says so, and a
+  // link that does replace progress offers Undo. A backup file sets a one-time flag, because loading one is on purpose.
   // A move from the old address (#m=...) only fills what this browser doesn't have yet, so it never undoes newer progress.
+  var beforeRestore = null, olderLink = null;
+  function applyProgress(o) {
+    beforeRestore = progressData();
+    Object.keys(o).forEach(function (k) { if (k !== 'vch.updated' && validKey(k, o[k])) rawSave(k, o[k]); });
+    stamp(); // what this browser now holds is its newest progress
+  }
+  // Undo: exactly the progress from before, nothing from the link left behind.
+  function replaceProgress(o) {
+    try { Object.keys(progressData()).forEach(function (k) { localStorage.removeItem(k); }); } catch (e) { /* blocked */ }
+    Object.keys(o).forEach(function (k) { rawSave(k, o[k]); });
+  }
+  function takeForce() {
+    try { var f = sessionStorage.getItem('vch-force') === '1'; sessionStorage.removeItem('vch-force'); return f; } catch (e) { return false; }
+  }
+  function openWithProgress(o, force) {
+    if (force) { try { sessionStorage.setItem('vch-force', '1'); } catch (e) { /* blocked */ } }
+    location.hash = 'p=' + encodeProgress(o); location.reload();
+  }
   var restored = (function () {
     var m = /^#([pm])=([A-Za-z0-9_-]+)(?:\.([A-Za-z][\w-]*))?$/.exec(location.hash || '');
     if (!m) return false;
+    var force = takeForce();
     try {
       var o = JSON.parse(decodeURIComponent(escape(atob(m[2].replace(/-/g, '+').replace(/_/g, '/')))));
-      var fillOnly = m[1] === 'm', n = 0;
-      Object.keys(o).forEach(function (k) {
-        if (!/^vch\.[a-zA-Z]+$/.test(k) || typeof o[k] !== 'string' || o[k].length >= 400) return;
-        if (fillOnly && load(k, null) !== null) return;
-        save(k, o[k]); n++;
-      });
+      if (!o || typeof o !== 'object') return false;
       history.replaceState(null, '', location.pathname + location.search + (m[3] ? '#' + m[3] : ''));
       if (m[3]) document.addEventListener('DOMContentLoaded', function () { var el = document.getElementById(m[3]); if (el) el.scrollIntoView(); });
-      return fillOnly ? (n ? 'moved' : false) : true;
+      if (m[1] === 'm') {
+        var n = 0;
+        Object.keys(o).forEach(function (k) { if (!validKey(k, o[k]) || load(k, null) !== null) return; rawSave(k, o[k]); n++; });
+        if (n && load('vch.updated', null) === null) stamp();
+        return n ? 'moved' : false;
+      }
+      var linkTime = Number(o['vch.updated']) || 0, localTime = Number(load('vch.updated', '')) || 0, had = hasProgress();
+      if (!force && had && localTime > linkTime) { olderLink = o; return 'older'; }
+      applyProgress(o);
+      return had ? 'replaced' : 'restored';
     } catch (e) { return false; }
   })();
 
@@ -237,9 +276,7 @@
   function buzz() { try { if (navigator.vibrate) navigator.vibrate(14); } catch (e) { /* not supported */ } }
 
   // ---- the map ----
-  var groups = [], labels = [], lakeEl = null, routeG = null, pctEl = null;
-  // Where a region's route dot sits: just above its name, so the dot never covers the label.
-  function anchorOf(r) { return [r.label[0], r.label[1] - 40]; }
+  var groups = [], labels = [], lakeEl = null, pctEl = null;
 
   var fogBase = null, fogLine = null, seaEl = null;
   function buildMap() {
@@ -271,7 +308,6 @@
     });
     lakeEl = el('path', { d: LAKE, class: 'lake', 'pointer-events': 'none' }, svg);
     el('text', { class: 'lake-name', x: LAKE_X, y: LAKE_Y + 4, 'text-anchor': 'middle', 'pointer-events': 'none' }, svg).textContent = tr('Lake');
-    routeG = el('g', { 'pointer-events': 'none' }, svg);
     // Each label: the name, and under it the level in a short word. A finished region gets a tick in front of "Finished".
     REGIONS.forEach(function (r) {
       var lg = el('g', { class: 'rl' + (r.out ? ' out' : ''), 'pointer-events': 'none' }, svg);
@@ -306,16 +342,6 @@
     if (!THEMES[v]) return;
     settings.theme = v; save('vch.theme', v);
     applyPalette(); render();
-  }
-
-  // Your route: a dashed neon line through every region you have touched, in map order.
-  function drawRoute() {
-    return; // the page map stays calm: colour and labels carry the state
-    while (routeG.firstChild) routeG.removeChild(routeG.firstChild);
-    var pts = [];
-    levels.forEach(function (l, i) { if (l) pts.push(anchorOf(REGIONS[i])); });
-    if (pts.length > 1) el('polyline', { class: 'route', points: pts.map(function (p) { return p.join(','); }).join(' ') }, routeG);
-    pts.forEach(function (p) { el('circle', { class: 'route-dot', cx: p[0], cy: p[1], r: 6 }, routeG); });
   }
 
   function bindList() {
@@ -420,7 +446,6 @@
     }
     $('pct').textContent = p;
     pctEl.textContent = tr('{n}% seen', { n: p });
-    drawRoute();
     $('rank').textContent = tr(RANKS[ri][1]);
     $('meter-sub').textContent = tr('{n} of 18 steps', { n: n });
     var next = RANKS[ri + 1];
@@ -485,16 +510,23 @@
     board = board.slice(0, BOARD_MAX);
     save('vch.board', boardString(board));
   }
+  // The board as shown and as sent: your friends (never you, even if your name came back in a link) plus your live row.
+  // Ties go to the friend, so you always see a step you can still take. One function, so the text you send always
+  // says the same position as the board on your screen.
+  function boardRows() {
+    var me = myName().toLowerCase();
+    var rows = board.filter(function (e) { return !me || e.n.toLowerCase() !== me; })
+      .map(function (e) { return { n: e.n, s: stepsOf(e.c), me: false }; });
+    if (!rows.length) return rows;
+    rows.push({ n: myName() || tr('You'), s: steps(), me: true });
+    rows.sort(function (a, b) { return b.s - a.s || (a.me ? 1 : 0) - (b.me ? 1 : 0); });
+    return rows;
+  }
   function renderBoard() {
     var box = $('board'); if (!box) return;
-    var me = myName().toLowerCase();
-    var friends = board.filter(function (e) { return !me || e.n.toLowerCase() !== me; });
-    box.hidden = !friends.length;
-    if (!friends.length) return;
-    var mine = steps(), rows = friends.map(function (e) { return { n: e.n, s: stepsOf(e.c), me: false }; });
-    rows.push({ n: myName() || tr('You'), s: mine, me: true });
-    // Ties go to the friend, so you always see a step you can still take.
-    rows.sort(function (a, b) { return b.s - a.s || (a.me ? 1 : 0) - (b.me ? 1 : 0); });
+    var rows = boardRows(), mine = steps();
+    box.hidden = !rows.length;
+    if (!rows.length) return;
     var list = $('board-list'); list.textContent = '';
     var myPos = 0;
     rows.forEach(function (r, i) {
@@ -533,8 +565,9 @@
     });
     $('board-send').addEventListener('click', function () {
       if (!myName()) { $('board-name').hidden = false; $('board-tag').focus(); toast(tr('Add your name first, so friends see who you are.')); return; }
-      var rows = board.length + 1, pos = 1 + board.filter(function (e) { return stepsOf(e.c) > steps(); }).length;
-      var text = tr('Our Leonida board: I am #{p} of {n} with {pct}%. Your move:', { p: pos, n: rows, pct: score() }) + ' ' + challengeUrl();
+      var rows = boardRows(), pos = 1;
+      rows.forEach(function (r, i) { if (r.me) pos = i + 1; });
+      var text = tr('Our Leonida board: I am #{p} of {n} with {pct}%. Your move:', { p: pos, n: Math.max(1, rows.length), pct: score() }) + ' ' + challengeUrl();
       shareOrCopy(text, function (m) { toast(m); }, tr('Board link copied. Paste it in the group chat.'));
     });
     $('board-clear').addEventListener('click', function () {
@@ -549,9 +582,10 @@
     var c = q.get('c');
     if (!c || !/^[0-3]{6}$/.test(c)) return;
     var t = 0; c.split('').forEach(function (d) { t += Number(d); });
-    var n = (q.get('n') || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 24) || tr('Your friend');
+    var given = cleanName(q.get('n')), n = given || tr('Your friend');
     rival = { name: n, pct: pctOf(t), levels: c.split('').map(Number) };
-    mergeBoard([{ n: cleanName(n), c: c }].concat(parseBoard(q.get('b'))));
+    // Only a named sender joins the board: unnamed links would all land on one "Your friend" row and overwrite each other.
+    mergeBoard((given ? [{ n: given, c: c }] : []).concat(parseBoard(q.get('b'))));
     $('challenge-name').textContent = n;
     $('vs-them').textContent = n;
     $('challenge-score').textContent = rival.pct + '%';
@@ -625,13 +659,15 @@
   function isoOf(day) { var d = new Date(LAUNCH + day * 864e5 + 432e5); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
   function bindSince() {
     var i = $('since'); if (!i) return;
-    i.max = isoOf(dayIndex()); i.value = isoOf(firstDay);
+    i.max = isoOf(dayIndex()); i.value = firstDay === null ? '' : isoOf(firstDay);
     i.addEventListener('change', function () {
+      // Clearing the field takes the start date off again: it is optional.
+      if (!i.value) { firstDay = null; drop('vch.since'); refreshDayLabel(); drawSoon(); return; }
       var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(i.value);
-      if (!m) { i.value = isoOf(firstDay); return; }
+      if (!m) { i.value = firstDay === null ? '' : isoOf(firstDay); return; }
       var day = Math.round((new Date(+m[1], +m[2] - 1, +m[3]).getTime() - LAUNCH) / 864e5);
       firstDay = Math.max(0, Math.min(dayIndex(), day)); i.value = isoOf(firstDay);
-      save('vch.since', String(firstDay)); drawSoon();
+      save('vch.since', String(firstDay)); refreshDayLabel(); drawSoon();
     });
   }
   function bindSettings() {
@@ -657,8 +693,7 @@
       r.checked = r.value === settings.kind;
       r.addEventListener('change', function () { settings.kind = r.value; if (r.value !== 'blend') save('vch.kind', r.value); drawSoon(); });
     });
-    var dLabel = $('dayone').parentNode.querySelector('span');
-    dLabel.textContent = tr('Show the day on my card: {day}', { day: startDay() === 0 ? tr('Day one') : tr('Day {n}', { n: startDay() + 1 }) });
+    refreshDayLabel();
     var d = $('dayone');
     d.checked = settings.dayone;
     d.addEventListener('change', function () { settings.dayone = d.checked; save('vch.dayone', d.checked ? '1' : '0'); drawSoon(); });
@@ -735,7 +770,8 @@
     ['Found a nest with painted eggs', 'Egg nest', 'myth'], ['Chased a rumour you read online', 'Rumour', 'myth'],
     ['Got close to an alligator', 'Gator', 'myth'], ['Reached the highest point you could find', 'Summit', 'myth']
   ];
-  // A new card goes live on the 1st of its month (local time). If no newer card ships, the latest one carries on.
+  // A new card goes live on the 1st of its month (local time). Cards are s1, s2, s3... one per month from November 2026,
+  // in order. Months after the last card written here get one automatically (see seasonAt).
   var SEASONS = [
     { id: 's1', month: '2026-11', squares: [
       ['Wanted in the first 10 minutes', 'Fast wanted', 'chaos'], ['Crashed within a block of the start', 'Early crash', 'chaos'],
@@ -765,13 +801,22 @@
     return out.concat([d1, d2]);
   }
   var LINES5 = linesOf(5), MID = 12;
-  function monthNow() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2); }
-  function seasonOf(id) { for (var i = 0; i < SEASONS.length; i++) if (SEASONS[i].id === id) return SEASONS[i]; return null; }
-  function currentSeason() {
-    var now = monthNow(), cur = SEASONS[0];
-    SEASONS.forEach(function (x) { if (x.month <= now) cur = x; });
-    return cur;
+  // Months since November 2026 on the visitor's clock (0 = November 2026, never below 0).
+  function monthIndex() { var d = new Date(); return Math.max(0, (d.getFullYear() - 2026) * 12 + d.getMonth() - 10); }
+  // After the written cards run out, each month still gets its own card: the monthly squares of an earlier card, taken
+  // in turn, in a new layout (cardOf seeds the layout with the card's id). The same for everyone, and already translated.
+  function seasonAt(k) {
+    if (k < SEASONS.length) return SEASONS[k];
+    var d = new Date(2026, 10 + k, 1);
+    return { id: 's' + (k + 1), month: d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2), squares: SEASONS[k % SEASONS.length].squares };
   }
+  // A card id from a link or from storage: a written card, or an automatic one whose month has already started.
+  function seasonOf(id) {
+    var m = /^s(\d{1,3})$/.exec(id || ''), k = m ? Number(m[1]) - 1 : -1;
+    if (k < 0) return null;
+    return k < SEASONS.length || k <= monthIndex() ? seasonAt(k) : null;
+  }
+  function currentSeason() { return seasonAt(monthIndex()); }
   function monthName(se) {
     var p = se.month.split('-');
     try { return new Date(Number(p[0]), Number(p[1]) - 1, 1).toLocaleDateString(LANG, { month: 'long', year: 'numeric' }).replace(/^./, function (c) { return c.toUpperCase(); }); }
@@ -891,11 +936,12 @@
   // Past cards: earlier months stay readable, and the launch-night board from the first two days is kept as a keepsake.
   function renderPast() {
     var list = $('bingo-past'), saved = cardsSaved(), rows = [];
-    SEASONS.forEach(function (se) {
-      if (se.id === bingo.season.id || !saved[se.id]) return;
+    for (var k = 0; k <= Math.max(monthIndex(), SEASONS.length - 1); k++) {
+      var se = seasonAt(k);
+      if (se.id === bingo.season.id || !saved[se.id]) continue;
       var m = maskIn(saved[se.id]);
       rows.push(monthName(se) + ': ' + scoreLine(m) + ' · ' + bingoLabel(m, cardOf(se)).label);
-    });
+    }
     var old = load('vch.bingoMarksBig', '') || load('vch.bingoMarks', '');
     if (/^[01]+$/.test(old) && old.replace(/0/g, '').length > 1) rows.push(tr('Launch night 2026: {n} squares ticked', { n: old.replace(/0/g, '').length - 1 }));
     list.textContent = '';
@@ -1038,19 +1084,12 @@
     var n = new Date(); n = new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime();
     return Math.max(0, Math.round((n - LAUNCH) / 864e5));
   }
-  // The player's own first day on the hub (players started on different days); Wrapped counts from it.
+  // The day the player started (0 = 19 Nov 2026, launch day = Day one), for the optional day stamp on the card.
+  // Optional: only set when the player picks a date under "I started playing on". Nothing is filled in for them.
   var firstDay = (function () {
-    var v = load('vch.since', ''), today = dayIndex();
-    if (/^\d{1,4}$/.test(v)) return Math.min(Number(v), today);
-    // Players from before this was saved: their first dare day if they have one, else today.
-    var days = load('vch.daily', '').split(',').filter(function (x) { return x !== ''; }).map(Number).filter(function (x) { return x >= 0 && x <= today; });
-    var first = days.length ? Math.min.apply(null, days) : today;
-    save('vch.since', String(first)); return first;
+    var v = load('vch.since', '');
+    return /^\d{1,4}$/.test(v) ? Math.min(Number(v), dayIndex()) : null;
   })();
-  function sinceText() {
-    var d = new Date(LAUNCH + firstDay * 864e5 + 432e5);
-    try { return d.toLocaleDateString(LANG, { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return d.toDateString(); }
-  }
   var dailyDone = (function () { var v = load('vch.daily', ''); return v ? v.split(',').map(Number).filter(function (x) { return x >= 0; }) : []; })();
   // The streak counts back from today (or yesterday, if today isn't done yet). A shield covers one missed day in any
   // 7 days, automatically, so one busy evening never wipes a run. shieldUsed tells the page whether it kicked in.
@@ -1114,6 +1153,7 @@
     b.hidden = done; $('daily-undo-line').hidden = !done;
     s.classList.toggle('btn--primary', done); s.classList.toggle('btn--quiet', !done);
     b.closest('.daily').classList.toggle('is-done', done);
+    refreshDayLabel(); // the day count moves on at midnight
   }
   // Remind me tomorrow: a calendar event for 8 pm tomorrow, made on the device. No account, nothing sent anywhere.
   function remindTomorrow() {
@@ -1202,8 +1242,6 @@
     }
     inputs.forEach(function (inp) {
       if (inp.type === 'checkbox') inp.checked = !!saved[inp.dataset.h]; else inp.value = saved[inp.dataset.h] || 0;
-      var before;
-      inp.addEventListener('focus', function () { before = paint(); });
       inp.addEventListener(inp.type === 'checkbox' ? 'change' : 'input', function () {
         var was = box.querySelectorAll('.hitem.is-done').length, now = paint();
         if (now > was) { buzz(); toast(now === inputs.length ? tr('Every category done. That is 100%.') : tr('Category done: {n} of {t}', { n: now, t: inputs.length })); }
@@ -1238,8 +1276,11 @@
     var got = load('vch.cheats', '').split(',').filter(Boolean);
     var cat = 'all';
     var norm = function (x) { return x.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); };
+    // Count only cheats on this page, so an old saved id (a renamed or removed cheat) can't push it past the total.
+    var ids = rows.map(function (r) { return r.dataset.id; });
     function count() {
-      $('cheat-count').textContent = tr('{n} of {m} unlocked', { n: got.length, m: rows.length });
+      var n = got.filter(function (g, k) { return ids.indexOf(g) >= 0 && got.indexOf(g) === k; }).length;
+      $('cheat-count').textContent = tr('{n} of {m} unlocked', { n: n, m: rows.length });
     }
     function apply() {
       var q = norm($('cheat-q').value.trim()), known = $('cheat-known').checked, shown = 0;
@@ -1296,9 +1337,10 @@
         try {
           var o = JSON.parse(r.result), d = o && o.app === 'vicecityhub' && o.data, clean = {};
           if (!d || typeof d !== 'object') throw new Error('not a backup');
-          Object.keys(d).forEach(function (k) { if (/^vch\.[a-zA-Z]+$/.test(k) && typeof d[k] === 'string' && d[k].length < 400) clean[k] = d[k]; });
-          if (!clean['vch.map']) throw new Error('no map');
-          location.hash = 'p=' + encodeProgress(clean); location.reload();
+          // Any backup with at least one valid entry loads: a player who only used the dare, bingo or cheat list has no map yet.
+          Object.keys(d).forEach(function (k) { if (validKey(k, d[k])) clean[k] = d[k]; });
+          if (!Object.keys(clean).some(function (k) { return !META[k]; })) throw new Error('empty backup');
+          openWithProgress(clean, true);
         } catch (e) { toast(tr('That file is not a Vice City Hub backup.')); }
       };
       r.readAsText(f);
@@ -1322,6 +1364,8 @@
       });
     });
     if (restored === 'moved') toast(tr('Your map moved here from the old address. Bookmark this one.'));
+    else if (restored === 'older') toast(tr('This progress link is older than the progress in this browser, so nothing changed.'), tr('Use it anyway'), function () { openWithProgress(olderLink, true); });
+    else if (restored === 'replaced') toast(tr('Progress restored from your link.'), tr('Undo'), function () { replaceProgress(beforeRestore); location.reload(); });
     else if (restored) toast(tr('Progress restored from your link.'));
   }
 
@@ -1435,7 +1479,7 @@
     mark(ctx, 64, y, s);
     ctx.fillStyle = T.ink; ctx.font = '400 ' + Math.round(s * 0.84) + 'px Anton, sans-serif';
     ctx.fillText('Vice City Hub', 64 + s + 16, y + s * 0.8);
-    var right = settings.platform + (settings.dayone ? '  ·  ' + (startDay() === 0 ? tr('Day one') : tr('Day {n}', { n: startDay() + 1 })) : '');
+    var right = settings.platform + (settings.dayone ? '  ·  ' + dayWord() : '');
     ctx.textAlign = 'right'; ctx.fillStyle = T.ink2; ctx.font = '600 ' + Math.round(s * 0.66) + 'px "DM Sans", sans-serif';
     ctx.fillText(right, W - 64, y + s * 0.76);
     // Players who tipped get a gold "Backed the hub" before the platform, on every card.
@@ -1728,7 +1772,7 @@
     var aw = ctx.measureText(a + ' ').width;
     ctx.fillStyle = T.accent; ctx.fillText(tr('Wrapped'), x + aw, y);
   }
-  function wrappedSub() { return cardName() + '  ·  ' + tr('since {date}', { date: sinceText() }); }
+  function wrappedSub() { return cardName(); }
   function wrappedGrid(ctx, T, st, x, y, cw, rh, vs, ls) {
     st.forEach(function (c, k) { statCell(ctx, T, c, x + (k % 2) * cw, y + Math.floor(k / 2) * rh, cw, vs, ls); });
   }
@@ -1827,8 +1871,14 @@
     grain(ctx, W, H);
   }
 
-  // The day count since launch (19 Nov 2026 = Day one), on the visitor's own clock.
-  function startDay() { return dayIndex(); }
+  // The day stamp on the card (only when the player ticks "Show the day on my card"): the day they started, if they
+  // picked one, counted from launch (19 Nov 2026 = Day one); with no start date, today's day since launch.
+  function startDay() { return firstDay === null ? dayIndex() : firstDay; }
+  function dayWord() { var d = startDay(); return d === 0 ? tr('Day one') : tr('Day {n}', { n: d + 1 }); }
+  function refreshDayLabel() {
+    var d = $('dayone'); if (!d) return;
+    d.parentNode.querySelector('span').textContent = tr('Show the day on my card: {day}', { day: dayWord() });
+  }
 
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
@@ -1919,7 +1969,7 @@
       var btn = this; btn.disabled = true;
       cardBlob().then(function (blob) {
         var file = new File([blob], fileName(), { type: 'image/png' });
-        var data = { files: [file], title: 'My Leonida card', text: shareText() + ' ' + challengeUrl() };
+        var data = { files: [file], title: tr('My Leonida card'), text: shareText() + ' ' + challengeUrl() };
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           return navigator.share(data).then(function () { status(tr('Shared. Now see if your crew can beat it.')); showThanks(); }, function (e) {
             if (e && e.name === 'AbortError') return;
@@ -1930,13 +1980,13 @@
         return copy(shareText() + ' ' + challengeUrl()).then(
           function () { status(tr('Card downloaded and the challenge text copied. Post both.')); },
           function () { status(tr('Card downloaded. Post it with your challenge link.')); });
-      }).catch(function () { status('The card could not be made in this browser. Try another browser.'); })
+      }).catch(function () { status(tr('The card could not be made in this browser. Try another browser.')); })
         .then(function () { btn.disabled = false; });
     });
     $('download').addEventListener('click', function () {
       var btn = this; btn.disabled = true;
       cardBlob().then(function (b) { download(b); status(tr('Card downloaded:') + ' ' + fileName()); showThanks(); },
-        function () { status('The card could not be made in this browser. Try another browser.'); })
+        function () { status(tr('The card could not be made in this browser. Try another browser.')); })
         .then(function () { btn.disabled = false; });
     });
     var canCopyImage = false;
@@ -2015,7 +2065,7 @@
   function boot() {
     if (LANG === 'en' || window.VCH_I18N) { start(); return; }
     var sc = document.createElement('script');
-    sc.src = '/hub/i18n.js?v=20261120f'; sc.onload = start; sc.onerror = start;
+    sc.src = '/hub/i18n.js?v=20261120g'; sc.onload = start; sc.onerror = start;
     document.head.appendChild(sc);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
