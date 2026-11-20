@@ -224,6 +224,8 @@ async def run(b, w, mob):
     if 'c=' in QUERY:
         await pg.evaluate("document.querySelector('details.list-toggle').open = true")
         await tap_el(pg, mob, '#region-list li:nth-child(4) button[data-k="2"]')
+        try: await pg.wait_for_function("!document.getElementById('vs-regions').hidden && document.getElementById('vs-regions').textContent.length > 10", timeout=5000)
+        except Exception: pass
         check(await pg.evaluate("!document.getElementById('vs-regions').hidden && document.getElementById('vs-regions').textContent.length > 10"), f'{tag} challenge region line')
 
     for e in errs: check(False, f'{tag} script error {e}')
