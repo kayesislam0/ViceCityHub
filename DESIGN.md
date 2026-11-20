@@ -87,19 +87,25 @@ its own bars. Every card type (Map, Wrapped, Blend, Bingo) has its own layout in
 feed shows a card at about a third of its size, so no text on a card is under 30px, and key text is 46px and up.
 Cards are checked after a 1080px resize and JPEG at quality 70, the way feeds recompress them.
 
-Only two things carry colour on a card: the big number and the map (or the bingo grid). Everything else is ink and
-grey. Anton is for the big number, the card title and the playstyle; everything else is DM Sans 600.
+Every card is a poster of Leonida at dusk, grown from the hub's own mark (a striped sun setting over the road): a sky in
+the theme's colours, the sun half under the horizon with the mark's five bands cut through it, the sea with the sun's
+reflection, and the map rising from the sea in front of the sun like the land itself. A fine grain over everything
+keeps the gradients from banding after a feed recompresses the image. Each theme has `sky`, `sun` and `water` colours.
+The big number sits in the open sky in white (gold at 100%); the playstyle, rank or Blend result in the sun's light
+gold under it; everything below the horizon sits on the dark sea. Anton is for the number, the card title and that
+gold line; everything else is DM Sans 600. No small grey label above a heading.
 
 Every card reads in the same order:
 
 1. **Top row:** the hub mark and "Vice City Hub" on the left; platform (and the day, if chosen) on the right.
 2. **Who:** the player's name or street name (DM Sans). A gold "Backed the hub" line under it for players who tipped.
 3. **The number:** the % in the theme accent, Anton, as large as the column allows. At 100% it turns gold.
-4. **The playstyle** (map card) or **rank** (Wrapped): a small grey kicker ("Plays like a", "Rank") over the value in Anton.
+4. **The playstyle** (map card), **rank** (Wrapped) or **who carried** (Blend), in Anton and the sun's gold, just above the horizon.
 5. **The verdict:** one true line only this player could have ("Has never set foot in Grassrivers",
    "4 of 6 regions still under the fog", "Finished every region of Leonida").
-6. **The map** with names. Seen regions in their level colour; unseen regions a flat dark fill (fine stripes turn to
-   mush once a feed recompresses the image).
+6. **The map**, rising from the sea in front of the sun. Seen regions in their level colour; unseen regions a flat dark
+   fill (fine stripes turn to mush once a feed recompresses the image). Names on the story map and Blend story only,
+   where they are large enough to read.
 7. **The footer:** a hairline, what to do in plain words ("Can you beat 50%?", "Get your Leonida Wrapped",
    "Blend with me"), the address in the accent colour, and an exit arrow in an accent ring.
 8. **Wrapped stats** show only what happened: a streak, dares or bingo lines that are still 0 are left out.
