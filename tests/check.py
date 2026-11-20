@@ -59,6 +59,16 @@ async def browser():
             if not await pg.evaluate("document.getElementById('card-canvas').toDataURL('image/png').length > 50000"): out.append(f'{w}px: the card did not paint')
             out += [f'{w}px: script error {e}' for e in errors]
             await ctx.close()
+        # Open in wallet: a BTC-only bitcoin: link; with no wallet app it copies the address and says what to do next.
+        cw = await b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True, permissions=['clipboard-read', 'clipboard-write'])
+        pw = await cw.new_page(); ew = []; pw.on('pageerror', lambda e: ew.append(str(e)))
+        await pw.goto(base); await pw.wait_for_timeout(300)
+        if await pw.get_attribute('#wallet-open', 'href') != f'bitcoin:{BTC}?label=Vice%20City%20Hub': out.append('wallet: the link is not a BTC payment link')
+        await pw.click('#wallet-open'); await pw.wait_for_timeout(2000)
+        if not await pw.is_visible('#wallet-help'): out.append('wallet: nothing happened when no wallet app opened')
+        if await pw.evaluate('navigator.clipboard.readText()') != BTC: out.append('wallet: the address was not copied')
+        out += [f'wallet: script error {e}' for e in ew]
+        await cw.close()
         # Moving from the old address: progress travels once, a section anchor survives, newer progress is never undone.
         cm = await b.new_context(viewport={'width': 390, 'height': 844})
         async def local(route):

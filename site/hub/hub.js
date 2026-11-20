@@ -875,7 +875,8 @@
   }
   function untilMidnight() {
     var n = new Date(), m = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1), mins = Math.max(1, Math.round((m - n) / 6e4));
-    return Math.floor(mins / 60) ? tr('{h} h {m} min', { h: Math.floor(mins / 60), m: mins % 60 }) : tr('{m} min', { m: mins });
+    // Non-breaking spaces keep "9 h 57 min" on one line.
+    return (Math.floor(mins / 60) ? tr('{h} h {m} min', { h: Math.floor(mins / 60), m: mins % 60 }) : tr('{m} min', { m: mins })).replace(/ /g, '\u00a0');
   }
   function renderDaily() {
     var d = dayIndex(), done = dailyDone.indexOf(d) >= 0, st = streak();
@@ -883,7 +884,8 @@
     $('daily-task').textContent = tr(DAILY[d % DAILY.length]);
     $('daily-reset').textContent = done ? tr('Done. Next dare in {t}', { t: untilMidnight() }) : tr('Same dare for everyone. New one in {t}', { t: untilMidnight() });
     $('daily-streak-n').textContent = st;
-    $('daily-streak').textContent = st === 1 ? tr('day streak') : tr('days streak');
+    // English says "0 day streak" and "5 day streak"; Spanish and Portuguese need the plural.
+    $('daily-streak').textContent = (st === 1 || LANG === 'en') ? tr('day streak') : tr('days streak');
     var best = Math.max(longestStreak(), st);
     $('daily-total').textContent = (best === 1 ? tr('Best: 1 day') : tr('Best: {n} days', { n: best })) + ' · ' + (dailyDone.length === 1 ? tr('1 done') : tr('{n} done', { n: dailyDone.length }));
     $('daily-shield').textContent = shieldUsed ? tr('A missed day was forgiven this week') : tr('Miss a day? One a week is forgiven');
@@ -1633,6 +1635,26 @@
         copy(b.dataset.copy).then(function () { b.textContent = tr(b.dataset.done || 'Copied'); },
           function () { b.textContent = tr('Select the address above to copy'); })
           .then(function () { setTimeout(function () { b.textContent = label; }, 2500); });
+      });
+    });
+    // Open in wallet: a bitcoin: link always means BTC on the Bitcoin network, and the phone offers the wallet apps
+    // that accept it. Many apps (exchanges included) don't take these links, so the address is copied first, and if no
+    // wallet opens, the next step is shown instead of nothing happening.
+    var wallet = $('wallet-open'), help = $('wallet-help');
+    if (wallet && help) wallet.addEventListener('click', function () {
+      var left = false, addr = wallet.getAttribute('href').replace(/^bitcoin:/, '').split('?')[0];
+      function away() { left = true; }
+      window.addEventListener('blur', away, { once: true });
+      document.addEventListener('visibilitychange', away, { once: true });
+      help.hidden = true;
+      copy(addr).then(function () { return true; }, function () { return false; }).then(function (copied) {
+        setTimeout(function () {
+          window.removeEventListener('blur', away); document.removeEventListener('visibilitychange', away);
+          if (left || document.hidden) return;
+          help.textContent = tr(copied ? 'No wallet app opened. The address is copied: open your wallet, tap Send, choose Bitcoin (BTC) as the coin and the Bitcoin network, then paste.'
+            : 'No wallet app opened. Copy the address above, then in your wallet tap Send, choose Bitcoin (BTC) and the Bitcoin network, and paste it.');
+          help.hidden = false;
+        }, 1500);
       });
     });
     $('reset').addEventListener('click', function () {
