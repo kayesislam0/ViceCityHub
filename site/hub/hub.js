@@ -123,7 +123,7 @@
     var hash = location.hash || '';
     var data = progressData(); delete data['vch.moved'];
     // A progress link (#p=) travels as it is. Otherwise local progress moves once, as #m=, keeping any section anchor.
-    if (!/^#p=/.test(hash) && load('vch.moved', '') !== '1' && Object.keys(data).length) {
+    if (!/^#[pb]=/.test(hash) && load('vch.moved', '') !== '1' && Object.keys(data).length) {
       var anchor = /^#[A-Za-z][\w-]*$/.test(hash) ? '.' + hash.slice(1) : '';
       hash = '#m=' + encodeProgress(data) + anchor;
     }
@@ -696,15 +696,41 @@
     });
   }
 
-  // ---- launch-night bingo: 3 x 3 or 5 x 5, free centre, a different board for every player ----
-  // 24 prompts: a 5 x 5 board uses all of them, a 3 x 3 board draws 8. Each size keeps its own ticks.
-  var BINGO = ['Wanted in the first 10 minutes', 'Skipped a mission to explore', 'Crashed within a block of the start',
-    'Changed outfit before anything else', 'Drove on the beach', 'Got lost in the swamp', 'Watched a sunset on purpose',
-    'Stole a boat', 'Still playing at 3 AM', 'Lost a fight to a stranger', 'One radio station on repeat',
-    'Followed the GPS into water', 'Fell off a roof', 'Hid from the cops in an alley', 'Texted the crew “it’s so good”',
-    'Forgot to eat dinner', 'Drove to the Keys at night', 'Restarted a mission 3 times', '20 photos before mission 2',
-    'Honked at every car', 'Parked in a silly spot', 'Swam when you should have driven', 'Ran out of money already',
-    'Missed a turn on Ocean Drive'];
+  // ---- Leonida Bingo: one 5 x 5 card a month, the same card for everyone, so friends can read each other's grid ----
+  // Each square belongs to one of four themes; which themes you tick (not how many) gives your label.
+  var BTHEME = {
+    chaos:  { name: 'Chaos', label: 'Florida Man', color: '#FF5A5F', emoji: '🟥' },
+    cruise: { name: 'Cruising', label: 'Keys Drifter', color: '#3FA9F5', emoji: '🟦' },
+    local:  { name: 'Local life', label: 'Bodega Regular', color: '#FFC35A', emoji: '🟨' },
+    myth:   { name: 'Secrets', label: 'Swamp Myth-Hunter', color: '#4CC38A', emoji: '🟩' }
+  };
+  var BORDER = ['chaos', 'cruise', 'local', 'myth'];
+  // [full text, short text for phones under 360px, theme]. 16 staples on every card, 8 that change each month.
+  // No story beats, and secrets are named without saying where they are.
+  var STAPLES = [
+    ['Survived a 6-star chase', '6 stars', 'chaos'], ['Lost the cops on foot', 'Foot chase', 'chaos'],
+    ['Tried to steal a jet', 'Jet theft', 'chaos'], ['Followed the GPS into water', 'GPS swim', 'chaos'],
+    ['Watched a sunset on purpose', 'Sunset', 'cruise'], ['Drove to the Keys at night', 'Keys night', 'cruise'],
+    ['Crossed Leonida without a crash', 'Clean drive', 'cruise'], ['Took a boat instead of a car', 'Boat ride', 'cruise'],
+    ['Played past 3 AM', '3 AM', 'local'], ['Changed outfit for no reason', 'New fit', 'local'],
+    ['Scrolled the in-game feed', 'Feed scroll', 'local'], ['One radio station on repeat', 'Radio loop', 'local'],
+    ['Found a nest with painted eggs', 'Egg nest', 'myth'], ['Chased a rumour you read online', 'Rumour', 'myth'],
+    ['Got close to an alligator', 'Gator', 'myth'], ['Reached the highest point you could find', 'Summit', 'myth']
+  ];
+  // A new card goes live on the 1st of its month (local time). If no newer card ships, the latest one carries on.
+  var SEASONS = [
+    { id: 's1', month: '2026-11', squares: [
+      ['Wanted in the first 10 minutes', 'Fast wanted', 'chaos'], ['Crashed within a block of the start', 'Early crash', 'chaos'],
+      ['Jet ski at full speed', 'Jet ski', 'cruise'], ['Drove on the beach', 'Beach drive', 'cruise'],
+      ['Petted a bodega cat', 'Bodega cat', 'local'], ['Played a game on the in-game console', 'Console', 'local'],
+      ['Met a dog on a jet ski', 'Cool dog', 'myth'], ['Got lost in the swamp', 'Swamp lost', 'myth']] },
+    { id: 's2', month: '2026-12', squares: [
+      ['Escaped 5 stars by boat', 'Boat escape', 'chaos'], ['Wrecked a car you just bought', 'New wreck', 'chaos'],
+      ['Flew over Vice City', 'Fly-over', 'cruise'], ['Drove coast to coast', 'Coast run', 'cruise'],
+      ['Repainted a room', 'Repaint', 'local'], ['Took 20 photos in one session', '20 photos', 'local'],
+      ['Explored a spot with no map marker', 'No marker', 'myth'], ['Saw an animal you could not name', 'Odd animal', 'myth']] }
+  ];
+  var FREE = ['Played this month', 'Played', 'free'];
   // Rows, columns and both diagonals of an n x n board.
   function linesOf(n) {
     var out = [], d1 = [], d2 = [];
@@ -715,130 +741,260 @@
     }
     return out.concat([d1, d2]);
   }
-  // 5 x 5 needs a screen at least 360px wide for its words to fit whole; narrower phones play 3 x 3 (the 5 x 5 board and
-  // its ticks stay saved for a wider screen).
-  function fitsBig() { try { return !matchMedia('(max-width: 359px)').matches; } catch (e) { return true; } }
-  var bingo = { size: load('vch.bingoSize', '3') === '5' && fitsBig() ? 5 : 3, seed: Number(load('vch.bingoSeed', '0')) || (Math.floor(Math.random() * 1e9) + 1) };
-  function marksKey() { return bingo.size === 5 ? 'vch.bingoMarksBig' : 'vch.bingoMarks'; }
-  function cellCount() { return bingo.size * bingo.size; }
-  function centre() { return (cellCount() - 1) / 2; }
-  function freshMarks() { var m = []; for (var i = 0; i < cellCount(); i++) m.push(i === centre() ? 1 : 0); return m; }
-  function loadMarks() {
-    var m = load(marksKey(), ''), n = cellCount();
-    bingo.marks = new RegExp('^[01]{' + n + '}$').test(m) ? m.split('').map(Number) : freshMarks();
-    bingo.marks[centre()] = 1;
+  var LINES5 = linesOf(5), MID = 12;
+  function monthNow() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2); }
+  function seasonOf(id) { for (var i = 0; i < SEASONS.length; i++) if (SEASONS[i].id === id) return SEASONS[i]; return null; }
+  function currentSeason() {
+    var now = monthNow(), cur = SEASONS[0];
+    SEASONS.forEach(function (x) { if (x.month <= now) cur = x; });
+    return cur;
   }
-  function saveMarks() { save(marksKey(), bingo.marks.join('')); }
-  loadMarks();
-  save('vch.bingoSeed', String(bingo.seed));
-  function LINES() { return linesOf(bingo.size); }
-
-  function boardPrompts() {
-    var idx = BINGO.map(function (_, i) { return i; });
-    var s = bingo.seed;
-    for (var i = idx.length - 1; i > 0; i--) { // seeded Fisher-Yates
+  function monthName(se) {
+    var p = se.month.split('-');
+    try { return new Date(Number(p[0]), Number(p[1]) - 1, 1).toLocaleDateString(LANG, { month: 'long', year: 'numeric' }).replace(/^./, function (c) { return c.toUpperCase(); }); }
+    catch (e) { return se.month; }
+  }
+  // The card layout is fixed per season (a seeded shuffle of its id), so every player sees the same grid.
+  function cardOf(se) {
+    var all = STAPLES.concat(se.squares), s = 0, i;
+    for (i = 0; i < se.id.length; i++) s = (Math.imul(s, 31) + se.id.charCodeAt(i)) >>> 0;
+    s = s || 1;
+    for (i = all.length - 1; i > 0; i--) {
       s = (Math.imul(s, 1103515245) + 12345) >>> 0;
-      var j = s % (i + 1); var t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+      var j = s % (i + 1), t = all[i]; all[i] = all[j]; all[j] = t;
     }
-    var picks = idx.slice(0, cellCount() - 1).map(function (k) { return BINGO[k]; });
-    picks.splice(centre(), 0, 'Free: played on launch night');
-    return picks;
+    all.splice(MID, 0, FREE);
+    return all;
   }
-  function bingoLines() { return LINES().filter(function (l) { return l.every(function (i) { return bingo.marks[i]; }); }).length; }
-  // Ticks still needed for the closest unfinished line (0 when every line is done).
+  // 24 ticks are 24 bits: 4 URL-safe characters. Saved as "s1:Az9f,s2:...." in one key, and used in compare links.
+  var B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  function maskOut(m) {
+    var bits = 0, k = 0, out = '', i;
+    for (i = 0; i < 25; i++) { if (i === MID) continue; if (m[i]) bits |= (1 << k); k++; }
+    for (i = 0; i < 4; i++) out += B64.charAt((bits >> (6 * i)) & 63);
+    return out;
+  }
+  function maskIn(str) {
+    if (!/^[A-Za-z0-9_-]{4}$/.test(str || '')) return null;
+    var bits = 0, m = [], k = 0, i;
+    for (i = 0; i < 4; i++) bits |= B64.indexOf(str.charAt(i)) << (6 * i);
+    for (i = 0; i < 25; i++) { if (i === MID) { m.push(1); continue; } m.push((bits >> k) & 1); k++; }
+    return m;
+  }
+  function cardsSaved() {
+    var o = {};
+    load('vch.bingoCards', '').split(',').forEach(function (p) { var kv = p.split(':'); if (seasonOf(kv[0]) && maskIn(kv[1])) o[kv[0]] = kv[1]; });
+    return o;
+  }
+  function marksFor(id) { return maskIn(cardsSaved()[id]) || maskIn('AAAA'); }
+  function saveCard() {
+    var o = cardsSaved(); o[bingo.season.id] = maskOut(bingo.marks);
+    save('vch.bingoCards', Object.keys(o).map(function (k) { return k + ':' + o[k]; }).join(','));
+  }
+  var bingo = { season: currentSeason(), friend: null };
+  bingo.squares = cardOf(bingo.season); bingo.marks = marksFor(bingo.season.id);
+
+  function linesIn(m) { return LINES5.filter(function (l) { return l.every(function (i) { return m[i]; }); }).length; }
+  function tickedIn(m) { var n = 0; m.forEach(function (v, i) { if (v && i !== MID) n++; }); return n; }
+  function bingoLines() { return linesIn(bingo.marks); }
   function bingoNeed() {
-    var need = bingo.size;
-    LINES().forEach(function (l) { var k = l.filter(function (i) { return !bingo.marks[i]; }).length; if (k) need = Math.min(need, k); });
-    return bingoLines() === LINES().length ? 0 : need;
+    var need = 5;
+    LINES5.forEach(function (l) { var k = l.filter(function (i) { return !bingo.marks[i]; }).length; if (k) need = Math.min(need, k); });
+    return bingoLines() === LINES5.length ? 0 : need;
   }
-  function ticked() { return bingo.marks.reduce(function (a, b) { return a + b; }, 0) - 1; }
+  // The label comes from the theme you ticked the biggest share of. Self-reported, never ranked against anyone.
+  function bingoLabel(m, sq) {
+    var per = {}, total = tickedIn(m);
+    BORDER.forEach(function (t) { per[t] = [0, 0]; });
+    sq.forEach(function (q, i) { if (i === MID) return; per[q[2]][1]++; if (m[i]) per[q[2]][0]++; });
+    if (total === 24) return { label: tr('Blackout'), why: tr('Every square on the card'), theme: null, per: per };
+    if (total < 3) return { label: tr('Fresh card'), why: tr('Tick 3 squares to get your label'), theme: null, per: per };
+    var order = BORDER.slice().sort(function (a, b) { return per[b][0] / per[b][1] - per[a][0] / per[a][1]; });
+    var top = order[0], gap = per[top][0] / per[top][1] - per[order[1]][0] / per[order[1]][1];
+    if (total >= 8 && gap < 0.17) return { label: tr('Leonida All-Rounder'), why: tr('An even spread across all four themes'), theme: null, per: per };
+    return { label: tr(BTHEME[top].label), why: tr('{k} of {n} {theme} squares', { k: per[top][0], n: per[top][1], theme: tr(BTHEME[top].name) }), theme: top, per: per };
+  }
   function paintLines() {
     var on = {};
-    LINES().forEach(function (l) { if (l.every(function (i) { return bingo.marks[i]; })) l.forEach(function (i) { on[i] = 1; }); });
+    LINES5.forEach(function (l) { if (l.every(function (i) { return bingo.marks[i]; })) l.forEach(function (i) { on[i] = 1; }); });
     Array.prototype.forEach.call($('bingo').children, function (c, i) { c.classList.toggle('is-line', !!on[i]); });
   }
 
   function buildBingo() {
-    var box = $('bingo'), c = centre();
+    var box = $('bingo'), f = bingo.friend && bingo.friend.season === bingo.season.id ? bingo.friend.marks : null;
     box.textContent = '';
-    box.classList.toggle('is-big', bingo.size === 5);
-    box.style.setProperty('--n', bingo.size);
-    boardPrompts().forEach(function (text, i) {
+    $('bingo-month').textContent = monthName(bingo.season);
+    bingo.squares.forEach(function (q, i) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'cell' + (i === c ? ' cell--free' : '');
-      b.textContent = tr(text);
+      b.className = 'cell cell--' + q[2] + (i === MID ? ' cell--free' : '') + (f && f[i] && i !== MID ? ' is-theirs' : '');
+      var full = document.createElement('span'); full.className = 'cell__t'; full.textContent = tr(q[0]);
+      var short = document.createElement('span'); short.className = 'cell__s'; short.textContent = tr(q[1]); short.setAttribute('aria-hidden', 'true');
+      b.appendChild(full); b.appendChild(short);
       b.setAttribute('aria-pressed', String(Boolean(bingo.marks[i])));
-      if (i === c) b.setAttribute('aria-disabled', 'true');
+      if (i === MID) b.setAttribute('aria-disabled', 'true');
       b.addEventListener('click', function () {
-        if (i === c) return;
+        if (i === MID) return;
         var before = bingoLines();
         bingo.marks[i] = bingo.marks[i] ? 0 : 1;
-        saveMarks();
+        saveCard();
         b.setAttribute('aria-pressed', String(Boolean(bingo.marks[i])));
+        $('bingo-said').textContent = (bingo.marks[i] ? '✓ ' : '') + tr(q[0]);
         var after = bingoLines();
         renderBingoScore();
         if (after > before) {
           buzz();
-          toast(after === LINES().length ? tr('Every square ticked.') : tr(after === 1 ? 'Bingo: 1 line. Share your board.' : 'Bingo: {n} lines. Share your board.', { n: after }));
+          toast(after === LINES5.length ? tr('Blackout. Every square ticked.') : tr(after === 1 ? 'Bingo: 1 line. Share your card.' : 'Bingo: {n} lines. Share your card.', { n: after }));
           box.classList.remove('win'); void box.offsetWidth; box.classList.add('win');
         }
         drawSoon();
       });
       box.appendChild(b);
     });
-    document.querySelectorAll('input[name="bingo-size"]').forEach(function (r) { r.checked = Number(r.value) === bingo.size; });
-    renderBingoScore();
+    renderBingoScore(); renderPast();
+  }
+  function scoreLine(m) {
+    var n = linesIn(m);
+    return tickedIn(m) + '/24 · ' + (n === 1 ? tr('1 line') : tr('{n} lines', { n: n }));
   }
   function renderBingoScore() {
-    var n = bingoLines(), need = bingoNeed();
-    var next = need === 1 ? tr('1 more for the next bingo') : tr('{k} more for the next bingo', { k: need });
-    var first = need === 1 ? tr('1 more for a bingo') : tr('{k} more for a bingo', { k: need });
-    $('bingo-score').textContent = !n ? first : need === 0 ? tr('Full board. Every line is a bingo') : (n === 1 ? tr('1 bingo') : tr('{n} bingos', { n: n })) + ' · ' + next;
+    var n = bingoLines(), need = bingoNeed(), L = bingoLabel(bingo.marks, bingo.squares);
+    $('bingo-score').textContent = scoreLine(bingo.marks) + (need ? ' · ' + (need === 1 ? tr('1 more for the next line') : tr('{k} more for the next line', { k: need })) : '');
     $('bingo-score').classList.toggle('is-bingo', n > 0);
-    paintLines();
+    $('bingo-label').textContent = L.label;
+    $('bingo-why').textContent = L.why;
+    paintLines(); renderFriend();
+  }
+  // Past cards: earlier months stay readable, and the launch-night board from the first two days is kept as a keepsake.
+  function renderPast() {
+    var list = $('bingo-past'), saved = cardsSaved(), rows = [];
+    SEASONS.forEach(function (se) {
+      if (se.id === bingo.season.id || !saved[se.id]) return;
+      var m = maskIn(saved[se.id]);
+      rows.push(monthName(se) + ': ' + scoreLine(m) + ' · ' + bingoLabel(m, cardOf(se)).label);
+    });
+    var old = load('vch.bingoMarksBig', '') || load('vch.bingoMarks', '');
+    if (/^[01]+$/.test(old) && old.replace(/0/g, '').length > 1) rows.push(tr('Launch night 2026: {n} squares ticked', { n: old.replace(/0/g, '').length - 1 }));
+    list.textContent = '';
+    rows.forEach(function (t) { var li = document.createElement('li'); li.textContent = t; list.appendChild(li); });
+    $('bingo-past-wrap').hidden = !rows.length;
+  }
+
+  // ---- compare: a friend's link (#b=s1.Az9f~Name) shows their ticks on your card ----
+  function readBingoLink() {
+    var m = /^#b=(s\d{1,3})\.([A-Za-z0-9_-]{4})(?:~(.*))?$/.exec(location.hash || '');
+    if (!m || !seasonOf(m[1])) return;
+    var name = '';
+    try { name = cleanName(decodeURIComponent(m[3] || '')).slice(0, 16); } catch (e) { name = ''; }
+    bingo.friend = { season: m[1], marks: maskIn(m[2]), name: name || tr('Your friend') };
+    try { history.replaceState(null, '', location.pathname + location.search + '#bingo-title'); } catch (e) { /* old browser */ }
+  }
+  function renderFriend() {
+    var box = $('bingo-vs'), f = bingo.friend;
+    if (!f) { box.hidden = true; return; }
+    box.hidden = false;
+    var se = seasonOf(f.season);
+    if (f.season !== bingo.season.id) {
+      $('bingo-vs-head').textContent = tr('{name} sent their {month} card: {score}', { name: f.name, month: monthName(se), score: scoreLine(f.marks) });
+      $('bingo-vs-text').textContent = tr('This month has a new card. Tick yours and send it back.');
+      return;
+    }
+    var both = 0, me = 0, them = 0;
+    for (var i = 0; i < 25; i++) { if (i === MID) continue; if (f.marks[i] && bingo.marks[i]) both++; else if (bingo.marks[i]) me++; else if (f.marks[i]) them++; }
+    $('bingo-vs-head').textContent = tr('{name}: {score} · {label}', { name: f.name, score: scoreLine(f.marks), label: bingoLabel(f.marks, bingo.squares).label });
+    $('bingo-vs-text').textContent = tr('You both did {b}. Only you: {m}. Only {name}: {t}. Their squares have a dashed edge.', { b: both, m: me, t: them, name: f.name });
+  }
+  function bingoUrl() {
+    var t = cleanName(settings.tag || '').slice(0, 16);
+    return SITE + '#b=' + bingo.season.id + '.' + maskOut(bingo.marks) + (t ? '~' + encodeURIComponent(t) : '');
   }
   function bingoText() {
-    var rows = [];
-    for (var r = 0; r < bingo.size; r++) {
+    var rows = [], L = bingoLabel(bingo.marks, bingo.squares);
+    for (var r = 0; r < 5; r++) {
       var row = '';
-      for (var c = 0; c < bingo.size; c++) row += bingo.marks[r * bingo.size + c] ? '🟪' : '⬛';
+      for (var c = 0; c < 5; c++) { var i = r * 5 + c; row += i === MID ? '⭐' : bingo.marks[i] ? BTHEME[bingo.squares[i][2]].emoji : '⬛'; }
       rows.push(row);
     }
-    var n = bingoLines();
-    var who = (settings.tag || '').trim();
-    var head = (who ? tr('{name}\'s launch-night bingo', { name: who }) : tr('My launch-night bingo')) + ' (' + bingo.size + '×' + bingo.size + ') · ' + settings.platform + ' · ' +
-      (n ? (n === 1 ? tr('1 bingo') : tr('{n} bingos', { n: n })) : tr('{k} of {m} ticked', { k: ticked(), m: cellCount() - 1 }));
-    return head + '\n' + rows.join('\n') + '\n' + SITE + '#tools';
+    return tr('Leonida Bingo') + ' · ' + monthName(bingo.season) + ' · ' + scoreLine(bingo.marks) + ' · ' + L.label + '\n' + rows.join('\n') + '\n' + tr('Beat my card:') + ' ' + bingoUrl();
+  }
+
+  // The share image: 1080 x 1080, label on top, the coloured grid (shape only, no words) and the score beside it.
+  function drawBingoCard(cv) {
+    var W = 1080, H = 1080, T = THEMES[settings.theme] || THEMES.night, L = bingoLabel(bingo.marks, bingo.squares);
+    cv.width = W * 2; cv.height = H * 2;
+    var ctx = cv.getContext('2d');
+    ctx.setTransform(2, 0, 0, 2, 0, 0);
+    var bg = ctx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, T.bg); bg.addColorStop(1, T.bg2);
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    topRow(ctx, T, W, 56, 48);
+    ctx.fillStyle = T.accent; fitText(ctx, (tr('Leonida Bingo') + '  ·  ' + monthName(bingo.season)).toUpperCase(), W - 128, 30, '600 {s}px "DM Sans", sans-serif');
+    ctx.fillText((tr('Leonida Bingo') + '  ·  ' + monthName(bingo.season)).toUpperCase(), 64, 184);
+    ctx.fillStyle = T.ink; fitText(ctx, L.label, W - 128, 104, '400 {s}px Anton, sans-serif'); ctx.fillText(L.label, 64, 292);
+    ctx.fillStyle = T.ink2; fitText(ctx, L.why, W - 128, 32, '600 {s}px "DM Sans", sans-serif'); ctx.fillText(L.why, 64, 344);
+    var gx = 64, gy = 388, cs = 88, gap = 8, on = {};
+    LINES5.forEach(function (l) { if (l.every(function (i) { return bingo.marks[i]; })) l.forEach(function (i) { on[i] = 1; }); });
+    bingo.squares.forEach(function (q, i) {
+      var x = gx + (i % 5) * (cs + gap), y = gy + Math.floor(i / 5) * (cs + gap);
+      roundRect(ctx, x, y, cs, cs, 14);
+      if (i === MID) ctx.fillStyle = T.done; else ctx.fillStyle = bingo.marks[i] ? BTHEME[q[2]].color : T.fill[0];
+      ctx.fill();
+      if (!bingo.marks[i]) { ctx.strokeStyle = T.line; ctx.lineWidth = 2; ctx.stroke(); }
+      if (on[i]) { roundRect(ctx, x + 4, y + 4, cs - 8, cs - 8, 11); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4; ctx.stroke(); }
+      if (i === MID) star(ctx, x + cs / 2, y + cs / 2, 22, T.onFull);
+      else if (bingo.marks[i]) {
+        ctx.strokeStyle = 'rgba(0,0,0,.72)'; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.beginPath(); ctx.moveTo(x + cs * 0.3, y + cs * 0.52); ctx.lineTo(x + cs * 0.44, y + cs * 0.66); ctx.lineTo(x + cs * 0.71, y + cs * 0.36); ctx.stroke();
+        ctx.lineCap = 'butt';
+      }
+    });
+    var rx = 600, n = tickedIn(bingo.marks), ln = bingoLines();
+    ctx.fillStyle = T.ink; ctx.font = '400 150px Anton, sans-serif'; ctx.fillText(String(n), rx, 548);
+    var nw = ctx.measureText(String(n)).width;
+    ctx.fillStyle = T.ink2; ctx.font = '400 64px Anton, sans-serif'; ctx.fillText('/24', rx + nw + 8, 548);
+    ctx.font = '600 30px "DM Sans", sans-serif'; ctx.fillText(tr('squares ticked'), rx + 2, 590);
+    ctx.fillStyle = ln ? T.done : T.ink; ctx.font = '400 76px Anton, sans-serif';
+    ctx.fillText(ln === 1 ? tr('1 line') : tr('{n} lines', { n: ln }), rx, 690);
+    BORDER.forEach(function (t, k) {
+      var y = 748 + k * 32, c = L.per[t];
+      roundRect(ctx, rx, y - 20, 22, 22, 5); ctx.fillStyle = BTHEME[t].color; ctx.fill();
+      ctx.fillStyle = T.ink2; ctx.font = '600 24px "DM Sans", sans-serif';
+      ctx.fillText(tr(BTHEME[t].name) + '  ' + c[0] + '/' + c[1], rx + 34, y);
+    });
+    dare(ctx, T, W, H, 196, n === 24 ? tr('Blackout. Can you match it?') : tr('Beat my bingo card'));
+  }
+  function star(ctx, cx, cy, r, color) {
+    ctx.beginPath();
+    for (var k = 0; k < 10; k++) { var a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? r * 0.45 : r; ctx[k ? 'lineTo' : 'moveTo'](cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); }
+    ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+  }
+  function bingoBlob() {
+    return new Promise(function (resolve, reject) {
+      var cv = document.createElement('canvas'); drawBingoCard(cv);
+      cv.toBlob(function (b) { b ? resolve(b) : reject(new Error('no image')); }, 'image/png');
+    });
   }
   function bingoStatus(msg) { var s = $('bingo-status'); s.textContent = ''; setTimeout(function () { s.textContent = msg; }, 30); }
   function bindBingo() {
+    readBingoLink();
+    $('bingo-share').addEventListener('click', function () {
+      var btn = this, name = 'leonida-bingo-' + bingo.season.month + '.png'; btn.disabled = true;
+      bingoBlob().then(function (blob) {
+        var file = new File([blob], name, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          return navigator.share({ files: [file], title: tr('Leonida Bingo'), text: bingoText() }).then(function () { bingoStatus(tr('Shared.')); }, function (e) {
+            if (e && e.name === 'AbortError') return;
+            downloadAs(blob, name); bingoStatus(tr('Sharing is blocked here, so the card was downloaded instead.'));
+          });
+        }
+        downloadAs(blob, name);
+        return copy(bingoText()).then(function () { bingoStatus(tr('Card downloaded and your grid copied. Post both.')); },
+          function () { bingoStatus(tr('Card downloaded.')); });
+      }).catch(function () { bingoStatus(tr('The card could not be made in this browser. Try another browser.')); })
+        .then(function () { btn.disabled = false; });
+    });
     $('bingo-copy').addEventListener('click', function () {
-      shareOrCopy(bingoText(), bingoStatus, tr('Board copied. Paste it in the group chat.'));
-    });
-    // Size: switching keeps the ticks of each size, so going back to 3 x 3 finds your old board.
-    document.querySelectorAll('input[name="bingo-size"]').forEach(function (r) {
-      r.addEventListener('change', function () {
-        bingo.size = Number(r.value) === 5 ? 5 : 3; save('vch.bingoSize', String(bingo.size));
-        loadMarks(); buildBingo(); drawSoon(); $('bingo-status').textContent = '';
-      });
-    });
-    $('bingo-new').addEventListener('click', function () {
-      var undo = { seed: bingo.seed, marks: bingo.marks.slice(), size: bingo.size };
-      bingo.seed = Math.floor(Math.random() * 1e9) + 1;
-      bingo.marks = freshMarks();
-      save('vch.bingoSeed', String(bingo.seed)); saveMarks();
-      buildBingo(); drawSoon();
-      var st = $('bingo-status');
-      st.textContent = tr('New board.') + ' ';
-      var u = document.createElement('button');
-      u.type = 'button'; u.className = 'linklike'; u.textContent = tr('Undo');
-      u.addEventListener('click', function () {
-        bingo.seed = undo.seed; bingo.size = undo.size; bingo.marks = undo.marks;
-        save('vch.bingoSeed', String(bingo.seed)); save('vch.bingoSize', String(bingo.size)); saveMarks();
-        buildBingo(); drawSoon(); st.textContent = tr('Old board back.');
-      });
-      st.appendChild(u);
+      shareOrCopy(bingoText(), bingoStatus, tr('Grid and link copied. Paste it in the group chat.'));
     });
   }
 
@@ -1611,10 +1767,11 @@
     return tr('{n}% of Leonida seen. I play like a {style}. Can you beat me?', { n: score(), style: playstyle() });
   }
 
-  function download(blob) {
+  function download(blob) { downloadAs(blob, fileName()); }
+  function downloadAs(blob, name) {
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
-    a.href = url; a.download = fileName();
+    a.href = url; a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   }

@@ -112,15 +112,14 @@ friend's own score from their link.
 | Street name: Share my name | Tap | Share sheet on phones, otherwise copies the nickname, the "known for" line and the link |
 | Street name: Another one | Tap | Next nickname for the same tag |
 | Street name: Put it on my card | Check | The card title uses the tag and nickname |
-| Bingo cell | Tap | Ticks or unticks; the centre is free and fixed. Finished lines get a gold edge; the score says how many ticks the next bingo needs |
-| Bingo: Share my board | Tap | Shares or copies your name, platform, score and an emoji grid |
+| Bingo cell | Tap | Ticks or unticks; the centre is free and fixed. Ticked squares take their theme colour, finished lines get a white edge, and the line under the card names the square you tapped |
+| Bingo: Share my card | Tap | Shares the 1080×1080 card image (label, coloured grid, score); without a share sheet it downloads the image and copies the text grid and compare link |
+| Bingo: Copy as text | Tap | Shares or copies the summary line, an emoji grid in theme colours and the compare link (`#b=s1.XXXX~Name`) |
 | Daily dare: I did it | Tap | Marks today; the button goes away, the 7-day row fills, Share my streak becomes the primary button, and an Undo link appears under it |
-| Bingo: New board | Tap | New prompts, with Undo in the status line |
 | Card: Share card | Tap | Native share with the PNG where supported, otherwise download and copy the challenge text |
 | Card: challenge link | Tap (text button) | Copies the challenge text and link |
 | Map picker: Undo | Tap | Takes back the last map change (up to 30), from the map, the picker or the list |
 | Clear my map | Tap | Clears the map; the message offers Undo for 6 seconds. On an empty map it only says so |
-| Bingo size | 3×3 or 5×5 | Each size keeps its own board and ticks; switching back finds the old one |
 | Street name: Previous | Tap | Goes back one name; shown only after Another one |
 | Daily dare: Past dares | Open | Every day since launch, newest first, done or missed. Read only, so the streak stays honest |
 | Card: Copy image | Tap (desktop) | Copies the PNG to the clipboard for Discord and chats; hidden on touch screens and where the browser can't |
@@ -154,9 +153,9 @@ friend's own score from their link.
 - No tap-highlight flash, and no text selection on the map, game squares, level buttons or buttons.
 - The toast never takes taps (`pointer-events: none`), so it can't swallow a tap on the map.
 - The phone next-step bar hides whenever any part of the map is on screen.
-- Bingo squares grow taller instead of spilling text; 5×5 on phones uses the card's full width with 10px words, and
-  long words may hyphenate below 380px. `tests/check.py` checks every language at 320px.
-- `tests/taps.py` taps and untaps every control as a phone, a tablet and a desktop (over 1,000 checks) and runs on
+- Bingo squares grow taller instead of spilling text; on phones the card uses the full width with 10px words, under 360px each square shows its short name, and
+  long words never break. `tests/check.py` checks every monthly card in every language at 320, 360 and 390px.
+- `tests/taps.py` taps and untaps every control as a phone, a tablet and a desktop (nearly 1,000 checks) and runs on
   every pull request, in English and in Spanish from a challenge link.
 
 ### 100% checklist, launch help, tips

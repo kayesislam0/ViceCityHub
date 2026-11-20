@@ -36,7 +36,7 @@ and challenge your crew with one link.
 | **Crew challenge** | A link that carries your score. Friends who open it see you versus them, live. |
 | **Daily dare** | One small in-game dare a day, the same for everyone, with a 7-day streak row you can send to the group chat. |
 | **Leonida Wrapped** | A recap card of your whole launch run: final rank, best streak, regions finished. |
-| **Street name and bingo** | A Leonida street name from your gamer tag, and a launch-night bingo board in 3×3 or 5×5. |
+| **Street name and Leonida Bingo** | A Leonida street name from your gamer tag, and a monthly 5×5 bingo card that is the same for everyone, with a playstyle label, a share image and a compare link. |
 
 In English, Spanish and Portuguese. [Terms and privacy](https://vicecityhub0.vercel.app/legal). Everything runs in the visitor's browser. There is no sign-up, no server, no cookie banner because there are no cookies,
 and no request to any other site.
@@ -101,7 +101,7 @@ DESIGN.md           Colours, type, spacing and components
 | Regions, map shapes, ranks, card looks | `REGIONS`, `RANKS`, `THEMES` in `site/hub/hub.js` |
 | Daily tasks | `DAILY` in `site/hub/hub.js` |
 | Translations | `site/hub/i18n.js` (keyed by the English text; add a language by adding an object) |
-| Street-name words, bingo prompts | `ALIAS_FIRST`, `ALIAS_TITLE`, `ALIAS_KNOWN`, `BINGO` in `site/hub/hub.js` |
+| Street-name words, bingo squares | `ALIAS_FIRST`, `ALIAS_TITLE`, `ALIAS_KNOWN`, `STAPLES` and `SEASONS` in `site/hub/hub.js`. A new month is one more entry in `SEASONS` (8 squares, 2 per theme); if none is added, the latest card carries on. |
 | Title, description, FAQ | `site/index.html` (keep the FAQ data in the head identical to the visible answers) |
 
 ## Support the hub
