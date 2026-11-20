@@ -632,7 +632,6 @@
     tag: load('vch.tag', ''),
     platform: load('vch.platform', 'PS5'),
     theme: load('vch.theme', 'night'),
-    dayone: load('vch.dayone', '0') === '1',
     useAlias: load('vch.useAlias', '0') === '1',
     aliasRoll: Number(load('vch.aliasRoll', '0')) || 0,
     format: load('vch.format', 'square') === 'story' ? 'story' : 'square',
@@ -655,23 +654,7 @@
     drawSoon();
   }
 
-  // "I started playing on": everyone started on a different day; Wrapped counts from the one the player picks.
-  function isoOf(day) { var d = new Date(LAUNCH + day * 864e5 + 432e5); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
-  function bindSince() {
-    var i = $('since'); if (!i) return;
-    i.max = isoOf(dayIndex()); i.value = firstDay === null ? '' : isoOf(firstDay);
-    i.addEventListener('change', function () {
-      // Clearing the field takes the start date off again: it is optional.
-      if (!i.value) { firstDay = null; drop('vch.since'); refreshDayLabel(); drawSoon(); return; }
-      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(i.value);
-      if (!m) { i.value = firstDay === null ? '' : isoOf(firstDay); return; }
-      var day = Math.round((new Date(+m[1], +m[2] - 1, +m[3]).getTime() - LAUNCH) / 864e5);
-      firstDay = Math.max(0, Math.min(dayIndex(), day)); i.value = isoOf(firstDay);
-      save('vch.since', String(firstDay)); refreshDayLabel(); drawSoon();
-    });
-  }
   function bindSettings() {
-    bindSince();
     $('tag').value = settings.tag;
     $('alias-input').value = settings.tag;
     $('tag').addEventListener('input', function () { setTag(this.value, 'tag'); });
@@ -693,10 +676,6 @@
       r.checked = r.value === settings.kind;
       r.addEventListener('change', function () { settings.kind = r.value; if (r.value !== 'blend') save('vch.kind', r.value); drawSoon(); });
     });
-    refreshDayLabel();
-    var d = $('dayone');
-    d.checked = settings.dayone;
-    d.addEventListener('change', function () { settings.dayone = d.checked; save('vch.dayone', d.checked ? '1' : '0'); drawSoon(); });
     var a = $('use-alias');
     a.checked = settings.useAlias;
     a.addEventListener('change', function () { settings.useAlias = a.checked; save('vch.useAlias', a.checked ? '1' : '0'); drawSoon(); });
@@ -1041,7 +1020,8 @@
   }
   function bingoBlob() {
     return new Promise(function (resolve, reject) {
-      var cv = document.createElement('canvas'); drawBingoCard(cv);
+      var cv = document.createElement('canvas'); exporting = true;
+      try { drawBingoCard(cv); } finally { exporting = false; }
       cv.toBlob(function (b) { b ? resolve(b) : reject(new Error('no image')); }, 'image/png');
     });
   }
@@ -1084,12 +1064,8 @@
     var n = new Date(); n = new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime();
     return Math.max(0, Math.round((n - LAUNCH) / 864e5));
   }
-  // The day the player started (0 = 19 Nov 2026, launch day = Day one), for the optional day stamp on the card.
-  // Optional: only set when the player picks a date under "I started playing on". Nothing is filled in for them.
-  var firstDay = (function () {
-    var v = load('vch.since', '');
-    return /^\d{1,4}$/.test(v) ? Math.min(Number(v), dayIndex()) : null;
-  })();
+  // Day stamps and start dates were removed; clear what older versions saved, without touching the progress stamp.
+  try { localStorage.removeItem('vch.dayone'); localStorage.removeItem('vch.since'); } catch (err) { /* blocked */ }
   var dailyDone = (function () { var v = load('vch.daily', ''); return v ? v.split(',').map(Number).filter(function (x) { return x >= 0; }) : []; })();
   // The streak counts back from today (or yesterday, if today isn't done yet). A shield covers one missed day in any
   // 7 days, automatically, so one busy evening never wipes a run. shieldUsed tells the page whether it kicked in.
@@ -1107,6 +1083,11 @@
     }
     return s;
   }
+  // A past dare's date, like "20 Nov" in the visitor's language.
+  function dateOf(day) {
+    var d = new Date(LAUNCH + day * 864e5 + 432e5);
+    try { return d.toLocaleDateString(LANG, { day: 'numeric', month: 'short' }); } catch (e) { return d.getDate() + '/' + (d.getMonth() + 1); }
+  }
   function untilMidnight() {
     var n = new Date(), m = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1), mins = Math.max(1, Math.round((m - n) / 6e4));
     // Non-breaking spaces keep "9 h 57 min" on one line.
@@ -1114,7 +1095,6 @@
   }
   function renderDaily() {
     var d = dayIndex(), done = dailyDone.indexOf(d) >= 0, st = streak();
-    $('daily-day').textContent = tr('Day {n}', { n: d + 1 });
     $('daily-task').textContent = tr(DAILY[d % DAILY.length]);
     $('daily-reset').textContent = done ? tr('Done. Next dare in {t}', { t: untilMidnight() }) : tr('Same dare for everyone. New one in {t}', { t: untilMidnight() });
     $('daily-streak-n').textContent = st;
@@ -1130,7 +1110,7 @@
       var li = document.createElement('li'), ok = dailyDone.indexOf(p) >= 0;
       li.className = ok ? 'is-on' : '';
       li.innerHTML = '<span class="past__day"></span><span class="past__task"></span><span class="past__mark"></span>';
-      li.children[0].textContent = tr('Day {n}', { n: p + 1 });
+      li.children[0].textContent = dateOf(p);
       li.children[1].textContent = tr(DAILY[p % DAILY.length]);
       li.children[2].textContent = ok ? tr('done') : tr('missed');
       pastList.appendChild(li);
@@ -1153,7 +1133,6 @@
     b.hidden = done; $('daily-undo-line').hidden = !done;
     s.classList.toggle('btn--primary', done); s.classList.toggle('btn--quiet', !done);
     b.closest('.daily').classList.toggle('is-done', done);
-    refreshDayLabel(); // the day count moves on at midnight
   }
   // Remind me tomorrow: a calendar event for 8 pm tomorrow, made on the device. No account, nothing sent anywhere.
   function remindTomorrow() {
@@ -1172,7 +1151,7 @@
     var d = dayIndex(), cells = '';
     for (var i = Math.max(0, d - 6); i <= d; i++) cells += dailyDone.indexOf(i) >= 0 ? '🟪' : '⬛';
     var st = streak();
-    return tr('Leonida daily dare') + ' · ' + tr('Day {n}', { n: d + 1 }) + ' · ' + (st ? tr('{n}-day streak', { n: st }) : tr('starting my streak')) + '\n' + cells + '\n' + tr('Today\'s dare:') + ' ' + SITE + '#tools';
+    return tr('Leonida daily dare') + ' · ' + (st ? tr('{n}-day streak', { n: st }) : tr('starting my streak')) + '\n' + cells + '\n' + tr('Today\'s dare:') + ' ' + SITE + '#tools';
   }
   function bindDaily() {
     // Focus only moves for keyboard users (a keyboard "click" has detail 0), so touch never shows a stray focus ring.
@@ -1417,16 +1396,28 @@
   // 'square' is the stored name of the feed post, now 4:5 (1080 x 1350): the size feeds show largest, and the one
   // Instagram's profile grid crops least. Stories are 9:16 with nothing important in the top 250 or bottom 310 px.
   var FORMATS = { square: [1080, 1350], story: [1080, 1920] };
+  // The preview is painted at the size it is shown on this screen (no grain, which only matters once a feed recompresses
+  // the file); the shared and downloaded image is painted separately at full 2x quality. On a slow phone this makes a
+  // change to the card about four times cheaper.
+  var exporting = false;
+  function previewScale(W) {
+    var cv = $('card-canvas'), shown = cv.getBoundingClientRect().width || 480;
+    return Math.min(2, Math.max(0.5, Math.ceil(shown * (window.devicePixelRatio || 1) / W * 4) / 4));
+  }
   function draw() {
     cardDirty = false;
     // A 0% map card says so, with a way to fix it, before anyone shares an empty map.
     var hint = $('card-hint'); if (hint) hint.hidden = steps() > 0 || settings.kind === 'blend';
     var cv = $('card-canvas');
-    var F = FORMATS[settings.format] || FORMATS.square, W = F[0], H = F[1], T = THEMES[settings.theme];
-    if (cv.width !== W * 2 || cv.height !== H * 2) { cv.width = W * 2; cv.height = H * 2; }
     cv.classList.toggle('is-story', settings.format === 'story');
+    paint(cv, previewScale((FORMATS[settings.format] || FORMATS.square)[0]));
+  }
+  function paint(cv, k) {
+    var F = FORMATS[settings.format] || FORMATS.square, W = F[0], H = F[1], T = THEMES[settings.theme];
+    var cw = Math.round(W * k), ch = Math.round(H * k);
+    if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; }
     var ctx = cv.getContext('2d');
-    ctx.setTransform(2, 0, 0, 2, 0, 0);
+    ctx.setTransform(k, 0, 0, k, 0, 0);
     ctx.imageSmoothingQuality = 'high';
     var bg = ctx.createLinearGradient(0, 0, 0, H);
     bg.addColorStop(0, T.bg); bg.addColorStop(1, T.bg2);
@@ -1479,7 +1470,7 @@
     mark(ctx, 64, y, s);
     ctx.fillStyle = T.ink; ctx.font = '400 ' + Math.round(s * 0.84) + 'px Anton, sans-serif';
     ctx.fillText('Vice City Hub', 64 + s + 16, y + s * 0.8);
-    var right = settings.platform + (settings.dayone ? '  ·  ' + dayWord() : '');
+    var right = settings.platform;
     ctx.textAlign = 'right'; ctx.fillStyle = T.ink2; ctx.font = '600 ' + Math.round(s * 0.66) + 'px "DM Sans", sans-serif';
     ctx.fillText(right, W - 64, y + s * 0.76);
     // Players who tipped get a gold "Backed the hub" before the platform, on every card.
@@ -1544,6 +1535,7 @@
   // the sun's reflection, and a fine grain so gradients never band when a feed recompresses the image.
   var grainTile = null;
   function grain(ctx, W, H) {
+    if (!exporting) return;
     if (!grainTile) {
       grainTile = document.createElement('canvas'); grainTile.width = grainTile.height = 160;
       var g = grainTile.getContext('2d'), d = g.createImageData(160, 160), seed = 7;
@@ -1871,14 +1863,6 @@
     grain(ctx, W, H);
   }
 
-  // The day stamp on the card (only when the player ticks "Show the day on my card"): the day they started, if they
-  // picked one, counted from launch (19 Nov 2026 = Day one); with no start date, today's day since launch.
-  function startDay() { return firstDay === null ? dayIndex() : firstDay; }
-  function dayWord() { var d = startDay(); return d === 0 ? tr('Day one') : tr('Day {n}', { n: d + 1 }); }
-  function refreshDayLabel() {
-    var d = $('dayone'); if (!d) return;
-    d.parentNode.querySelector('span').textContent = tr('Show the day on my card: {day}', { day: dayWord() });
-  }
 
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
@@ -1896,10 +1880,14 @@
     t.classList.add('pop-in');
   }
 
+  // The file people share: always painted fresh at full 2x quality with the grain, whatever the preview shows.
   function cardBlob() {
     return new Promise(function (resolve, reject) {
-      if (cardDirty) draw();
-      $('card-canvas').toBlob(function (b) { b ? resolve(b) : reject(new Error('no image')); }, 'image/png');
+      var cv = document.createElement('canvas');
+      exporting = true;
+      try { paint(cv, 2); } catch (e) { exporting = false; reject(e); return; }
+      exporting = false;
+      cv.toBlob(function (b) { b ? resolve(b) : reject(new Error('no image')); }, 'image/png');
     });
   }
   function fileName() { return settings.kind === 'blend' && rival ? 'leonida-blend.png' : settings.kind === 'wrapped' ? 'leonida-wrapped.png' : 'leonida-' + score() + '-percent.png'; }
@@ -2046,6 +2034,8 @@
     if (steps() > 0) touched = true;
     buildBingo(); renderDaily(); renderTipped(); renderAlias(); render();
     document.addEventListener('visibilitychange', function () { if (!document.hidden) renderDaily(); });
+    // The preview is painted for its on-screen size, so repaint it after a rotation or resize (at most once per frame).
+    window.addEventListener('resize', function () { drawSoon(); });
     setInterval(function () { if (!document.hidden) renderDaily(); }, 60000);
     var cv = $('card-canvas');
     if ('IntersectionObserver' in window) {
@@ -2065,7 +2055,7 @@
   function boot() {
     if (LANG === 'en' || window.VCH_I18N) { start(); return; }
     var sc = document.createElement('script');
-    sc.src = '/hub/i18n.js?v=20261120g'; sc.onload = start; sc.onerror = start;
+    sc.src = '/hub/i18n.js?v=20261120h'; sc.onload = start; sc.onerror = start;
     document.head.appendChild(sc);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
