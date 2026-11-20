@@ -15,7 +15,7 @@ def static():
     for want in ['<link rel="canonical" href="https://vicecityhub.okenshop.com/">', BTC, BINANCE, '"@type":"FAQPage"', 'og:image']:
         if want not in html: out.append(f'index.html is missing {want}')
     if '<script>' in html: out.append('inline script (the security policy blocks it)')
-    for f in ['robots.txt', 'sitemap.xml', '404.html', 'legal.html', 'gta-6-cheat-codes.html', 'site.webmanifest', 'hub/img/icon-192.png', 'hub/img/icon-512.png', 'hub/hub.js', 'hub/i18n.js', 'hub/hub.css', 'hub/img/og.png', 'hub/img/qr-btc.svg', 'hub/img/qr-binance.svg']:
+    for f in ['robots.txt', 'sitemap.xml', '404.html', 'legal.html', 'gta-6-cheat-codes.html', 'gta-6-100-percent-checklist.html', 'gta-6-guide.html', 'site.webmanifest', 'hub/img/icon-192.png', 'hub/img/icon-512.png', 'hub/hub.js', 'hub/i18n.js', 'hub/hub.css', 'hub/img/og.png', 'hub/img/qr-btc.svg', 'hub/img/qr-binance.svg']:
         if not (SITE / f).is_file(): out.append(f'{f} is missing')
     return out
 
@@ -65,8 +65,23 @@ async def browser():
         await pg.goto(base + 'gta-6-cheat-codes.html'); await pg.wait_for_timeout(300)
         out += [f'cheat page: script error {e}' for e in errs]
         if await pg.evaluate('document.documentElement.scrollWidth > 390'): out.append('cheat page: sideways scrolling')
+        # 100% checklist: + and - change the count, a full count marks the category done, and it survives a reload.
+        c3 = await b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True)
+        p3 = await c3.new_page(); e3 = []; p3.on('pageerror', lambda e: e3.append(str(e)))
+        await p3.goto(base + 'gta-6-100-percent-checklist.html'); await p3.wait_for_timeout(200)
+        for _ in range(3): await p3.click('[data-inc="vaults"]')
+        await p3.click('[data-dec="vaults"]')
+        await p3.fill('input[data-h="playlists"]', '2'); await p3.dispatch_event('input[data-h="playlists"]', 'input')
+        await p3.reload(); await p3.wait_for_timeout(200)
+        if await p3.input_value('input[data-h="vaults"]') != '2': out.append('100% checklist: + and - did not keep the count')
+        if await p3.evaluate("document.getElementById('h-done').textContent") != '1': out.append('100% checklist: a full count did not mark the category done')
+        await p3.goto(base + 'gta-6-guide.html'); await p3.wait_for_timeout(200)
+        await p3.click('[data-c1="cash"]'); await p3.reload(); await p3.wait_for_timeout(200)
+        if not await p3.is_checked('[data-c1="cash"]'): out.append('Chapter 1 checklist: a tick was not saved')
+        out += [f'checklist or help page script error: {e}' for e in e3]
+        await c3.close()
         # Every page, at the smallest phone, in every language: nothing scrolls sideways.
-        for page in ['', 'gta-6-cheat-codes.html', 'legal.html', '404.html']:
+        for page in ['', 'gta-6-cheat-codes.html', 'gta-6-100-percent-checklist.html', 'gta-6-guide.html', 'legal.html', '404.html']:
             for lang in ['en', 'es', 'pt']:
                 c2 = await b.new_context(viewport={'width': 320, 'height': 780}, has_touch=True, is_mobile=True)
                 p2 = await c2.new_page(); await p2.goto(base + page + '?lang=' + lang); await p2.wait_for_timeout(200)

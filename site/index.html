@@ -60,8 +60,9 @@
   </a>
   <nav class="top__nav" aria-label="Sections">
     <a href="#tools">Tools</a>
+    <a href="/gta-6-guide">Help</a>
     <a class="top__more" href="#regions">Regions</a>
-    <a href="#tip">Support</a>
+    <a class="top__more" href="#tip">Support</a>
   </nav>
 </header>
 
@@ -76,6 +77,7 @@
     <p class="challenge__msg" id="challenge-msg" aria-live="polite">Tap the regions you've seen to answer</p>
     <div class="challenge__actions">
       <a class="btn btn--primary" href="#map-wrap">Beat it</a>
+      <button class="btn" id="rematch" type="button" hidden><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 12h13M13 6l6 6-6 6"/></svg><span>Send it back</span></button>
       <button class="btn btn--blend" id="blend-go" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg><span>Make our Blend</span></button>
     </div>
   </div>
@@ -264,7 +266,7 @@
 
       <article class="tool bingo" aria-labelledby="bingo-title">
         <h3 id="bingo-title">Launch-night bingo</h3>
-        <p class="tool__lede">Tap what happened to you. A full row, column or diagonal is a bingo.</p>
+        <p class="tool__lede">A keepsake from launch night 2026. Tap what happened to you; a full row, column or diagonal is a bingo.</p>
         <fieldset class="field bingo__size">
           <legend class="sr-only">Board size</legend>
           <div class="seg">
@@ -284,6 +286,15 @@
         </div>
         <p class="status" id="bingo-status" role="status"></p>
       </article>
+    </div>
+  </section>
+
+  <section class="more-tools" aria-labelledby="more-title">
+    <h2 id="more-title">Going for 100%?</h2>
+    <div class="more-grid">
+      <a class="more-card" href="/gta-6-100-percent-checklist"><b>100% checklist</b><span>All 31 categories with the counts you need. Track yours.</span></a>
+      <a class="more-card" href="/gta-6-cheat-codes"><b>Cheat tracker</b><span>18 codes found so far, how each unlocks, and the save warning.</span></a>
+      <a class="more-card" href="/gta-6-guide"><b>Launch help</b><span>Before Chapter 1 ends, saving, known issues, money by chapter.</span></a>
     </div>
   </section>
 
@@ -312,7 +323,12 @@
   <section class="tip" id="tip" aria-labelledby="tip-title">
     <div class="tip__head">
       <h2 id="tip-title">Support the hub</h2>
-      <p class="section-lede">The hub is free. Tips pay for the domain and new tools.</p>
+      <p class="section-lede">Vice City Hub is free, with no ads, no sign-up and nothing locked. It's made by one fan. If it helped your run, a tip keeps it online and updated every week.</p>
+      <ul class="tip__facts">
+        <li><b>Where tips go:</b> the domain, hosting, and time for weekly updates and new tools.</li>
+        <li><b>What you get:</b> our thanks. Tips buy nothing and unlock nothing; every tool stays free either way.</li>
+        <li><b>Optional, always:</b> skip it and nothing changes.</li>
+      </ul>
     </div>
     <div class="tip__ways">
       <article class="way">
@@ -335,11 +351,19 @@
         <p class="way__note warn">Send only BTC on the Bitcoin network. Other coins or networks sent here are lost.</p>
       </article>
     </div>
+    <aside class="tip__safe" aria-labelledby="safe-title">
+      <h3 id="safe-title">Stay safe</h3>
+      <ul>
+        <li>These two are the only ways to tip. The same details are in the site's public source code.</li>
+        <li>We never message you asking for money, never run giveaways, and never ask for a wallet password or recovery phrase. Anyone who does isn't us.</li>
+        <li>Crypto can't be refunded. Check the address in your wallet before you send.</li>
+      </ul>
+    </aside>
     <div class="tipped" id="tipped">
       <button class="btn" id="tipped-btn" type="button" aria-pressed="false">
-        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg><span>I sent a tip</span>
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 21s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.5-7 10-7 10z"/></svg><span>Already tipped?</span>
       </button>
-      <p class="tipped__msg" id="tipped-msg" aria-live="polite">Sent a tip? Tap here to add a gold "Backed the hub" line to your card.</p>
+      <p class="tipped__msg" id="tipped-msg" aria-live="polite">Honor system: we can't see who tips. Tap to add a gold "Backed the hub" line to your card as a thank-you.</p>
     </div>
     <p class="fine">Tips are voluntary and can't be refunded. They give no in-game items.</p>
   </section>
