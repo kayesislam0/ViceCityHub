@@ -9,7 +9,7 @@
 A free, fast fan tool for GTA VI players. Mark the regions you have explored, get a map card worth posting,
 and challenge your crew with one link.
 
-[**Open the hub →**](https://vicecityhub.okenshop.com) &nbsp;·&nbsp; [Report a bug](https://vicecityhub.okenshop.com/report) &nbsp;·&nbsp; [Suggest an idea](https://vicecityhub.okenshop.com/idea) &nbsp;·&nbsp; [Tip the hub](https://vicecityhub.okenshop.com/#tip)
+[**Open the hub →**](https://vicecityhub0.vercel.app) &nbsp;·&nbsp; [Report a bug](https://vicecityhub0.vercel.app/report) &nbsp;·&nbsp; [Suggest an idea](https://vicecityhub0.vercel.app/idea) &nbsp;·&nbsp; [Tip the hub](https://vicecityhub0.vercel.app/#tip)
 
 ![No build step](https://img.shields.io/badge/build_step-none-0B6B3A)
 ![No tracking](https://img.shields.io/badge/tracking-none-0B6B3A)
@@ -29,7 +29,7 @@ and challenge your crew with one link.
 
 | | |
 |---|---|
-| **All 61 cheat codes** | [Its own page](https://vicecityhub.okenshop.com/gta-6-cheat-codes): every GTA VI cheat with its button code (where known) and how to unlock it. Search, filter by type, tick off the ones you have. |
+| **All 61 cheat codes** | [Its own page](https://vicecityhub0.vercel.app/gta-6-cheat-codes): every GTA VI cheat with its button code (where known) and how to unlock it. Search, filter by type, tick off the ones you have. |
 | **Map tracker** | Tap each of Leonida's six regions as you go: passed through, explored, finished. A picker under the map sets any level, and Undo takes back any change. |
 | **Map card** | One tap makes a picture of your map to post, square (1:1) or story (9:16). Three looks, an optional date stamp. |
 | **Leonida Blend** | Open a friend's link and make a Blend: both maps on one card, how much of Leonida you covered together, your map match, and who carried. |
@@ -38,7 +38,7 @@ and challenge your crew with one link.
 | **Leonida Wrapped** | A recap card of your whole launch run: final rank, best streak, regions finished. |
 | **Street name and bingo** | A Leonida street name from your gamer tag, and a launch-night bingo board in 3×3 or 5×5. |
 
-In English, Spanish and Portuguese. [Terms and privacy](https://vicecityhub.okenshop.com/legal). Everything runs in the visitor's browser. There is no sign-up, no server, no cookie banner because there are no cookies,
+In English, Spanish and Portuguese. [Terms and privacy](https://vicecityhub0.vercel.app/legal). Everything runs in the visitor's browser. There is no sign-up, no server, no cookie banner because there are no cookies,
 and no request to any other site.
 
 <p align="center">
@@ -62,7 +62,7 @@ JavaScript, no framework and no build step.
 
 Bug fixes and small improvements are welcome from anyone, and every pull request gets a review.
 
-1. Pick an issue labelled [`good first issue`](https://vicecityhub.okenshop.com/good-first-issues), or open one.
+1. Pick an issue labelled [`good first issue`](https://vicecityhub0.vercel.app/good-first-issues), or open one.
 2. Fork, make your change, run the checks (below).
 3. Open a pull request. The checks run on it automatically.
 
@@ -107,7 +107,7 @@ DESIGN.md           Colours, type, spacing and components
 ## Support the hub
 
 The hub is free and has no ads. If it made your launch week better, you can
-[send a tip](https://vicecityhub.okenshop.com/#tip) by Binance Pay or Bitcoin. Tips pay for the domain and the time
+[send a tip](https://vicecityhub0.vercel.app/#tip) by Binance Pay or Bitcoin. Tips pay for the domain and the time
 behind each new tool. They are gifts: they cannot be refunded and do not buy anything.
 
 The tip details on the page are the only real ones. The project never asks for crypto in messages, and pull requests

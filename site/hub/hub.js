@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  var SITE = 'https://vicecityhub.okenshop.com/';
+  var SITE = 'https://vicecityhub0.vercel.app/';
   var LEVELS = ['Not yet', 'Passed through', 'Explored', 'Finished'];
 
   function ellipse(cx, cy, rx, ry) {
@@ -1237,8 +1237,8 @@
     fitText(ctx, big, tw, Math.round(sh * 0.4), '400 {s}px Anton, sans-serif');
     ctx.fillText(big, tx, y + sh * 0.52);
     ctx.fillStyle = '#E3F2E8';
-    fitText(ctx, 'vicecityhub.okenshop.com', tw, Math.round(sh * 0.22), '600 {s}px "DM Sans", sans-serif');
-    ctx.fillText('vicecityhub.okenshop.com', tx, y + sh * 0.8);
+    fitText(ctx, 'vicecityhub0.vercel.app', tw, Math.round(sh * 0.22), '600 {s}px "DM Sans", sans-serif');
+    ctx.fillText('vicecityhub0.vercel.app', tx, y + sh * 0.8);
   }
   function mapDare(p) {
     return p === 0 ? tr('How much have you seen?') : p === 100 ? tr('100%. Can you match it?') : tr('Can you beat {n}%?', { n: p });

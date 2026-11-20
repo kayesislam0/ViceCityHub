@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://vicecityhub.okenshop.com/sitemap.xml
+Sitemap: https://vicecityhub0.vercel.app/sitemap.xml

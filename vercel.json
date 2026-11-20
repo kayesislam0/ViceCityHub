@@ -11,7 +11,7 @@
           "value": "www.vicecityhub.okenshop.com"
         }
       ],
-      "destination": "https://vicecityhub.okenshop.com/:path*",
+      "destination": "https://vicecityhub0.vercel.app/:path*",
       "permanent": true
     },
     {
