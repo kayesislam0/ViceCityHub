@@ -97,7 +97,7 @@ gold line; everything else is DM Sans 600. No small grey label above a heading.
 
 Every card reads in the same order:
 
-1. **Top row:** the hub mark and "Vice City Hub" on the left; platform (and the day, if chosen) on the right.
+1. **Top row:** the hub mark and "Vice City Hub" on the left; platform on the right (and "Backed the hub" in gold for supporters).
 2. **Who:** the player's name or street name (DM Sans). A gold "Backed the hub" line under it for players who tipped.
 3. **The number:** the % in the theme accent, Anton, as large as the column allows. At 100% it turns gold.
 4. **The playstyle** (map card), **rank** (Wrapped) or **who carried** (Blend), in Anton and the sun's gold, just above the horizon.

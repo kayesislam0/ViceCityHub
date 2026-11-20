@@ -127,7 +127,7 @@ async def run(b, w, mob):
         got = await pg.evaluate("getComputedStyle(document.getElementById('map-wrap')).getPropertyValue('--m-accent').trim()")
         check(got.upper() == accent, f'{tag} map colours {v}: accent {got}')
         check(await pg.evaluate(f"document.querySelector('input[name=\"theme\"][value=\"{v}\"]').checked"), f'{tag} map colours {v} not in step with the card')
-    for cb in ['#dayone', '#use-alias']:
+    for cb in ['#use-alias']:
         for want in [True, False]:
             await tap_el(pg, mob, cb)
             check(await pg.evaluate(f"document.querySelector('{cb}').checked") == want, f'{tag} checkbox {cb} -> {want}')
@@ -224,6 +224,8 @@ async def run(b, w, mob):
     if 'c=' in QUERY:
         await pg.evaluate("document.querySelector('details.list-toggle').open = true")
         await tap_el(pg, mob, '#region-list li:nth-child(4) button[data-k="2"]')
+        try: await pg.wait_for_function("!document.getElementById('vs-regions').hidden && document.getElementById('vs-regions').textContent.length > 10", timeout=5000)
+        except Exception: pass
         check(await pg.evaluate("!document.getElementById('vs-regions').hidden && document.getElementById('vs-regions').textContent.length > 10"), f'{tag} challenge region line')
 
     for e in errs: check(False, f'{tag} script error {e}')
@@ -238,7 +240,6 @@ async def run(b, w, mob):
     await tap_el(pg, mob, '#daily-past-wrap > summary')
     items = await pg.evaluate("[...document.querySelectorAll('#daily-past li')].map(l => l.className)")
     check(items == ['', 'is-on', 'is-on'], f'{tag} past dares {items}')
-    check((await pg.evaluate("document.getElementById('daily-day').textContent")).endswith('4'), f'{tag} day number')
     for e in errs: check(False, f'{tag} script error (past dares) {e}')
     await ctx.close()
 

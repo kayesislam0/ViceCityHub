@@ -192,27 +192,18 @@ async def browser():
                     out += [f'{lang} {w}px {month[1] + 1}/{month[0]} bingo: the word "{x}" does not fit whole in its square' for x in sorted(set(r['tight']))]
                     await pg.close()
                 await ctx.close()
-        # The start date is optional: nothing is filled in for a new player, and the day stamp follows the date they pick.
+        # No day stamps or start dates anywhere: the controls are gone, the card never prints a day, and what older
+        # versions saved is cleared.
         def clock(y, m, d): return "(() => { const R = Date, t = new R(%d, %d, %d, 12).getTime(); window.Date = class extends R { constructor(...a) { super(...(a.length ? a : [t])); } static now() { return t; } }; })()" % (y, m, d)
         cs = await b.new_context(viewport={'width': 390, 'height': 844})
         ps = await cs.new_page()
         await ps.add_init_script(clock(2026, 10, 25))
+        await ps.add_init_script("localStorage.setItem('vch.dayone', '1'); localStorage.setItem('vch.since', '1')")
         await ps.goto(base); await ps.wait_for_timeout(300)
-        if await ps.evaluate("localStorage.getItem('vch.since')") is not None: out.append('start date: it was filled in without the player picking one')
-        if await ps.input_value('#since') != '': out.append('start date: the field is not empty for a new player')
-        if 'Day 7' not in await ps.evaluate("document.getElementById('dayone').parentNode.textContent"): out.append('start date: with none picked, the day stamp should be today (Day 7)')
-        await ps.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
-        await ps.fill('#since', '2026-11-20'); await ps.dispatch_event('#since', 'change')
-        if await ps.evaluate("localStorage.getItem('vch.since')") != '1': out.append('start date: picking 20 Nov should save day 1')
-        if 'Day 2' not in await ps.evaluate("document.getElementById('dayone').parentNode.textContent"): out.append('start date: the day stamp should follow the picked date (Day 2)')
-        if await ps.get_attribute('#since', 'min') != '2026-11-19': out.append('start date: the earliest date should be launch day, 19 Nov 2026')
-        await ps.fill('#since', '2026-11-19'); await ps.dispatch_event('#since', 'change')
-        if await ps.evaluate("localStorage.getItem('vch.since')") != '0': out.append('start date: 19 Nov 2026 should be day 0')
-        if 'Day one' not in await ps.evaluate("document.getElementById('dayone').parentNode.textContent"): out.append('start date: 19 Nov 2026 should show Day one')
-        await ps.fill('#since', '2026-11-01'); await ps.dispatch_event('#since', 'change')
-        if await ps.evaluate("localStorage.getItem('vch.since')") != '0': out.append('start date: a date before launch should become launch day')
-        await ps.fill('#since', ''); await ps.dispatch_event('#since', 'change')
-        if await ps.evaluate("localStorage.getItem('vch.since')") is not None: out.append('start date: clearing the field did not remove it')
+        for sel in ['#dayone', '#since', '#daily-day']:
+            if await ps.query_selector(sel): out.append(f'day removal: {sel} is still on the page')
+        if await ps.evaluate("localStorage.getItem('vch.dayone') || localStorage.getItem('vch.since')"): out.append('day removal: old day settings were not cleared')
+        if 'Day ' in await ps.evaluate("document.getElementById('daily-task').closest('.daily').innerText"): out.append('day removal: the daily dare still shows a day number')
         await cs.close()
         # Progress links never quietly replace newer progress; a link that does replace it offers Undo.
         cp = await b.new_context(viewport={'width': 390, 'height': 844})
