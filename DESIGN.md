@@ -29,7 +29,7 @@ Rules: one accent. Neon marks the primary action and the live state. Surfaces st
 ## Space and shape
 
 - 4px grid. Section padding `clamp(56px, 8vw, 104px)`. Page gutter `clamp(16px, 4vw, 48px)`.
-- Radii: controls 10px, cards 14px, the QR frame 10px, the highway sign 8px.
+- Radii: controls 10px, cards 14px, the QR frame 10px.
 - Minimum tap target 44px.
 
 ## Components
@@ -41,7 +41,6 @@ Rules: one accent. Neon marks the primary action and the live state. Surfaces st
 | Highway sign (`.sign`) | static | Region names. |
 | Tip card (`.way`) | static | Green sign, white QR on a white frame. |
 | Live line (`.live`) | static | "GTA 6 is out." with a neon dot. |
-| Exit sign (card dare) | static | Bottom of every card: green highway sign with a white inset border and an exit arrow (asphalt on the Highway look). |
 | Map picker (`.pick`) | hidden, shown after the first map tap | The selected region and four levels. |
 
 ## Motion
@@ -82,21 +81,28 @@ Text on the accent and on gold is the scheme's dark background colour (6:1 or mo
 
 ### Card
 
-Two sizes: Square 1:1 (1080 x 1080) and Story 9:16 (1080 x 1920), painted at 2x. Every card type (Map, Wrapped, Blend)
-has its own layout in both sizes; nothing is letterboxed. A feed shows a card at about a third of its size, so text
-on a card stays at 30px and up, and key text at 50px and up.
+Two sizes: Post 4:5 (1080 x 1350, the size feeds show largest and Instagram's profile grid crops least) and Story 9:16
+(1080 x 1920), painted at 2x. In stories nothing important sits in the top 250 or bottom 310 px, where Instagram puts
+its own bars. Every card type (Map, Wrapped, Blend, Bingo) has its own layout in both sizes; nothing is letterboxed. A
+feed shows a card at about a third of its size, so no text on a card is under 30px, and key text is 46px and up.
+Cards are checked after a 1080px resize and JPEG at quality 70, the way feeds recompress them.
+
+Only two things carry colour on a card: the big number and the map (or the bingo grid). Everything else is ink and
+grey. Anton is for the big number, the card title and the playstyle; everything else is DM Sans 600.
 
 Every card reads in the same order:
 
 1. **Top row:** the hub mark and "Vice City Hub" on the left; platform (and the day, if chosen) on the right.
-2. **Who:** the player's name or street name (Anton). A gold "Backed the hub" line under it for players who tipped.
+2. **Who:** the player's name or street name (DM Sans). A gold "Backed the hub" line under it for players who tipped.
 3. **The number:** the % in the theme accent, Anton, as large as the column allows. At 100% it turns gold.
-4. **The rank** on a green highway sign. Nine ranks by steps (0, 1, 3, 5, 7, 10, 13, 16, 18), so the next one is always close.
+4. **The playstyle** (map card) or **rank** (Wrapped): a small grey kicker ("Plays like a", "Rank") over the value in Anton.
 5. **The verdict:** one true line only this player could have ("Has never set foot in Grassrivers",
    "4 of 6 regions still under the fog", "Finished every region of Leonida").
-6. **The map** with names. Seen regions in their own colour; unseen regions under fog (diagonal stripes).
-7. **The exit sign:** a green highway sign inside the card margins with an exit arrow: what to do, large ("Can you beat 50%?", "Get your Leonida Wrapped",
-   "Blend with me"), then vicecityhub0.vercel.app.
+6. **The map** with names. Seen regions in their level colour; unseen regions a flat dark fill (fine stripes turn to
+   mush once a feed recompresses the image).
+7. **The footer:** a hairline, what to do in plain words ("Can you beat 50%?", "Get your Leonida Wrapped",
+   "Blend with me"), the address in the accent colour, and an exit arrow in an accent ring.
+8. **Wrapped stats** show only what happened: a streak, dares or bingo lines that are still 0 are left out.
 
 Blend paints the map by who explored it: you in the accent, your friend in gold, regions you both explored in stripes
 of both. The site has no server, so cards never claim percentiles or "top X% of players"; the only comparison is the
@@ -113,7 +119,7 @@ friend's own score from their link.
 | Street name: Another one | Tap | Next nickname for the same tag |
 | Street name: Put it on my card | Check | The card title uses the tag and nickname |
 | Bingo cell | Tap | Ticks or unticks; the centre is free and fixed. Ticked squares take their theme colour, finished lines get a white edge, and the line under the card names the square you tapped |
-| Bingo: Share my card | Tap | Shares the 1080×1080 card image (label, coloured grid, score); without a share sheet it downloads the image and copies the text grid and compare link |
+| Bingo: Share my card | Tap | Shares the 1080×1350 card image (label, coloured grid, score); without a share sheet it downloads the image and copies the text grid and compare link |
 | Bingo: Copy as text | Tap | Shares or copies the summary line, an emoji grid in theme colours and the compare link (`#b=s1.XXXX~Name`) |
 | Daily dare: I did it | Tap | Marks today; the button goes away, the 7-day row fills, Share my streak becomes the primary button, and an Undo link appears under it |
 | Card: Share card | Tap | Native share with the PNG where supported, otherwise download and copy the challenge text |
