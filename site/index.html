@@ -33,8 +33,8 @@
 <meta name="twitter:image:alt" content="How much of Leonida have you seen? A Leonida map card and a Blend card for two friends">
 <link rel="preload" href="hub/fonts/anton-400.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="hub/fonts/dmsans-400.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="hub/hub.css?v=20261120h">
-<script src="hub/hub.js?v=20261120h" defer></script>
+<link rel="stylesheet" href="hub/hub.css?v=20261120i">
+<script src="hub/hub.js?v=20261120i" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
 {"@type":"WebSite","@id":"https://vicecityhub0.vercel.app/#site","name":"Vice City Hub","inLanguage":"en","url":"https://vicecityhub0.vercel.app/"},
@@ -188,6 +188,13 @@
         </div>
       </fieldset>
       <fieldset class="field">
+        <legend>Plays on</legend>
+        <div class="seg" id="platform">
+          <label><input type="radio" name="platform" value="PS5" checked><span>PS5</span></label>
+          <label><input type="radio" name="platform" value="Xbox Series X|S"><span>Xbox Series X|S</span></label>
+        </div>
+      </fieldset>
+      <fieldset class="field">
         <legend>Size</legend>
         <div class="seg" id="format">
           <label><input type="radio" name="format" value="square" checked><span>Post 4:5</span></label>
@@ -207,16 +214,6 @@
         <p><strong>Your card is ready.</strong> The site is free. Tips are optional.</p>
         <a class="btn" href="#tip">Support the hub</a>
       </div>
-      <details class="more">
-        <summary>More options</summary>
-        <fieldset class="field">
-          <legend>Plays on</legend>
-          <div class="seg" id="platform">
-            <label><input type="radio" name="platform" value="PS5" checked><span>PS5</span></label>
-            <label><input type="radio" name="platform" value="Xbox Series X|S"><span>Xbox Series X|S</span></label>
-          </div>
-        </fieldset>
-      </details>
     </div>
     <div class="card-maker__preview">
       <canvas id="card-canvas" width="2160" height="2700" aria-label="Preview of your Leonida card" role="img"></canvas>

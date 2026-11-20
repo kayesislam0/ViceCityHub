@@ -48,7 +48,9 @@ async def browser():
             pg = await ctx.new_page(); errors = []
             pg.on('pageerror', lambda e: errors.append(str(e)))
             await pg.goto(base); await pg.wait_for_timeout(300)
-            await pg.click('details.list-toggle > summary')
+            # The region list starts open on wide screens (beside the map) and folded on phones.
+            if (w >= 960) != await pg.evaluate("document.querySelector('details.list-toggle').open"): out.append(f'{w}px: the region list should start ' + ('open' if w >= 960 else 'folded'))
+            await pg.evaluate("document.querySelector('details.list-toggle').open = true")
             await pg.click('#region-list li:nth-child(4) button[data-k="2"]')
             # Marking: tapping the current level keeps it; the map picker sets an exact level; the daily dare only undoes on purpose.
             await pg.click('#region-list li:nth-child(4) button[data-k="2"]')
