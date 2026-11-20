@@ -451,7 +451,7 @@ kbd { display: inline-grid; place-items: center; min-width: 30px; height: 30px; 
 section.cheats:first-child { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 p.cheat-more { margin-top: 16px; }
 
-/* Phones: the card first, then name, size and the share buttons, then More options. */
+/* Phones: the card first, then name, size and the share buttons, then the options. */
 @media (max-width: 899px) {
   .card-maker { gap: 0; }
   .card-maker__form { display: contents; }
@@ -495,14 +495,13 @@ p.cheat-more { margin-top: 16px; }
 .actions--sub { margin-top: 12px; }
 .card-maker .actions { margin-top: 24px; }
 .card-maker .actions .btn--primary { min-height: 56px; padding-inline: 28px; font-size: 17px; }
-details.more, details.list-toggle { margin-top: 24px; border-top: 1px solid var(--line); }
-details.more > summary, details.list-toggle > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+details.list-toggle { margin-top: 24px; border-top: 1px solid var(--line); }
+details.list-toggle > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;
   min-height: 52px; font-weight: 600; font-size: 16px; color: var(--chalk); }
-details.more > summary::-webkit-details-marker, details.list-toggle > summary::-webkit-details-marker { display: none; }
-details.more > summary::after, details.list-toggle > summary::after { content: ""; width: 10px; height: 10px; border-right: 2px solid var(--chalk-2); border-bottom: 2px solid var(--chalk-2);
+details.list-toggle > summary::-webkit-details-marker { display: none; }
+details.list-toggle > summary::after { content: ""; width: 10px; height: 10px; border-right: 2px solid var(--chalk-2); border-bottom: 2px solid var(--chalk-2);
   transform: rotate(45deg) translateY(-3px); transition: transform .2s; }
-details[open].more > summary::after, details[open].list-toggle > summary::after { transform: rotate(225deg) translateY(-3px); }
-details.more > .field:first-of-type { margin-top: 4px; }
+details[open].list-toggle > summary::after { transform: rotate(225deg) translateY(-3px); }
 details.list-toggle .regions-list { margin-top: 4px; }
 
 /* Next step: after the first map tap on a phone, the way to the card is always one tap away. */

@@ -2033,6 +2033,10 @@
     buildMap(); bindList(); bindPick(); bindBackup(); bindSettings(); bindAlias(); bindBingo(); bindRemind(); bindDaily(); bindTipped(); bindCheats(); bindActions(); bindBoard(); readChallenge(); bindRematch();
     if (steps() > 0) touched = true;
     buildBingo(); renderDaily(); renderTipped(); renderAlias(); render();
+    // Wide screens have room for the region list beside the map, so it starts open there. On phones it stays folded:
+    // the map is the quicker way to mark, and an open list would push the map below the fold.
+    var lt = document.querySelector('details.list-toggle');
+    if (lt && window.matchMedia && window.matchMedia('(min-width: 960px)').matches) lt.open = true;
     document.addEventListener('visibilitychange', function () { if (!document.hidden) renderDaily(); });
     // The preview is painted for its on-screen size, so repaint it after a rotation or resize (at most once per frame).
     window.addEventListener('resize', function () { drawSoon(); });
@@ -2055,7 +2059,7 @@
   function boot() {
     if (LANG === 'en' || window.VCH_I18N) { start(); return; }
     var sc = document.createElement('script');
-    sc.src = '/hub/i18n.js?v=20261120h'; sc.onload = start; sc.onerror = start;
+    sc.src = '/hub/i18n.js?v=20261120i'; sc.onload = start; sc.onerror = start;
     document.head.appendChild(sc);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

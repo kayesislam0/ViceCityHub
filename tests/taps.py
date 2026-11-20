@@ -100,7 +100,7 @@ async def run(b, w, mob):
         check(pressed == k, f'{tag} picker pressed {pressed} after {k}')
 
     # List: open it, set every level of every row, tapping the current level keeps it.
-    await tap_el(pg, mob, 'details.list-toggle > summary')
+    if not await pg.evaluate("document.querySelector('details.list-toggle').open"): await tap_el(pg, mob, 'details.list-toggle > summary')
     for r in range(1, 7):
         for k in ['3', '3', '1', '0', '0', '2']:
             await tap_el(pg, mob, f'#region-list li:nth-child({r}) button[data-k="{k}"]')
@@ -116,7 +116,6 @@ async def run(b, w, mob):
         check(await pg.evaluate("document.activeElement.dataset.i") == '1', f'{tag} arrow keys between regions')
 
     # Card options: every radio and checkbox, on and off.
-    await pg.evaluate("document.querySelector('details.more').open = true")
     for name, vals in [('format', ['story', 'square']), ('kind', ['wrapped', 'map']), ('platform', ['Xbox Series X|S', 'PS5']), ('theme', ['sunset', 'ocean', 'night'])]:
         for v in vals:
             await tap_el(pg, mob, f'input[name="{name}"][value="{v}"]')
