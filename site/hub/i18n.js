@@ -2,6 +2,15 @@
    Loaded by hub.js only for Spanish and Portuguese visitors. */
 window.VCH_I18N = {
  "es": {
+  "Make my card": "Hacer mi tarjeta",
+  "Your rank": "Tu rango",
+  "Best: 1 day": "Mejor: 1 día",
+  "Best: {n} days": "Mejor: {n} días",
+  "Best: 0 days": "Mejor: 0 días",
+  "1 done": "1 hecho",
+  "{n} done": "{n} hechos",
+  "A missed day was forgiven this week": "Esta semana se perdonó un día perdido",
+  "Miss a day? One a week is forgiven": "¿Te saltas un día? Se perdona uno por semana",
   "Road tripper": "Viajero de carretera",
   "Explorer": "Explorador",
   "Mountain goat": "Cabra montés",
@@ -650,6 +659,15 @@ window.VCH_I18N = {
   "DAY {n}": "DÍA {n}"
  },
  "pt": {
+  "Make my card": "Fazer meu card",
+  "Your rank": "Seu rank",
+  "Best: 1 day": "Melhor: 1 dia",
+  "Best: {n} days": "Melhor: {n} dias",
+  "Best: 0 days": "Melhor: 0 dias",
+  "1 done": "1 feito",
+  "{n} done": "{n} feitos",
+  "A missed day was forgiven this week": "Um dia perdido foi perdoado esta semana",
+  "Miss a day? One a week is forgiven": "Perdeu um dia? Um por semana é perdoado",
   "Road tripper": "Rei da estrada",
   "Explorer": "Explorador",
   "Mountain goat": "Cabra da montanha",

@@ -400,6 +400,8 @@
     var next = RANKS[ri + 1];
     var from = RANKS[ri][0];
     $('xp').style.transform = 'scaleX(' + (next ? (n - from) / (next[0] - from) : 1) + ')';
+    var st = $('start');
+    if (st) { st.textContent = n ? tr('Make my card') : tr('Mark where you\'ve been'); st.setAttribute('href', n ? '#card' : '#map-wrap'); }
     $('next-rank').textContent = next ? tr(next[0] - n === 1 ? '1 step to {rank}' : '{n} steps to {rank}', { n: next[0] - n, rank: tr(next[1]) }) : tr('Top rank reached.');
     updateChallenge();
     updateNextbar();
@@ -762,9 +764,8 @@
     $('daily-streak-n').textContent = st;
     $('daily-streak').textContent = st === 1 ? tr('day streak') : tr('days streak');
     var best = Math.max(longestStreak(), st);
-    $('daily-total').textContent = (dailyDone.length === 1 ? tr('1 dare done in total') : tr('{n} dares done in total', { n: dailyDone.length })) +
-      ' · ' + (best === 1 ? tr('best 1 day') : tr('best {n} days', { n: best })) +
-      ' · ' + (shieldUsed ? tr('shield used this week') : tr('1 missed day a week is covered'));
+    $('daily-total').textContent = (best === 1 ? tr('Best: 1 day') : tr('Best: {n} days', { n: best })) + ' · ' + (dailyDone.length === 1 ? tr('1 done') : tr('{n} done', { n: dailyDone.length }));
+    $('daily-shield').textContent = shieldUsed ? tr('A missed day was forgiven this week') : tr('Miss a day? One a week is forgiven');
     // Past dares: every day since launch, newest first, done or missed. Read only, so the streak stays honest.
     var pastList = $('daily-past'), wrap = $('daily-past-wrap');
     wrap.hidden = d === 0; pastList.textContent = '';

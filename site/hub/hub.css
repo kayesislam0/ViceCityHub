@@ -676,3 +676,20 @@ a, button, label, summary, .rg, .cell { -webkit-tap-highlight-color: transparent
 .tip__safe ul { margin: 8px 0 0; padding-left: 1.2em; display: grid; gap: 6px; }
 .cheat-src { margin-top: 8px; }
 .hitem .got { justify-self: start; }
+
+/* Rank kicker: the meter says what its word is, so it never clashes with the card's playstyle. */
+.meter__kicker { font: 600 13px/1 var(--text); color: var(--chalk-2); margin-bottom: 4px; }
+/* 100% cards: an arrow says they open a page. */
+.more-card b { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.more-card__go { width: 20px; height: 20px; flex: none; fill: none; stroke: var(--chalk-2); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s, stroke .2s; }
+@media (hover: hover) { .more-card:hover .more-card__go { stroke: var(--neon); transform: translateX(3px); } }
+/* Tips: payment details on calm, plain cards. Bright colour reads as an ad; trust reads as plain. */
+.way { background: var(--asphalt-2); border: 1px solid var(--line); }
+.way__who, .way__note { color: var(--chalk-2); }
+.way .btn { background: transparent; border-color: var(--line-strong); color: var(--chalk); }
+@media (hover: hover) { .way .btn:hover { background: transparent; border-color: var(--chalk); } }
+.way .btn--primary { background: var(--chalk); border-color: var(--chalk); color: var(--asphalt); }
+@media (hover: hover) { .way .btn--primary:hover { background: #FFFFFF; border-color: #FFFFFF; } }
+.way__note.warn { color: var(--sun); }
+.addr { background: var(--asphalt); border: 1px solid var(--line); }
+.addr b { color: var(--sun); }
