@@ -1325,6 +1325,8 @@
   var FORMATS = { square: [1080, 1350], story: [1080, 1920] };
   function draw() {
     cardDirty = false;
+    // A 0% map card says so, with a way to fix it, before anyone shares an empty map.
+    var hint = $('card-hint'); if (hint) hint.hidden = steps() > 0 || settings.kind === 'blend';
     var cv = $('card-canvas');
     var F = FORMATS[settings.format] || FORMATS.square, W = F[0], H = F[1], T = THEMES[settings.theme];
     if (cv.width !== W * 2 || cv.height !== H * 2) { cv.width = W * 2; cv.height = H * 2; }
@@ -1954,7 +1956,7 @@
       new IntersectionObserver(function (es) {
         cardVisible = es[0].isIntersecting;
         if (cardVisible && cardDirty) drawSoon();
-      }, { rootMargin: '400px 0px' }).observe(cv);
+      }, { rootMargin: '1200px 0px' }).observe(cv);
     } else { cardVisible = true; drawSoon(); }
     if (document.fonts && document.fonts.load) {
       Promise.all([document.fonts.load('400 40px Anton'), document.fonts.load('600 20px "DM Sans"')]).then(drawSoon, drawSoon);
@@ -1963,7 +1965,7 @@
   function boot() {
     if (LANG === 'en' || window.VCH_I18N) { start(); return; }
     var sc = document.createElement('script');
-    sc.src = '/hub/i18n.js?v=20261120b'; sc.onload = start; sc.onerror = start;
+    sc.src = '/hub/i18n.js?v=20261120c'; sc.onload = start; sc.onerror = start;
     document.head.appendChild(sc);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

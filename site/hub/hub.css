@@ -275,7 +275,8 @@ section.hero { border-top: 0; padding-top: clamp(24px, 4vw, 56px); }
 .week__dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line-strong); }
 .week__day.is-on .week__dot { background: var(--neon); border-color: var(--neon); }
 .week__day.is-today .week__dot { box-shadow: 0 0 0 3px var(--asphalt), 0 0 0 5px var(--chalk-2); }
-.week__day.is-before .week__dot { border-style: dashed; opacity: .4; }
+.week__day.is-before .week__dot { border-color: transparent; }
+.week__day.is-before .week__name { opacity: .35; }
 .week__name { font: 600 12px/1 var(--text); color: var(--chalk-2); }
 .daily__total { color: var(--chalk-2); font-size: 14px; font-variant-numeric: tabular-nums; }
 
@@ -721,3 +722,11 @@ a, button, label, summary, .rg, .cell { -webkit-tap-highlight-color: transparent
 .board .actions { margin-top: 4px; }
 @media (prefers-reduced-motion: reduce) { .board__bar i { transition: none; } }
 .bingo .past li { display: block; }
+
+/* Card maker: a nudge when the card would show 0%, and the secondary buttons in one row under Share. */
+.card-hint { margin-top: 20px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line-strong); color: var(--chalk-2); font-size: 15px; }
+.card-hint a { color: var(--chalk); font-weight: 600; text-underline-offset: 3px; }
+.card-maker .actions .btn--primary { flex: 1 1 100%; }
+.card-maker__form > .actions--sub { display: flex; flex-wrap: wrap; gap: 10px; }
+.card-maker__form > .actions--sub .btn { flex: 1 1 0; min-width: 0; white-space: nowrap; }
+.card-maker__form > .actions--sub .btn[hidden] { display: none; }
