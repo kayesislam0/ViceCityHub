@@ -59,6 +59,28 @@ async def browser():
             if not await pg.evaluate("document.getElementById('card-canvas').toDataURL('image/png').length > 50000"): out.append(f'{w}px: the card did not paint')
             out += [f'{w}px: script error {e}' for e in errors]
             await ctx.close()
+        # Moving from the old address: progress travels once, a section anchor survives, newer progress is never undone.
+        cm = await b.new_context(viewport={'width': 390, 'height': 844})
+        async def local(route):
+            from urllib.parse import urlparse
+            path = urlparse(route.request.url).path.lstrip('/') or 'index.html'
+            f = SITE / path
+            if not f.is_file() and (SITE / (path + '.html')).is_file(): f = SITE / (path + '.html')
+            if not f.is_file(): return await route.fulfill(status=404, body='')
+            ct = {'.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff': 'font/woff'}.get(f.suffix, 'application/octet-stream')
+            await route.fulfill(status=200, body=f.read_bytes(), headers={'content-type': ct})
+        await cm.route('https://vicecityhub.okenshop.com/**', local); await cm.route('https://vicecityhub0.vercel.app/**', local)
+        pm = await cm.new_page(); em = []; pm.on('pageerror', lambda e: em.append(str(e)))
+        await cm.add_init_script("if (location.hostname === 'vicecityhub.okenshop.com' && !localStorage.getItem('vch.moved')) { localStorage.setItem('vch.map', '321000'); localStorage.setItem('vch.tag', 'Rafi'); }")
+        await pm.goto('https://vicecityhub.okenshop.com/#tools'); await pm.wait_for_url('https://vicecityhub0.vercel.app/**'); await pm.wait_for_timeout(400)
+        if await pm.evaluate("localStorage.getItem('vch.map')") != '321000': out.append('move: the map did not come over from the old address')
+        if await pm.evaluate("location.hash") != '#tools': out.append('move: the section anchor was lost')
+        await pm.evaluate("localStorage.setItem('vch.map', '333000')")
+        await pm.goto('https://vicecityhub.okenshop.com/gta-6-cheat-codes'); await pm.wait_for_url('https://vicecityhub0.vercel.app/gta-6-cheat-codes'); await pm.wait_for_timeout(300)
+        await pm.goto('https://vicecityhub0.vercel.app/'); await pm.wait_for_timeout(300)
+        if await pm.evaluate("localStorage.getItem('vch.map')") != '333000': out.append('move: a second visit to the old address undid newer progress')
+        out += [f'move: script error {e}' for e in em]
+        await cm.close()
         # Cheat codes: all 61 rows are in the page itself (search engines read it), and the search filters them.
         ctx = await b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True)
         pg = await ctx.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
