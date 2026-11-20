@@ -80,6 +80,31 @@ async def browser():
         if not await p3.is_checked('[data-c1="cash"]'): out.append('Chapter 1 checklist: a tick was not saved')
         out += [f'checklist or help page script error: {e}' for e in e3]
         await c3.close()
+        # Friends board: a link passed Rafi -> Mia -> Sam carries both friends; old links never lower a score; clear has undo.
+        async def person(tag, mp):
+            cx = await b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True)
+            await cx.add_init_script(f"try {{ if (!localStorage.getItem('vch.tag')) {{ localStorage.setItem('vch.tag', '{tag}'); localStorage.setItem('vch.map', '{mp}') }} }} catch (e) {{}}")
+            pp = await cx.new_page(); return cx, pp
+        def link_of(pp): return pp.evaluate("(() => { const u = new URL(location.href); return u.search; })()")
+        cr, pr = await person('Rafi', '321100'); await pr.goto(base); await pr.wait_for_timeout(150)
+        if not await pr.evaluate("document.getElementById('board').hidden"): out.append('board: shows with no friends')
+        rafi = await pr.evaluate("'?c=' + '321100' + '&n=Rafi'")
+        cm, pm = await person('Mia', '332210'); await pm.goto(base + rafi); await pm.wait_for_timeout(200)
+        rows = await pm.evaluate("[...document.querySelectorAll('#board-list .board__who')].map(e => e.textContent)")
+        if rows != ['Mia (you)', 'Rafi']: out.append(f'board: Mia sees {rows}')
+        mia_board = await pm.evaluate("encodeURIComponent(localStorage.getItem('vch.board'))")
+        cs, ps = await person('Sam', '100000'); await ps.goto(base + '?c=332210&n=Mia&b=' + mia_board); await ps.wait_for_timeout(200)
+        rows = await ps.evaluate("[...document.querySelectorAll('#board-list .board__who')].map(e => e.textContent)")
+        if rows != ['Mia', 'Rafi', 'Sam (you)']: out.append(f'board: Sam sees {rows}')
+        gap = await ps.evaluate("document.getElementById('board-gap').textContent")
+        if 'Rafi' not in gap: out.append(f'board: gap line {gap!r}')
+        await ps.goto(base + '?c=100000&n=Rafi'); await ps.wait_for_timeout(200)
+        if '~321100' not in await ps.evaluate("localStorage.getItem('vch.board')"): out.append('board: an old link lowered a score')
+        await ps.click('#board-clear')
+        if not await ps.evaluate("document.getElementById('board').hidden"): out.append('board: clear did not clear')
+        await ps.click('#toast .toast__act')
+        if await ps.evaluate("document.getElementById('board').hidden"): out.append('board: undo did not restore')
+        for cx in (cr, cm, cs): await cx.close()
         # Every page, at the smallest phone, in every language: nothing scrolls sideways.
         for page in ['', 'gta-6-cheat-codes.html', 'gta-6-100-percent-checklist.html', 'gta-6-guide.html', 'legal.html', '404.html']:
             for lang in ['en', 'es', 'pt']:

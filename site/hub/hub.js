@@ -404,6 +404,7 @@
     if (st) { st.textContent = n ? tr('Make my card') : tr('Mark where you\'ve been'); st.setAttribute('href', n ? '#card' : '#map-wrap'); }
     $('next-rank').textContent = next ? tr(next[0] - n === 1 ? '1 step to {rank}' : '{n} steps to {rank}', { n: next[0] - n, rank: tr(next[1]) }) : tr('Top rank reached.');
     updateChallenge();
+    renderBoard();
     updateNextbar();
     renderPick();
     drawSoon();
@@ -422,6 +423,99 @@
 
   // ---- a friend's challenge (?c=320100&n=Name) ----
   var rival = null;
+  // ---- friends board: scores travel inside challenge links and merge on each device ----
+  // Up to 8 friends, self-reported, kept as "name~code|name~code" (codes are the 6-digit map). One entry per name
+  // (case-insensitive); when the same name arrives twice, the higher score stays, so passing old links around never
+  // lowers anyone. You are never stored in your own board: your row is drawn live from your map.
+  var BOARD_MAX = 8;
+  function cleanName(s) { return String(s || '').replace(/[\u0000-\u001f\u007f|~]/g, '').trim().slice(0, 24); }
+  function stepsOf(c) { var t = 0; c.split('').forEach(function (d) { t += Number(d); }); return t; }
+  function parseBoard(s) {
+    var out = [];
+    String(s || '').split('|').forEach(function (p) {
+      var kv = p.split('~'), n = cleanName(decodeURIComponent(kv[0] || '')), c = kv[1] || '';
+      if (n && /^[0-3]{6}$/.test(c)) out.push({ n: n, c: c });
+    });
+    return out;
+  }
+  function boardString(list) {
+    var s = list.map(function (e) { return encodeURIComponent(e.n) + '~' + e.c; }).join('|');
+    while (s.length > 380 && list.length) { list = list.slice(0, -1); s = boardString(list); }
+    return s;
+  }
+  var board = [];
+  try { board = parseBoard(load('vch.board', '')); } catch (e) { board = []; }
+  function myName() { return cleanName(settings.tag); }
+  function mergeBoard(entries) {
+    var me = myName().toLowerCase();
+    entries.forEach(function (e) {
+      if (me && e.n.toLowerCase() === me) return;
+      var hit = board.filter(function (x) { return x.n.toLowerCase() === e.n.toLowerCase(); })[0];
+      if (hit) { if (stepsOf(e.c) > stepsOf(hit.c)) hit.c = e.c; } else board.push({ n: e.n, c: e.c });
+    });
+    board.sort(function (a, b) { return stepsOf(b.c) - stepsOf(a.c); });
+    board = board.slice(0, BOARD_MAX);
+    save('vch.board', boardString(board));
+  }
+  function renderBoard() {
+    var box = $('board'); if (!box) return;
+    var me = myName().toLowerCase();
+    var friends = board.filter(function (e) { return !me || e.n.toLowerCase() !== me; });
+    box.hidden = !friends.length;
+    if (!friends.length) return;
+    var mine = steps(), rows = friends.map(function (e) { return { n: e.n, s: stepsOf(e.c), me: false }; });
+    rows.push({ n: myName() || tr('You'), s: mine, me: true });
+    // Ties go to the friend, so you always see a step you can still take.
+    rows.sort(function (a, b) { return b.s - a.s || (a.me ? 1 : 0) - (b.me ? 1 : 0); });
+    var list = $('board-list'); list.textContent = '';
+    var myPos = 0;
+    rows.forEach(function (r, i) {
+      if (r.me) myPos = i;
+      var li = document.createElement('li');
+      li.className = 'board__row' + (r.me ? ' is-me' : '');
+      li.innerHTML = '<span class="board__pos"></span><span class="board__who"></span><span class="board__bar" aria-hidden="true"><i></i></span><b class="board__pct"></b>';
+      li.children[0].textContent = i + 1;
+      li.children[1].textContent = r.me ? (myName() ? tr('{name} (you)', { name: r.n }) : tr('You')) : r.n;
+      li.querySelector('i').style.transform = 'scaleX(' + pctOf(r.s) / 100 + ')';
+      li.children[3].textContent = pctOf(r.s) + '%';
+      list.appendChild(li);
+    });
+    // One concrete next step, never a loss screen.
+    var gap;
+    if (myPos === 0) {
+      var second = rows[1], lead = mine - second.s;
+      gap = lead === 0 ? tr('Level with {name}. One more step takes the lead.', { name: second.n })
+        : lead === 1 ? tr('You lead {name} by 1 step. Send the board and make them chase.', { name: second.n })
+        : tr('You lead {name} by {k} steps. Send the board and make them chase.', { name: second.n, k: lead });
+    } else {
+      var ahead = rows[myPos - 1], k = ahead.s - mine + 1;
+      gap = k === 1 ? tr('1 step to pass {name}.', { name: ahead.n }) : tr('{k} steps to pass {name}.', { k: k, name: ahead.n });
+      if (myPos === rows.length - 1 && mine === 0) gap = tr('Everyone starts somewhere. Tap one region to get on the board.');
+    }
+    $('board-gap').textContent = gap;
+    $('board-name').hidden = !!myName();
+  }
+  function bindBoard() {
+    if (!$('board')) return;
+    $('board-tag').addEventListener('input', function () {
+      settings.tag = $('board-tag').value.slice(0, 24); save('vch.tag', settings.tag);
+      if ($('tag')) $('tag').value = settings.tag;
+      if ($('alias-input')) $('alias-input').value = settings.tag;
+      renderBoard(); drawSoon();
+    });
+    $('board-send').addEventListener('click', function () {
+      if (!myName()) { $('board-name').hidden = false; $('board-tag').focus(); toast(tr('Add your name first, so friends see who you are.')); return; }
+      var rows = board.length + 1, pos = 1 + board.filter(function (e) { return stepsOf(e.c) > steps(); }).length;
+      var text = tr('Our Leonida board: I am #{p} of {n} with {pct}%. Your move:', { p: pos, n: rows, pct: score() }) + ' ' + challengeUrl();
+      shareOrCopy(text, function (m) { toast(m); }, tr('Board link copied. Paste it in the group chat.'));
+    });
+    $('board-clear').addEventListener('click', function () {
+      var undo = board.slice();
+      board = []; save('vch.board', ''); renderBoard();
+      toast(tr('Board cleared.'), tr('Undo'), function () { board = undo; save('vch.board', boardString(board)); renderBoard(); });
+    });
+  }
+
   function readChallenge() {
     var q = new URLSearchParams(location.search);
     var c = q.get('c');
@@ -429,6 +523,7 @@
     var t = 0; c.split('').forEach(function (d) { t += Number(d); });
     var n = (q.get('n') || '').replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, 24) || tr('Your friend');
     rival = { name: n, pct: pctOf(t), levels: c.split('').map(Number) };
+    mergeBoard([{ n: cleanName(n), c: c }].concat(parseBoard(q.get('b'))));
     $('challenge-name').textContent = n;
     $('vs-them').textContent = n;
     $('challenge-score').textContent = rival.pct + '%';
@@ -1411,6 +1506,8 @@
     var u = SITE + '?c=' + code();
     var t = (settings.tag || '').trim();
     if (t) u += '&n=' + encodeURIComponent(t);
+    var b = boardString(board);
+    if (b) u += '&b=' + encodeURIComponent(b);
     return u;
   }
   function shareText() {
@@ -1522,7 +1619,7 @@
   function start() {
     translatePage(); bindLang(); bindSaveLine();
     if (!$('map')) { bindCheats(); bindHundred(); bindChapterOne(); return; } // cheat, checklist and help pages
-    buildMap(); bindList(); bindPick(); bindBackup(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge(); bindRematch();
+    buildMap(); bindList(); bindPick(); bindBackup(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); bindBoard(); readChallenge(); bindRematch();
     if (steps() > 0) touched = true;
     buildBingo(); renderDaily(); renderTipped(); renderAlias(); render();
     document.addEventListener('visibilitychange', function () { if (!document.hidden) renderDaily(); });
