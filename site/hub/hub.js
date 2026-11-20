@@ -1386,13 +1386,9 @@
     var right = settings.platform + (settings.dayone ? '  ·  ' + (startDay() === 0 ? tr('Day one') : tr('Day {n}', { n: startDay() + 1 })) : '');
     ctx.textAlign = 'right'; ctx.fillStyle = T.ink2; ctx.font = '600 ' + Math.round(s * 0.66) + 'px "DM Sans", sans-serif';
     ctx.fillText(right, W - 64, y + s * 0.76);
+    // Players who tipped get a gold "Backed the hub" before the platform, on every card.
+    if (tipped) { var rw = ctx.measureText(right + '   ').width; ctx.fillStyle = T.done; ctx.fillText(tr('Backed the hub') + '  ·', W - 64 - rw, y + s * 0.76); }
     ctx.textAlign = 'left';
-  }
-  // A gold line for players who backed the hub, right under their name.
-  function backed(ctx, T, x, y, size) {
-    if (!tipped) return;
-    ctx.fillStyle = T.done; ctx.font = '600 ' + size + 'px "DM Sans", sans-serif';
-    ctx.fillText(tr('Backed the hub'), x, y);
   }
   // Every card ends the same way: a hairline, what to do in plain words, the address in the accent colour, and an
   // exit arrow in a ring. Feeds keep it 76 px from the bottom; stories keep it above Instagram's reply bar.
@@ -1509,10 +1505,10 @@
     topRow(ctx, T, W, 64, 44);
     lift(ctx, true);
     ctx.fillStyle = T.ink; var nm = cardName();
-    fitText(ctx, nm, 520, 46, '600 {s}px "DM Sans", sans-serif'); ctx.fillText(nm, 64, 214);
-    bigPct(ctx, T, p, 54, 480, 520, 300, p === 100 ? T.done : T.ink);
-    ctx.fillStyle = T.ink2; ctx.font = '600 40px "DM Sans", sans-serif'; ctx.fillText(tr('of Leonida seen'), 64, 546);
-    ctx.fillStyle = T.sun[0]; fitText(ctx, playstyle(), 500, 76, '400 {s}px Anton, sans-serif'); ctx.fillText(playstyle(), 62, 650);
+    fitText(ctx, nm, 520, 46, '600 {s}px "DM Sans", sans-serif'); ctx.fillText(nm, 64, 200);
+    bigPct(ctx, T, p, 54, 506, 520, 280, p === 100 ? T.done : T.ink);
+    ctx.fillStyle = T.ink2; ctx.font = '600 40px "DM Sans", sans-serif'; ctx.fillText(tr('of Leonida seen'), 64, 566);
+    ctx.fillStyle = T.sun[0]; fitText(ctx, playstyle(), 500, 76, '400 {s}px Anton, sans-serif'); ctx.fillText(playstyle(), 62, 664);
     lift(ctx, false);
     drawMap(ctx, T, 592, 606, 0.7, null);
     ctx.fillStyle = T.ink; wrapFit(ctx, verdict(), 64, 800, 470, 42, 32, 3, '600');
