@@ -103,6 +103,23 @@
         </div>
       </div>
 
+      <section class="board" id="board" aria-labelledby="board-title" hidden>
+        <div class="board__head">
+          <h2 class="board__title" id="board-title">Friends board</h2>
+          <p class="board__meta">Self-reported · up to 8 friends</p>
+        </div>
+        <p class="board__gap" id="board-gap" aria-live="polite"></p>
+        <ol class="board__list" id="board-list"></ol>
+        <div class="field board__name" id="board-name" hidden>
+          <label for="board-tag">Your name on the board</label>
+          <input id="board-tag" maxlength="24" autocomplete="nickname" spellcheck="false" placeholder="e.g. Rafi">
+        </div>
+        <div class="actions">
+          <button class="btn btn--primary" id="board-send" type="button"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg><span>Send the board</span></button>
+          <button class="btn btn--quiet" id="board-clear" type="button">Clear board</button>
+        </div>
+      </section>
+
       <details class="list-toggle">
         <summary>Edit regions as a list</summary>
       <ol class="regions-list" id="region-list" aria-label="Your regions">

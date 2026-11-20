@@ -170,3 +170,11 @@ friend's own score from their link.
   any 7 doesn't break it. Friend challenge has "Send it back".
 - Tips: what tips pay for, that they buy nothing, a "Stay safe" box (only these two ways, we never DM, never ask for a
   recovery phrase), and an honor-system "Already tipped?" thank-you line.
+
+### Friends board
+
+Under the score in the hero, shown once a challenge link has brought at least one friend. Up to 8 friends, labelled
+"Self-reported". Names and maps travel in challenge links (`b=name~code|…`) and merge on each device (`vch.board`):
+one entry per name, the higher score wins, so old links never lower anyone. Your own row is drawn live from your map.
+One line on top gives the next step ("2 steps to pass Mia"; ties go to the friend). "Send the board" shares the link;
+"Clear board" has Undo. A name is asked for before sending.
