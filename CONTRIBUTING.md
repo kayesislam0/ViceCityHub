@@ -5,8 +5,8 @@ Thanks for helping. Fixes and small improvements from anyone are welcome, and ev
 ## Before you start
 
 - **Small fix?** Just open a pull request.
-- **Bigger change** (a new tool, a new section, a redesign)? Open an [idea issue](https://vicecityhub.okenshop.com/idea) first, so you don't spend an evening on something that won't fit.
-- Looking for something to do? Try the [`good first issue`](https://vicecityhub.okenshop.com/good-first-issues) label.
+- **Bigger change** (a new tool, a new section, a redesign)? Open an [idea issue](https://vicecityhub0.vercel.app/idea) first, so you don't spend an evening on something that won't fit.
+- Looking for something to do? Try the [`good first issue`](https://vicecityhub0.vercel.app/good-first-issues) label.
 
 ## Set up
 

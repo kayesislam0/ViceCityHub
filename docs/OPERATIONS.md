@@ -6,7 +6,7 @@ For the owner. Contributors don't need any of this.
 
 1. Vercel → Add New → Project → import this repository.
 2. Framework preset: Other. Build and install commands: empty. Output directory: `site`. Root directory: the repository root.
-3. Settings → Domains → add `vicecityhub.okenshop.com`.
+3. Settings → Domains → add `vicecityhub0.vercel.app`.
 4. At your DNS provider keep (or add) the record Vercel shows, usually `CNAME vicecityhub → cname.vercel-dns.com`.
 
 ## Take it down

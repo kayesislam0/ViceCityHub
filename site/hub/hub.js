@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  var SITE = 'https://vicecityhub.okenshop.com/';
+  var SITE = 'https://vicecityhub0.vercel.app/';
   var LEVELS = ['Not yet', 'Passed through', 'Explored', 'Finished'];
 
   function ellipse(cx, cy, rx, ry) {
@@ -115,15 +115,39 @@
     return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
   function progressLink() { return location.origin + location.pathname + '#p=' + progressCode(); }
+
+  // ---- moving from the old address: each browser keeps progress per address, so the old one carries it over once ----
+  var OLD_HOSTS = { 'vicecityhub.okenshop.com': 1, 'www.vicecityhub.okenshop.com': 1 };
+  if (OLD_HOSTS[location.hostname]) {
+    var dest = SITE.replace(/\/$/, '') + location.pathname + location.search;
+    var hash = location.hash || '';
+    var data = progressData(); delete data['vch.moved'];
+    // A progress link (#p=) travels as it is. Otherwise local progress moves once, as #m=, keeping any section anchor.
+    if (!/^#p=/.test(hash) && load('vch.moved', '') !== '1' && Object.keys(data).length) {
+      var anchor = /^#[A-Za-z][\w-]*$/.test(hash) ? '.' + hash.slice(1) : '';
+      hash = '#m=' + encodeProgress(data) + anchor;
+    }
+    save('vch.moved', '1');
+    location.replace(dest + hash);
+    return;
+  }
+
   // Opening a progress link (#p=...) copies that progress into this browser, then tidies the address.
+  // A move from the old address (#m=...) only fills what this browser doesn't have yet, so it never undoes newer progress.
   var restored = (function () {
-    var m = /#p=([A-Za-z0-9_-]+)/.exec(location.hash || '');
+    var m = /^#([pm])=([A-Za-z0-9_-]+)(?:\.([A-Za-z][\w-]*))?$/.exec(location.hash || '');
     if (!m) return false;
     try {
-      var o = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, '+').replace(/_/g, '/')))));
-      Object.keys(o).forEach(function (k) { if (/^vch\.[a-zA-Z]+$/.test(k) && typeof o[k] === 'string' && o[k].length < 400) save(k, o[k]); });
-      history.replaceState(null, '', location.pathname + location.search);
-      return true;
+      var o = JSON.parse(decodeURIComponent(escape(atob(m[2].replace(/-/g, '+').replace(/_/g, '/')))));
+      var fillOnly = m[1] === 'm', n = 0;
+      Object.keys(o).forEach(function (k) {
+        if (!/^vch\.[a-zA-Z]+$/.test(k) || typeof o[k] !== 'string' || o[k].length >= 400) return;
+        if (fillOnly && load(k, null) !== null) return;
+        save(k, o[k]); n++;
+      });
+      history.replaceState(null, '', location.pathname + location.search + (m[3] ? '#' + m[3] : ''));
+      if (m[3]) document.addEventListener('DOMContentLoaded', function () { var el = document.getElementById(m[3]); if (el) el.scrollIntoView(); });
+      return fillOnly ? (n ? 'moved' : false) : true;
     } catch (e) { return false; }
   })();
 
@@ -1087,7 +1111,8 @@
           function () { toast(tr('Copy is blocked here. Bookmark this page after tapping again.')); location.hash = 'p=' + progressCode(); });
       });
     });
-    if (restored) toast(tr('Progress restored from your link.'));
+    if (restored === 'moved') toast(tr('Your map moved here from the old address. Bookmark this one.'));
+    else if (restored) toast(tr('Progress restored from your link.'));
   }
 
   // ---- the cards, drawn only near the screen or when exported ----
@@ -1237,8 +1262,8 @@
     fitText(ctx, big, tw, Math.round(sh * 0.4), '400 {s}px Anton, sans-serif');
     ctx.fillText(big, tx, y + sh * 0.52);
     ctx.fillStyle = '#E3F2E8';
-    fitText(ctx, 'vicecityhub.okenshop.com', tw, Math.round(sh * 0.22), '600 {s}px "DM Sans", sans-serif');
-    ctx.fillText('vicecityhub.okenshop.com', tx, y + sh * 0.8);
+    fitText(ctx, 'vicecityhub0.vercel.app', tw, Math.round(sh * 0.22), '600 {s}px "DM Sans", sans-serif');
+    ctx.fillText('vicecityhub0.vercel.app', tx, y + sh * 0.8);
   }
   function mapDare(p) {
     return p === 0 ? tr('How much have you seen?') : p === 100 ? tr('100%. Can you match it?') : tr('Can you beat {n}%?', { n: p });

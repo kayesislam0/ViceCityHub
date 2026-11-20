@@ -96,7 +96,7 @@ Every card reads in the same order:
    "4 of 6 regions still under the fog", "Finished every region of Leonida").
 6. **The map** with names. Seen regions in their own colour; unseen regions under fog (diagonal stripes).
 7. **The exit sign:** a green highway sign inside the card margins with an exit arrow: what to do, large ("Can you beat 50%?", "Get your Leonida Wrapped",
-   "Blend with me"), then vicecityhub.okenshop.com.
+   "Blend with me"), then vicecityhub0.vercel.app.
 
 Blend paints the map by who explored it: you in the accent, your friend in gold, regions you both explored in stripes
 of both. The site has no server, so cards never claim percentiles or "top X% of players"; the only comparison is the
