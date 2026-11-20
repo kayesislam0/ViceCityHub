@@ -33,8 +33,8 @@
 <meta name="twitter:image:alt" content="How much of Leonida have you seen? A Leonida map card and a Blend card for two friends">
 <link rel="preload" href="hub/fonts/anton-400.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="hub/fonts/dmsans-400.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="hub/hub.css?v=20261120e">
-<script src="hub/hub.js?v=20261120e" defer></script>
+<link rel="stylesheet" href="hub/hub.css?v=20261120f">
+<script src="hub/hub.js?v=20261120f" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
 {"@type":"WebSite","@id":"https://vicecityhub0.vercel.app/#site","name":"Vice City Hub","inLanguage":"en","url":"https://vicecityhub0.vercel.app/"},
@@ -213,10 +213,14 @@
           <legend>Plays on</legend>
           <div class="seg" id="platform">
             <label><input type="radio" name="platform" value="PS5" checked><span>PS5</span></label>
-            <label><input type="radio" name="platform" value="Xbox Series"><span>Xbox Series</span></label>
+            <label><input type="radio" name="platform" value="Xbox Series X|S"><span>Xbox Series X|S</span></label>
           </div>
         </fieldset>
         <label class="check"><input type="checkbox" id="dayone"><span>Show the day on my card</span></label>
+        <div class="field">
+          <label for="since">I started playing on</label>
+          <input type="date" id="since" min="2026-11-19">
+        </div>
       </details>
     </div>
     <div class="card-maker__preview">
