@@ -89,7 +89,7 @@
       ]
     },
     {
-      "source": "/hub/(hub\\.css|hub\\.js)",
+      "source": "/hub/(hub\\.css|hub\\.js|i18n\\.js)",
       "headers": [
         {
           "key": "Cache-Control",

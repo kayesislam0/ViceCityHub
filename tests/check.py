@@ -15,6 +15,17 @@ def static():
     for want in ['<link rel="canonical" href="https://vicecityhub0.vercel.app/">', BTC, BINANCE, '"@type":"FAQPage"', 'og:image']:
         if want not in html: out.append(f'index.html is missing {want}')
     if '<script>' in html: out.append('inline script (the security policy blocks it)')
+    # Every page loads the same version of the script and styles, so a browser never mixes an old file with a new one.
+    import re
+    stamps = set()
+    for f in ['index.html', '404.html', 'legal.html', 'gta-6-cheat-codes.html', 'gta-6-100-percent-checklist.html', 'gta-6-guide.html']:
+        t = (SITE / f).read_text(encoding='utf-8')
+        for m in re.findall(r'hub/hub\.(?:js|css)(\?v=[\w-]+)?"', t):
+            if not m: out.append(f'{f}: hub.js or hub.css has no ?v= version')
+            stamps.add(m)
+    js = (SITE / 'hub/hub.js').read_text(encoding='utf-8')
+    stamps.update(re.findall(r"i18n\.js(\?v=[\w-]+)'", js))
+    if len(stamps) != 1: out.append(f'pages load different versions of the hub files: {sorted(stamps)}')
     for f in ['robots.txt', 'sitemap.xml', '404.html', 'legal.html', 'gta-6-cheat-codes.html', 'gta-6-100-percent-checklist.html', 'gta-6-guide.html', 'site.webmanifest', 'hub/img/icon-192.png', 'hub/img/icon-512.png', 'hub/hub.js', 'hub/i18n.js', 'hub/hub.css', 'hub/img/og.png', 'hub/img/qr-btc.svg', 'hub/img/qr-binance.svg']:
         if not (SITE / f).is_file(): out.append(f'{f} is missing')
     return out

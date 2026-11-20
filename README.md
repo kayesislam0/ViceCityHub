@@ -121,3 +121,7 @@ included next to them.
 Vice City Hub is an independent fan project. It is not affiliated with or endorsed by Rockstar Games or Take-Two
 Interactive. Grand Theft Auto and GTA are their trademarks. No Rockstar artwork, logos or fonts are used, and the map is
 our own sketch, not to scale.
+
+## Releasing changes
+
+The pages load `hub.js`, `hub.css` and `i18n.js` with a `?v=` version (for example `hub.js?v=20261120b`), so browsers that keep old copies still load the new files. When you change any of those files, bump the version in every page and in the `i18n.js` line of `hub.js`. `tests/check.py` fails if the pages disagree.
