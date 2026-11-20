@@ -38,7 +38,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
 {"@type":"WebSite","@id":"https://vicecityhub0.vercel.app/#site","name":"Vice City Hub","inLanguage":"en","url":"https://vicecityhub0.vercel.app/"},
-{"@type":"WebApplication","name":"Leonida Map Tracker","url":"https://vicecityhub0.vercel.app/","applicationCategory":"GameApplication","operatingSystem":"Any","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Mark the GTA 6 regions you have explored and download a shareable map card.","inLanguage":["en","es","pt"],"featureList":["Leonida map tracker","Shareable map card","Crew challenge link","Daily dare","Leonida Wrapped recap card","Launch-night bingo"]},
+{"@type":"WebApplication","name":"Leonida Map Tracker","url":"https://vicecityhub0.vercel.app/","applicationCategory":"GameApplication","operatingSystem":"Any","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Mark the GTA 6 regions you have explored and download a shareable map card.","inLanguage":["en","es","pt"],"featureList":["Leonida map tracker","Shareable map card","Crew challenge link","Daily dare","Leonida Wrapped recap card","Leonida Bingo"]},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"How do I track my GTA 6 map progress?","acceptedAnswer":{"@type":"Answer","text":"Tap each region of Leonida on the map as you go: passed through, explored, or finished. Your percentage and rank update straight away and stay saved in your browser, so you can come back after every session."}},
 {"@type":"Question","name":"What is Leonida Wrapped?","acceptedAnswer":{"@type":"Answer","text":"A recap card of your whole launch run: how much of Leonida you saw, your final rank, your best daily dare streak and the regions you finished. Pick it under Card, then share or download it."}},
@@ -226,7 +226,7 @@
 
   <section class="tools" id="tools" aria-labelledby="tools-title">
     <h2 id="tools-title">Challenges for your crew</h2>
-    <p class="section-lede">A daily dare, a street-name generator and launch-night bingo.</p>
+    <p class="section-lede">A daily dare, a street-name generator and a monthly bingo card.</p>
 
     <div class="tools__grid">
       <article class="tool daily" aria-labelledby="daily-title">
@@ -284,26 +284,33 @@
       </article>
 
       <article class="tool bingo" aria-labelledby="bingo-title">
-        <h3 id="bingo-title">Launch-night bingo</h3>
-        <p class="tool__lede">Tap what happened to you on launch night. A full row, column or diagonal is a bingo.</p>
-        <fieldset class="field bingo__size">
-          <legend class="sr-only">Board size</legend>
-          <div class="seg">
-            <label><input type="radio" name="bingo-size" value="3" checked><span>3×3</span></label>
-            <label><input type="radio" name="bingo-size" value="5"><span>5×5</span></label>
-          </div>
-        </fieldset>
-        <div class="bingo__board" id="bingo" role="group" aria-label="Bingo board"></div>
-        <p class="bingo__score" id="bingo-score" aria-live="polite">2 more for a bingo</p>
+        <p class="tool__kicker"><span id="bingo-title">Leonida Bingo</span> <span class="tool__meta" id="bingo-month">November 2026</span></p>
+        <p class="tool__lede">One card a month, the same for everyone. Tick what you've done in Leonida. A full row, column or diagonal is a line.</p>
+        <div class="bingo__vs" id="bingo-vs" hidden>
+          <p class="bingo__vs-head" id="bingo-vs-head"></p>
+          <p class="bingo__vs-text" id="bingo-vs-text"></p>
+        </div>
+        <div class="bingo__board" id="bingo" role="group" aria-label="Bingo card"></div>
+        <p class="bingo__said" id="bingo-said" aria-live="polite"></p>
+        <div class="bingo__result">
+          <p class="bingo__label" id="bingo-label">Fresh card</p>
+          <p class="bingo__why" id="bingo-why">Tick 3 squares to get your label</p>
+          <p class="bingo__score" id="bingo-score" aria-live="polite">0/24 · 0 lines</p>
+        </div>
         <div class="actions">
-          <button class="btn btn--primary" id="bingo-copy" type="button">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg><span>Share my board</span>
+          <button class="btn btn--primary" id="bingo-share" type="button">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg><span>Share my card</span>
           </button>
-          <button class="btn btn--quiet" id="bingo-new" type="button">
-            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 14h6v6h-6zM14 4h6v6h-6zM4 14h6v6H4z"/></svg><span>New board</span>
+          <button class="btn btn--quiet" id="bingo-copy" type="button">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg><span>Copy as text</span>
           </button>
         </div>
         <p class="status" id="bingo-status" role="status"></p>
+        <p class="bingo__new">A new card on the 1st of every month. Your old cards stay below.</p>
+        <details class="daily__past" id="bingo-past-wrap" hidden>
+          <summary>Past cards</summary>
+          <ol class="past" id="bingo-past"></ol>
+        </details>
       </article>
     </div>
   </section>

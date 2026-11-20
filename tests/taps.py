@@ -1,5 +1,5 @@
 """Tap and untap every control on the hub, as a phone (real touch taps), a tablet and a desktop (mouse clicks):
-map regions, the level picker and undo, the region list, card options, street name, bingo (both sizes), the daily dare
+map regions, the level picker and undo, the region list, card options, street name, bingo, the daily dare
 and its history, the tip toggle, copy and share buttons, backup files, clearing the map, and the cheat code ticks.
 Every control is scrolled to the middle of the screen and checked for anything covering it before it is tapped.
 
@@ -145,14 +145,8 @@ async def run(b, w, mob):
             await tap_el(pg, mob, f'#bingo .cell:nth-child({i + 1})')
             got = await pg.evaluate(f"document.querySelectorAll('#bingo .cell')[{i}].getAttribute('aria-pressed')")
             check(got == ('true' if want else 'false'), f'{tag} bingo square {i} -> {got}, wanted {want}')
-    marks = await pg.evaluate("localStorage.getItem('vch.bingoMarks')")
-    check(marks is not None and marks.replace('0', '') in ('1',), f'{tag} bingo marks after on/off: {marks}')
-    # New board, then undo.
-    seed = await pg.evaluate("localStorage.getItem('vch.bingoSeed')")
-    await tap_el(pg, mob, '#bingo-new')
-    check(await pg.evaluate("localStorage.getItem('vch.bingoSeed')") != seed, f'{tag} new board')
-    await tap_el(pg, mob, '#bingo-status .linklike')
-    check(await pg.evaluate("localStorage.getItem('vch.bingoSeed')") == seed, f'{tag} bingo undo')
+    cards = await pg.evaluate("localStorage.getItem('vch.bingoCards') || ''")
+    check(cards.endswith(':AAAA'), f'{tag} bingo card after on/off: {cards}')
 
     # Daily dare: done, undo, done.
     for sel, want in [('#daily-done', True), ('#daily-undo', False), ('#daily-done', True)]:
@@ -193,22 +187,12 @@ async def run(b, w, mob):
     await tap_el(pg, mob, '#alias-roll'); await tap_el(pg, mob, '#alias-prev')
     check(await pg.evaluate("document.getElementById('alias-name').textContent") == n1, f'{tag} street name Previous')
 
-    # Bingo 5 x 5: every square on and off, and the 3 x 3 ticks survive the size switch.
-    await tap_el(pg, mob, '#bingo .cell:nth-child(1)')
-    small = await pg.evaluate("localStorage.getItem('vch.bingoMarks')")
-    await tap_el(pg, mob, 'input[name="bingo-size"][value="5"]')
-    check(await pg.evaluate("document.querySelectorAll('#bingo .cell').length") == 25, f'{tag} 5x5 board has 25 squares')
-    for i in range(25):
-        free = i == 12
-        for want in ([True, False] if not free else [True]):
-            await tap_el(pg, mob, f'#bingo .cell:nth-child({i + 1})')
-            got = await pg.evaluate(f"document.querySelectorAll('#bingo .cell')[{i}].getAttribute('aria-pressed')")
-            check(got == ('true' if want else 'false'), f'{tag} 5x5 square {i} -> {got}')
+    # Bingo: a diagonal is a line, the ticks are saved, and the card has 25 squares.
+    check(await pg.evaluate("document.querySelectorAll('#bingo .cell').length") == 25, f'{tag} bingo card has 25 squares')
     for i in [0, 6, 18, 24]: await tap_el(pg, mob, f'#bingo .cell:nth-child({i + 1})')
-    check('1 bingo' in await pg.evaluate("document.getElementById('bingo-score').textContent"), f'{tag} 5x5 diagonal bingo not detected')
-    await tap_el(pg, mob, 'input[name="bingo-size"][value="3"]')
-    check(await pg.evaluate("localStorage.getItem('vch.bingoMarks')") == small, f'{tag} 3x3 ticks lost after switching size')
-    check(await pg.evaluate("document.querySelectorAll('#bingo .cell[aria-pressed=\"true\"]').length") == small.count('1'), f'{tag} 3x3 board shows the wrong ticks')
+    check(await pg.evaluate("document.querySelectorAll('#bingo .cell.is-line').length") == 5, f'{tag} bingo diagonal line not detected')
+    check(not (await pg.evaluate("localStorage.getItem('vch.bingoCards') || ''")).endswith(':AAAA'), f'{tag} bingo ticks not saved')
+    for i in [0, 6, 18, 24]: await tap_el(pg, mob, f'#bingo .cell:nth-child({i + 1})')
 
     # Copy image (desktop only).
     if not mob:

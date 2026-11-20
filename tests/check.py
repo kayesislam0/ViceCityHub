@@ -157,30 +157,41 @@ async def browser():
         await pg.fill('#cheat-q', 'ammo')
         if await pg.evaluate("[...document.querySelectorAll('#cheat-rows tr')].filter(r => !r.hidden).length") != 3: out.append('cheats: search for "ammo" should show 3')
         await ctx.close()
-        # Bingo squares: every word of every prompt fits whole in its square, and nothing spills, on small phones, at
-        # both sizes, in every language. Measured after the webfont has loaded, so a slow machine measures the real font.
+        # Bingo squares: every visible word fits whole in its square and nothing spills, on small phones, for every monthly
+        # card, in every language. Measured after the webfont has loaded, so a slow machine measures the real font.
         WORDS = """async () => { await document.fonts.ready;
           const cells = [...document.querySelectorAll('#bingo .cell')], c = cells[0], st = getComputedStyle(c);
           const room = c.clientWidth - parseFloat(st.paddingLeft) - parseFloat(st.paddingRight);
           const cv = document.createElement('canvas').getContext('2d'); cv.font = st.fontWeight + ' ' + st.fontSize + ' ' + st.fontFamily;
           const tight = [];
-          cells.forEach(x => x.textContent.split(/\\s+/).forEach(w => { if (cv.measureText(w).width > room - 2) tight.push(w); }));
-          const spill = cells.filter(x => x.scrollWidth > x.clientWidth + 1 || x.scrollHeight > x.clientHeight + 1).map(x => x.textContent);
+          cells.forEach(x => x.innerText.split(/\\s+/).forEach(w => { if (w && cv.measureText(w).width > room - 2) tight.push(w); }));
+          const spill = cells.filter(x => x.scrollWidth > x.clientWidth + 1 || x.scrollHeight > x.clientHeight + 1).map(x => x.innerText);
           return { n: cells.length, tight, spill }; }"""
         for lang in ['en', 'es', 'pt']:
-            for w, size in [(320, '3'), (320, '5'), (360, '5'), (390, '5')]:
+            for w in [320, 360, 390]:
                 ctx = await b.new_context(viewport={'width': w, 'height': 780}, has_touch=True, is_mobile=True)
-                pg = await ctx.new_page()
-                for seed in ['11', '222', '3333']:
-                    await pg.goto(base + '?lang=' + lang)
-                    await pg.evaluate(f"localStorage.setItem('vch.bingoSize', '{size}'); localStorage.setItem('vch.bingoSeed', '{seed}')")
-                    await pg.reload(); await pg.wait_for_timeout(100)
+                for month in [(2026, 10, 20), (2026, 11, 5)]:
+                    await ctx.clear_cookies()
+                    pg = await ctx.new_page()
+                    await pg.add_init_script("(() => { const R = Date, t = new R(%d, %d, %d, 12).getTime(); window.Date = class extends R { constructor(...a) { super(...(a.length ? a : [t])); } static now() { return t; } }; })()" % month)
+                    await pg.goto(base + '?lang=' + lang); await pg.wait_for_timeout(100)
                     r = await pg.evaluate(WORDS)
-                    want = 9 if (size == '3' or w < 360) else 25
-                    if r['n'] != want: out.append(f'{lang} {w}px: bingo should show {want} squares, shows {r["n"]}')
-                    out += [f'{lang} {w}px bingo: "{x}" spills out of its square' for x in r['spill']]
-                    out += [f'{lang} {w}px bingo: the word "{x}" does not fit whole in its square' for x in sorted(set(r['tight']))]
+                    if r['n'] != 25: out.append(f'{lang} {w}px: bingo should show 25 squares, shows {r["n"]}')
+                    out += [f'{lang} {w}px {month[1] + 1}/{month[0]} bingo: "{x}" spills out of its square' for x in r['spill']]
+                    out += [f'{lang} {w}px {month[1] + 1}/{month[0]} bingo: the word "{x}" does not fit whole in its square' for x in sorted(set(r['tight']))]
+                    await pg.close()
                 await ctx.close()
+        # Bingo compare link: a friend's card shows on yours, and a broken link is ignored.
+        cb = await b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True)
+        pb = await cb.new_page(); eb = []; pb.on('pageerror', lambda e: eb.append(str(e)))
+        await pb.add_init_script("(() => { const R = Date, t = new R(2026, 10, 20, 12).getTime(); window.Date = class extends R { constructor(...a) { super(...(a.length ? a : [t])); } static now() { return t; } }; })()")
+        await pb.goto(base + '#b=s1.____~Mia'); await pb.wait_for_timeout(300)
+        if await pb.is_hidden('#bingo-vs'): out.append('bingo: a friend link did not show their card')
+        if await pb.evaluate("document.querySelectorAll('#bingo .cell.is-theirs').length") != 24: out.append('bingo: a full friend card should mark 24 squares')
+        await pb.goto(base + '#b=s9.%%~x'); await pb.reload(); await pb.wait_for_timeout(300)
+        if not await pb.is_hidden('#bingo-vs'): out.append('bingo: a broken link showed a friend card')
+        out += [f'bingo link: script error {e}' for e in eb]
+        await cb.close()
         # Spanish and Portuguese run longer than English: no script errors, no sideways scrolling, text translated.
         for lang, word in [('es', 'Herramientas'), ('pt', 'Ferramentas')]:
             ctx = await b.new_context(viewport={'width': 320, 'height': 780}, has_touch=True, is_mobile=True)
