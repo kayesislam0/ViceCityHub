@@ -1965,7 +1965,7 @@
   function boot() {
     if (LANG === 'en' || window.VCH_I18N) { start(); return; }
     var sc = document.createElement('script');
-    sc.src = '/hub/i18n.js?v=20261120c'; sc.onload = start; sc.onerror = start;
+    sc.src = '/hub/i18n.js?v=20261120d'; sc.onload = start; sc.onerror = start;
     document.head.appendChild(sc);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
