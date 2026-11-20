@@ -181,7 +181,7 @@ async def browser():
         for lang in ['en', 'es', 'pt']:
             for w in [320, 360, 390]:
                 ctx = await b.new_context(viewport={'width': w, 'height': 780}, has_touch=True, is_mobile=True)
-                for month in [(2026, 10, 20), (2026, 11, 5), (2027, 0, 10)]:
+                for month in [(2026, 10, 20), (2026, 11, 5), (2027, 0, 10), (2027, 2, 10)]:
                     await ctx.clear_cookies()
                     pg = await ctx.new_page()
                     await pg.add_init_script("(() => { const R = Date, t = new R(%d, %d, %d, 12).getTime(); window.Date = class extends R { constructor(...a) { super(...(a.length ? a : [t])); } static now() { return t; } }; })()" % month)
@@ -192,13 +192,79 @@ async def browser():
                     out += [f'{lang} {w}px {month[1] + 1}/{month[0]} bingo: the word "{x}" does not fit whole in its square' for x in sorted(set(r['tight']))]
                     await pg.close()
                 await ctx.close()
-        # A player who starts on 20 November: their first day is day 1 (Wrapped says "since 20 Nov"), not launch day.
+        # The start date is optional: nothing is filled in for a new player, and the day stamp follows the date they pick.
+        def clock(y, m, d): return "(() => { const R = Date, t = new R(%d, %d, %d, 12).getTime(); window.Date = class extends R { constructor(...a) { super(...(a.length ? a : [t])); } static now() { return t; } }; })()" % (y, m, d)
         cs = await b.new_context(viewport={'width': 390, 'height': 844})
         ps = await cs.new_page()
-        await ps.add_init_script("(() => { const R = Date, t = new R(2026, 10, 20, 12).getTime(); window.Date = class extends R { constructor(...a) { super(...(a.length ? a : [t])); } static now() { return t; } }; })()")
+        await ps.add_init_script(clock(2026, 10, 25))
         await ps.goto(base); await ps.wait_for_timeout(300)
-        if await ps.evaluate("localStorage.getItem('vch.since')") != '1': out.append('first day: a player starting on 20 Nov should start on day 1')
+        if await ps.evaluate("localStorage.getItem('vch.since')") is not None: out.append('start date: it was filled in without the player picking one')
+        if await ps.input_value('#since') != '': out.append('start date: the field is not empty for a new player')
+        if 'Day 7' not in await ps.evaluate("document.getElementById('dayone').parentNode.textContent"): out.append('start date: with none picked, the day stamp should be today (Day 7)')
+        await ps.evaluate("document.querySelectorAll('details').forEach(d => d.open = true)")
+        await ps.fill('#since', '2026-11-20'); await ps.dispatch_event('#since', 'change')
+        if await ps.evaluate("localStorage.getItem('vch.since')") != '1': out.append('start date: picking 20 Nov should save day 1')
+        if 'Day 2' not in await ps.evaluate("document.getElementById('dayone').parentNode.textContent"): out.append('start date: the day stamp should follow the picked date (Day 2)')
+        if await ps.get_attribute('#since', 'min') != '2026-11-19': out.append('start date: the earliest date should be launch day, 19 Nov 2026')
+        await ps.fill('#since', '2026-11-19'); await ps.dispatch_event('#since', 'change')
+        if await ps.evaluate("localStorage.getItem('vch.since')") != '0': out.append('start date: 19 Nov 2026 should be day 0')
+        if 'Day one' not in await ps.evaluate("document.getElementById('dayone').parentNode.textContent"): out.append('start date: 19 Nov 2026 should show Day one')
+        await ps.fill('#since', '2026-11-01'); await ps.dispatch_event('#since', 'change')
+        if await ps.evaluate("localStorage.getItem('vch.since')") != '0': out.append('start date: a date before launch should become launch day')
+        await ps.fill('#since', ''); await ps.dispatch_event('#since', 'change')
+        if await ps.evaluate("localStorage.getItem('vch.since')") is not None: out.append('start date: clearing the field did not remove it')
         await cs.close()
+        # Progress links never quietly replace newer progress; a link that does replace it offers Undo.
+        cp = await b.new_context(viewport={'width': 390, 'height': 844})
+        pp = await cp.new_page(); ep = []; pp.on('pageerror', lambda e: ep.append(str(e)))
+        enc = "(o => btoa(JSON.stringify(o)).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, ''))"
+        await pp.goto(base); await pp.wait_for_timeout(200)
+        await pp.evaluate("localStorage.setItem('vch.map', '333333'); localStorage.setItem('vch.updated', String(Date.now()))")
+        old = await pp.evaluate(enc + "({'vch.map': '100000', 'vch.updated': String(Date.now() - 864e5)})")
+        await pp.goto('about:blank'); await pp.goto(base + '#p=' + old); await pp.wait_for_timeout(300)
+        if await pp.evaluate("localStorage.getItem('vch.map')") != '333333': out.append('progress link: an older link replaced newer progress')
+        async def act(what):
+            if not await pp.is_visible('#toast .toast__act'): out.append(f'progress link: no {what} button'); return False
+            await pp.click('#toast .toast__act'); await pp.wait_for_timeout(400); return True
+        if await act('"Use it anyway"') and await pp.evaluate("localStorage.getItem('vch.map')") != '100000': out.append('progress link: "Use it anyway" did not load the older link')
+        if await act('Undo') and await pp.evaluate("localStorage.getItem('vch.map')") != '333333': out.append('progress link: Undo did not bring the earlier progress back')
+        legacy = await pp.evaluate(enc + "({'vch.map': '200000'})")
+        await pp.evaluate("localStorage.removeItem('vch.updated')")
+        await pp.goto('about:blank'); await pp.goto(base + '#p=' + legacy); await pp.wait_for_timeout(300)
+        if await pp.evaluate("localStorage.getItem('vch.map')") != '200000': out.append('progress link: an old-style link did not restore over old-style progress')
+        if not await pp.is_visible('#toast .toast__act'): out.append('progress link: replacing progress offered no Undo')
+        # A backup from a player who never touched the map still loads.
+        import json, tempfile, os
+        bk = os.path.join(tempfile.mkdtemp(), 'backup.json')
+        open(bk, 'w').write(json.dumps({'app': 'vicecityhub', 'v': 1, 'data': {'vch.daily': '0,1', 'vch.cheats': 'x'}}))
+        await pp.set_input_files('#backup-file', bk); await pp.wait_for_timeout(600)
+        if await pp.evaluate("localStorage.getItem('vch.daily')") != '0,1': out.append('backup: a backup without a map was refused')
+        # Cheat counter: a saved id that is not on the page does not count.
+        await pp.evaluate("localStorage.setItem('vch.cheats', 'gone,gone,also-gone')")
+        await pp.goto(base + 'gta-6-cheat-codes.html'); await pp.wait_for_timeout(200)
+        if await pp.evaluate("document.getElementById('cheat-count').textContent") != '0 of 61 unlocked': out.append('cheats: unknown saved ids were counted')
+        out += [f'progress link: script error {e}' for e in ep]
+        await cp.close()
+        # Friends board: an unnamed challenge link does not add a row; the text you send gives the position on screen.
+        cf = await b.new_context(viewport={'width': 1200, 'height': 844}, permissions=['clipboard-read', 'clipboard-write'])
+        pf = await cf.new_page()
+        await pf.goto(base + '?c=111000'); await pf.wait_for_timeout(200)
+        await pf.goto(base + '?c=333000'); await pf.wait_for_timeout(200)
+        if await pf.evaluate("localStorage.getItem('vch.board')"): out.append('board: an unnamed challenge link added a row')
+        await pf.evaluate("localStorage.setItem('vch.tag', 'Sam'); localStorage.setItem('vch.map', '100000'); localStorage.setItem('vch.board', 'Mia~100000|Sam~333333')")
+        await pf.goto(base); await pf.wait_for_timeout(200)
+        await pf.click('#board-send'); await pf.wait_for_timeout(200)
+        sent = await pf.evaluate('navigator.clipboard.readText()')
+        if 'I am #2 of 2' not in sent: out.append(f'board: the sent position does not match the board: {sent[:60]!r}')
+        await cf.close()
+        # Bingo keeps a fresh card each month after the written ones run out.
+        cb2 = await b.new_context(viewport={'width': 390, 'height': 844})
+        pb2 = await cb2.new_page(); await pb2.add_init_script(clock(2027, 2, 10))
+        await pb2.goto(base); await pb2.wait_for_timeout(200)
+        if 'March 2027' not in await pb2.evaluate("document.getElementById('bingo-month').textContent"): out.append('bingo: March 2027 has no card of its own')
+        await pb2.evaluate("document.querySelector('#bingo .cell').click()")
+        if 's5:' not in (await pb2.evaluate("localStorage.getItem('vch.bingoCards')") or ''): out.append('bingo: the March 2027 card is not saved as its own card')
+        await cb2.close()
         # Bingo compare link: a friend's card shows on yours, and a broken link is ignored.
         cb = await b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True, is_mobile=True)
         pb = await cb.new_page(); eb = []; pb.on('pageerror', lambda e: eb.append(str(e)))
