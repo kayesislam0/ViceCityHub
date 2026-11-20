@@ -440,6 +440,14 @@
       $('card').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
+  // Rematch: send your updated score back, so the challenge keeps going.
+  function bindRematch() {
+    var b = $('rematch'); if (!b) return;
+    b.addEventListener('click', function () {
+      var text = tr('Your move, {name}. I am on {n}% now.', { name: rival.name, n: score() }) + ' ' + challengeUrl();
+      shareOrCopy(text, function (m) { toast(m); }, tr('Link copied. Send it back to {name}.', { name: rival.name }));
+    });
+  }
   function updateChallenge() {
     if (!rival) return;
     var mine = score();
@@ -457,6 +465,7 @@
       ? tr('Ahead in {a} of 6 regions. Catch up in {list}', { a: ahead, list: behind.slice(0, 3).join(', ') + (behind.length > 3 ? '…' : '') })
       : tr('Level with or ahead of {name} in every region', { name: rival.name });
     $('vs-regions').textContent = line; $('vs-regions').hidden = !line;
+    $('rematch').hidden = mine === 0;
   }
 
   // ---- card settings ----
@@ -725,10 +734,20 @@
     return Math.max(0, Math.round((n - LAUNCH) / 864e5));
   }
   var dailyDone = (function () { var v = load('vch.daily', ''); return v ? v.split(',').map(Number).filter(function (x) { return x >= 0; }) : []; })();
+  // The streak counts back from today (or yesterday, if today isn't done yet). A shield covers one missed day in any
+  // 7 days, automatically, so one busy evening never wipes a run. shieldUsed tells the page whether it kicked in.
+  var shieldUsed = false;
   function streak() {
-    var d = dayIndex(), s = 0;
+    var d = dayIndex(), s = 0, shieldAt = null;
+    shieldUsed = false;
     if (dailyDone.indexOf(d) < 0) d--;
-    while (d >= 0 && dailyDone.indexOf(d) >= 0) { s++; d--; }
+    while (d >= 0) {
+      if (dailyDone.indexOf(d) >= 0) { s++; d--; continue; }
+      // A single missed day, with a done day before it, and no other shield in the 7 days after it.
+      var single = d - 1 >= 0 && dailyDone.indexOf(d - 1) >= 0;
+      if (single && (shieldAt === null || shieldAt - d >= 7)) { if (shieldAt === null && dayIndex() - d < 7) shieldUsed = true; shieldAt = d; d--; continue; }
+      break;
+    }
     return s;
   }
   function untilMidnight() {
@@ -744,7 +763,8 @@
     $('daily-streak').textContent = st === 1 ? tr('day streak') : tr('days streak');
     var best = Math.max(longestStreak(), st);
     $('daily-total').textContent = (dailyDone.length === 1 ? tr('1 dare done in total') : tr('{n} dares done in total', { n: dailyDone.length })) +
-      ' · ' + (best === 1 ? tr('best 1 day') : tr('best {n} days', { n: best }));
+      ' · ' + (best === 1 ? tr('best 1 day') : tr('best {n} days', { n: best })) +
+      ' · ' + (shieldUsed ? tr('shield used this week') : tr('1 missed day a week is covered'));
     // Past dares: every day since launch, newest first, done or missed. Read only, so the streak stays honest.
     var pastList = $('daily-past'), wrap = $('daily-past-wrap');
     wrap.hidden = d === 0; pastList.textContent = '';
@@ -808,10 +828,10 @@
   function renderTipped() {
     var b = $('tipped-btn');
     b.setAttribute('aria-pressed', String(tipped));
-    b.querySelector('span').textContent = tipped ? tr('Tip sent') : tr('I sent a tip');
+    b.querySelector('span').textContent = tipped ? tr('Tip sent') : tr('Already tipped?');
     $('tipped-msg').textContent = tipped
       ? tr('Your card now shows a gold Backed the hub line. Tap again to remove it.')
-      : tr('Sent a tip? Tap here to add a gold "Backed the hub" line to your card.');
+      : tr('Honor system: we can\'t see who tips. Tap to add a gold "Backed the hub" line to your card as a thank-you.');
   }
   function bindTipped() {
     $('tipped-btn').addEventListener('click', function () {
@@ -822,6 +842,64 @@
   }
 
   // ---- cheat codes: search, type filter, "known code only", and a personal unlocked checklist ----
+  // ---- 100% checklist: one count per category, saved as "key:n,key:n" (short enough for backups and progress links) ----
+  function bindHundred() {
+    var box = $('hundred'); if (!box) return;
+    var saved = {};
+    load('vch.hundred', '').split(',').forEach(function (p) { var kv = p.split(':'); if (kv[1]) saved[kv[0]] = Number(kv[1]) || 0; });
+    var inputs = Array.prototype.slice.call(box.querySelectorAll('[data-h]'));
+    function val(inp) { return inp.type === 'checkbox' ? (inp.checked ? 1 : 0) : Math.max(0, Math.min(Number(inp.max) || 999, Math.floor(Number(inp.value) || 0))); }
+    function paint() {
+      var done = 0, out = [];
+      inputs.forEach(function (inp) {
+        var li = inp.closest('.hitem'), req = Number(li.dataset.req), v = val(inp), ok = v >= req;
+        if (inp.type !== 'checkbox' && String(v) !== inp.value) inp.value = v;
+        li.classList.toggle('is-done', ok);
+        li.querySelector('.hbar i').style.transform = 'scaleX(' + Math.min(1, v / req) + ')';
+        if (ok) done++;
+        if (v) out.push(inp.dataset.h + ':' + v);
+      });
+      box.querySelectorAll('.hgroup').forEach(function (g) {
+        var items = g.querySelectorAll('.hitem'), d = g.querySelectorAll('.hitem.is-done').length;
+        g.querySelector('[data-group-count]').textContent = tr('{d} of {n}', { d: d, n: items.length });
+      });
+      $('h-done').textContent = done; $('h-total').textContent = inputs.length;
+      box.classList.toggle('only-left', $('h-left').checked);
+      save('vch.hundred', out.join(','));
+      return done;
+    }
+    inputs.forEach(function (inp) {
+      if (inp.type === 'checkbox') inp.checked = !!saved[inp.dataset.h]; else inp.value = saved[inp.dataset.h] || 0;
+      var before;
+      inp.addEventListener('focus', function () { before = paint(); });
+      inp.addEventListener(inp.type === 'checkbox' ? 'change' : 'input', function () {
+        var was = box.querySelectorAll('.hitem.is-done').length, now = paint();
+        if (now > was) { buzz(); toast(now === inputs.length ? tr('Every category done. That is 100%.') : tr('Category done: {n} of {t}', { n: now, t: inputs.length })); }
+      });
+    });
+    box.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-inc],[data-dec]'); if (!b) return;
+      var k = b.dataset.inc || b.dataset.dec, inp = box.querySelector('input[data-h="' + k + '"]');
+      inp.value = val(inp) + (b.dataset.inc ? 1 : -1);
+      inp.dispatchEvent(new Event('input'));
+    });
+    $('h-left').addEventListener('change', paint);
+    paint();
+  }
+  // ---- Chapter 1 checklist on the help page ----
+  function bindChapterOne() {
+    var boxes = document.querySelectorAll('[data-c1]'); if (!boxes.length) return;
+    var got = load('vch.chapterOne', '').split(',').filter(Boolean);
+    boxes.forEach(function (b) {
+      b.checked = got.indexOf(b.dataset.c1) >= 0;
+      b.addEventListener('change', function () {
+        got = Array.prototype.filter.call(boxes, function (x) { return x.checked; }).map(function (x) { return x.dataset.c1; });
+        save('vch.chapterOne', got.join(','));
+        if (got.length === boxes.length) toast(tr('All set. Chapter 1 can end.'));
+      });
+    });
+  }
+
   function bindCheats() {
     var rows = Array.prototype.slice.call(document.querySelectorAll('#cheat-rows tr'));
     if (!rows.length) return;
@@ -1000,6 +1078,18 @@
     ctx.fillStyle = '#FFFFFF'; ctx.fillText(text, x + size * 0.45, y + h / 2 + size * 0.36);
     return w;
   }
+  // A playstyle from where you went most, not how much: everyone gets a label they'd post.
+  var STYLES = { kalaga: 'Mountain goat', gellhorn: 'Dockside drifter', ambrosia: 'Small-town legend', vice: 'City slicker', grass: 'Swamp rat', keys: 'Beach bum' };
+  function playstyle(lv) {
+    lv = lv || levels;
+    var n = lv.reduce(function (a, b) { return a + b; }, 0), max = Math.max.apply(null, lv);
+    if (!n) return tr('Still in the menu');
+    if (n === 18) return tr('Owns the map');
+    var top = []; lv.forEach(function (l, i) { if (l === max) top.push(i); });
+    if (Math.min.apply(null, lv) >= 2) return tr('Road tripper');
+    if (top.length > 2) return tr('Explorer');
+    return tr(STYLES[REGIONS[top[0]].id]);
+  }
   function cardName() { var tag = (settings.tag || '').trim() || tr('Player one'); return settings.useAlias ? alias().name : tag; }
 
   // The hub's mark, from the same paths as the page logo (32 x 32), drawn at size s.
@@ -1099,7 +1189,7 @@
     bigPct(ctx, T, p, 50, 586, 480, 340);
     ctx.fillStyle = T.ink2; ctx.font = '600 40px "DM Sans", sans-serif';
     ctx.fillText(tr('of Leonida seen'), 64, 642);
-    rankSign(ctx, T, rank(n), 64, 676, 48);
+    rankSign(ctx, T, playstyle(), 64, 676, 48);
     ctx.fillStyle = T.ink;
     wrapFit(ctx, verdict(), 64, 808, 460, 36, 28, 2, '600');
     drawMap(ctx, T, 548, 172, 0.82, null, { labels: true });
@@ -1114,7 +1204,7 @@
     bigPct(ctx, T, p, 46, 760, 952, 440);
     ctx.fillStyle = T.ink2; ctx.font = '600 52px "DM Sans", sans-serif';
     ctx.fillText(tr('of Leonida seen'), 64, 834);
-    rankSign(ctx, T, rank(n), 64, 876, 58);
+    rankSign(ctx, T, playstyle(), 64, 876, 58);
     ctx.fillStyle = T.ink;
     wrapFit(ctx, verdict(), 64, 1036, 952, 44, 34, 2, '600');
     var sc = 0.82; drawMap(ctx, T, (W - 600 * sc) / 2, 1080, sc, null, { labels: true });
@@ -1202,7 +1292,7 @@
     var aw = ctx.measureText(a + ' ').width;
     ctx.fillStyle = T.accent; ctx.fillText(tr('Wrapped'), x + aw, y);
   }
-  function wrappedSub() { return cardName() + '  ·  ' + tr('19 Nov – 10 Dec 2026'); }
+  function wrappedSub() { return cardName() + '  ·  ' + tr('since 19 Nov 2026'); }
   function drawWrappedSquare(ctx, T, W, H) {
     var n = steps(), p = pctOf(n);
     topRow(ctx, T, W, 56, 48);
@@ -1328,7 +1418,7 @@
       return tr('Our Leonida Blend with {name}: {c}% covered together, {m}% match. Blend with me:', { name: rival.name, c: b.cover, m: b.match });
     }
     if (settings.kind === 'wrapped') return tr('My Leonida Wrapped: {n}% seen, {rank}. Get yours:', { n: score(), rank: rank() });
-    return tr('{n}% of Leonida seen. Rank: {rank}. Can you beat me?', { n: score(), rank: rank() });
+    return tr('{n}% of Leonida seen. I play like a {style}. Can you beat me?', { n: score(), style: playstyle() });
   }
 
   function download(blob) {
@@ -1430,8 +1520,8 @@
   // ---- start ----
   function start() {
     translatePage(); bindLang(); bindSaveLine();
-    if (!$('map')) { bindCheats(); return; } // the cheat code page has only the cheat list
-    buildMap(); bindList(); bindPick(); bindBackup(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge();
+    if (!$('map')) { bindCheats(); bindHundred(); bindChapterOne(); return; } // cheat, checklist and help pages
+    buildMap(); bindList(); bindPick(); bindBackup(); bindSettings(); bindAlias(); bindBingo(); bindDaily(); bindTipped(); bindCheats(); bindActions(); readChallenge(); bindRematch();
     if (steps() > 0) touched = true;
     buildBingo(); renderDaily(); renderTipped(); renderAlias(); render();
     document.addEventListener('visibilitychange', function () { if (!document.hidden) renderDaily(); });

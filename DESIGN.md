@@ -158,3 +158,15 @@ friend's own score from their link.
   long words may hyphenate below 380px. `tests/check.py` checks every language at 320px.
 - `tests/taps.py` taps and untaps every control as a phone, a tablet and a desktop (over 1,000 checks) and runs on
   every pull request, in English and in Spanish from a challenge link.
+
+### 100% checklist, launch help, tips
+
+- `/gta-6-100-percent-checklist`: 31 categories with required counts from GTABase (checked 20 Nov 2026), a −/+ stepper
+  and a number field per category, a progress bar that turns gold when the requirement is met, "Show only what's left",
+  and a sticky total. Saved as `vch.hundred` ("key:n,…"), so backups and progress links carry it.
+- `/gta-6-guide`: This week in Leonida (dated, updated weekly), the Chapter 1 checklist (`vch.chapterOne`), saving,
+  known issues and community settings tips, money by chapter, getting around. Every section names its source.
+- Card sign shows a playstyle (where you went most), not a rank. Daily streak has an automatic shield: one missed day in
+  any 7 doesn't break it. Friend challenge has "Send it back".
+- Tips: what tips pay for, that they buy nothing, a "Stay safe" box (only these two ways, we never DM, never ask for a
+  recovery phrase), and an honor-system "Already tipped?" thank-you line.
