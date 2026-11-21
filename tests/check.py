@@ -232,6 +232,17 @@ async def browser():
         open(bk, 'w').write(json.dumps({'app': 'vicecityhub', 'v': 1, 'data': {'vch.daily': '0,1', 'vch.cheats': 'x'}}))
         await pp.set_input_files('#backup-file', bk); await pp.wait_for_timeout(600)
         if await pp.evaluate("localStorage.getItem('vch.daily')") != '0,1': out.append('backup: a backup without a map was refused')
+        # Long values survive a backup and a progress link: every cheat ticked and a year of daily dares.
+        cheats = ','.join(await pp.evaluate("fetch('gta-6-cheat-codes.html').then(r => r.text()).then(t => [...new DOMParser().parseFromString(t, 'text/html').querySelectorAll('#cheat-rows tr[data-id]')].map(r => r.dataset.id))"))
+        year = ','.join(str(i) for i in range(365))
+        open(bk, 'w').write(json.dumps({'app': 'vicecityhub', 'v': 1, 'data': {'vch.map': '111111', 'vch.daily': year, 'vch.cheats': cheats}}))
+        await pp.set_input_files('#backup-file', bk); await pp.wait_for_timeout(600)
+        if await pp.evaluate("localStorage.getItem('vch.cheats')") != cheats: out.append('backup: a long cheat list was dropped')
+        if await pp.evaluate("localStorage.getItem('vch.daily')") != year: out.append('backup: a long daily-dare history was dropped')
+        await pp.evaluate("localStorage.clear()")
+        longlink = await pp.evaluate(enc + "(" + json.dumps({'vch.map': '222222', 'vch.daily': year, 'vch.cheats': cheats}) + ")")
+        await pp.goto('about:blank'); await pp.goto(base + '#p=' + longlink); await pp.wait_for_timeout(300)
+        if await pp.evaluate("localStorage.getItem('vch.cheats')") != cheats: out.append('progress link: a long cheat list was dropped')
         # Cheat counter: a saved id that is not on the page does not count.
         await pp.evaluate("localStorage.setItem('vch.cheats', 'gone,gone,also-gone')")
         await pp.goto(base + 'gta-6-cheat-codes.html'); await pp.wait_for_timeout(200)
