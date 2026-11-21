@@ -128,7 +128,9 @@
   }
   function progressCode() { return encodeProgress(progressData()); }
   function progressLink() { return location.origin + location.pathname + '#p=' + progressCode(); }
-  function validKey(k, v) { return /^vch\.[a-zA-Z]+$/.test(k) && typeof v === 'string' && v.length < 400; }
+  // A value as long as a real player's can get: every cheat ticked is ~900 characters, a year of daily dares ~1,400.
+  // (It was 400, which quietly dropped cheats and long dare histories from progress links, backups and the move.)
+  function validKey(k, v) { return /^vch\.[a-zA-Z]+$/.test(k) && typeof v === 'string' && v.length <= 6000; }
   function hasProgress() { return Object.keys(progressData()).some(function (k) { return !META[k]; }); }
 
   // ---- moving from the old address: each browser keeps progress per address, so the old one carries it over once ----
@@ -1140,10 +1142,22 @@
     var pad = function (n) { return ('0' + n).slice(-2); };
     var stamp = function (d) { return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + '00Z'; };
     var end = new Date(t.getTime() + 15 * 6e4);
+    // Calendar text escapes \ ; , and newlines, and no line runs past 75 bytes (RFC 5545), so strict calendar apps
+    // (Outlook, some Android ones) accept the file in every language.
+    var esc = function (x) { return String(x).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n'); };
+    var fold = function (line) {
+      var out = '', n = 0;
+      Array.from(line).forEach(function (ch) {
+        var b = unescape(encodeURIComponent(ch)).length;
+        if (n + b > 74) { out += '\r\n '; n = 1; }
+        out += ch; n += b;
+      });
+      return out;
+    };
     var ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Vice City Hub//Daily dare//EN', 'BEGIN:VEVENT',
       'UID:dare-' + stamp(t) + '@vicecityhub0.vercel.app', 'DTSTAMP:' + stamp(new Date()), 'DTSTART:' + stamp(t), 'DTEND:' + stamp(end),
-      'SUMMARY:' + tr('Leonida daily dare'), 'DESCRIPTION:' + tr('Today\'s dare:') + ' ' + SITE + '#tools', 'URL:' + SITE + '#tools',
-      'BEGIN:VALARM', 'TRIGGER:PT0M', 'ACTION:DISPLAY', 'DESCRIPTION:' + tr('Leonida daily dare'), 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+      'SUMMARY:' + esc(tr('Leonida daily dare')), 'DESCRIPTION:' + esc(tr('Today\'s dare:') + ' ' + SITE + '#tools'), 'URL:' + SITE + '#tools',
+      'BEGIN:VALARM', 'TRIGGER:PT0M', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(tr('Leonida daily dare')), 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].map(fold).join('\r\n') + '\r\n';
     downloadAs(new Blob([ics], { type: 'text/calendar' }), 'leonida-daily-dare.ics');
     var st = $('daily-status'); st.textContent = ''; setTimeout(function () { st.textContent = tr('Calendar event downloaded. Open it to add the reminder.'); }, 30);
   }
@@ -1310,7 +1324,7 @@
     load_.addEventListener('click', function () { file.value = ''; file.click(); });
     file.addEventListener('change', function () {
       var f = file.files && file.files[0]; if (!f) return;
-      if (f.size > 20000) { toast(tr('That file is not a Vice City Hub backup.')); return; }
+      if (f.size > 200000) { toast(tr('That file is not a Vice City Hub backup.')); return; }
       var r = new FileReader();
       r.onload = function () {
         try {
@@ -2083,7 +2097,7 @@
   function boot() {
     if (LANG === 'en' || window.VCH_I18N) { start(); return; }
     var sc = document.createElement('script');
-    sc.src = '/hub/i18n.js?v=20261121d'; sc.onload = start; sc.onerror = start;
+    sc.src = '/hub/i18n.js?v=20261121e'; sc.onload = start; sc.onerror = start;
     document.head.appendChild(sc);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
