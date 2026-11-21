@@ -971,7 +971,7 @@
     var W = 1080, H = 1350, T = THEMES[settings.theme] || THEMES.night, L = bingoLabel(bingo.marks, bingo.squares);
     cv.width = W * 2; cv.height = H * 2;
     var ctx = cv.getContext('2d');
-    ctx.setTransform(2, 0, 0, 2, 0, 0);
+    ctx.setTransform(2, 0, 0, 2, 0, 0); crisp(ctx);
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     scene(ctx, T, W, H, 470, 880, 140, true);
     topRow(ctx, T, W, 64, 44);
@@ -1419,6 +1419,7 @@
     var ctx = cv.getContext('2d');
     ctx.setTransform(k, 0, 0, k, 0, 0);
     ctx.imageSmoothingQuality = 'high';
+    crisp(ctx);
     var bg = ctx.createLinearGradient(0, 0, 0, H);
     bg.addColorStop(0, T.bg); bg.addColorStop(1, T.bg2);
     ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
@@ -1431,16 +1432,24 @@
 
   // The % fills the width it is given: the number at full size, the % sign at half. At 100% it turns gold.
   function bigPct(ctx, T, p, x, y, maxW, maxS, color) {
-    var s = maxS, num = String(p);
-    var fit = function () { ctx.font = '400 ' + s + 'px Anton, sans-serif'; var a = ctx.measureText(num).width; ctx.font = '400 ' + Math.round(s / 2) + 'px Anton, sans-serif'; return a + 8 + ctx.measureText('%').width; };
+    var s = maxS, num = String(p), gap = function () { return Math.round(s * 0.03); };
+    var fit = function () { ctx.font = '400 ' + s + 'px Anton, sans-serif'; var a = ctx.measureText(num).width; ctx.font = '400 ' + Math.round(s / 2) + 'px Anton, sans-serif'; return a + gap() + ctx.measureText('%').width; };
     while (fit() > maxW && s > 60) s -= 6;
     ctx.save();
     ctx.fillStyle = color || (p === 100 ? '#FFC35A' : T.accent);
-    ctx.font = '400 ' + s + 'px Anton, sans-serif'; ctx.fillText(num, x, y);
-    var nw = ctx.measureText(num).width;
-    ctx.font = '400 ' + Math.round(s / 2) + 'px Anton, sans-serif'; ctx.fillText('%', x + nw + 8, y);
+    ctx.font = '400 ' + s + 'px Anton, sans-serif';
+    var m = ctx.measureText(num); x = inkX(m, x); ctx.fillText(num, x, y);
+    ctx.font = '400 ' + Math.round(s / 2) + 'px Anton, sans-serif'; ctx.fillText('%', x + m.width + gap(), y);
     ctx.restore();
+    return y - (m.actualBoundingBoxAscent || s * 0.86);
   }
+  // Large Anton starts a few pixels right of its x (the glyph's side bearing); this puts the ink itself on the
+  // column edge, so the number and the playstyle line up with the DM Sans text above and below them.
+  function inkX(m, x) { return m.actualBoundingBoxLeft === undefined ? x : x + m.actualBoundingBoxLeft; }
+  function inkText(ctx, text, x, y) { ctx.fillText(text, inkX(ctx.measureText(text), x), y); }
+  // Kerning on and exact glyph outlines, wherever the browser supports them.
+  function crisp(ctx) { try { ctx.fontKerning = 'normal'; ctx.textRendering = 'geometricPrecision'; } catch (e) { /* older browser */ } }
+
   // A playstyle from where you went most, not how much: everyone gets a label they'd post.
   var STYLES = { kalaga: 'Mountain goat', gellhorn: 'Dockside drifter', ambrosia: 'Small-town legend', vice: 'City slicker', grass: 'Swamp rat', keys: 'Beach bum' };
   function playstyle(lv) {
@@ -1584,19 +1593,20 @@
     return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')';
   }
   // Text over the sky gets a soft dark shadow so it holds on every part of the gradient.
-  function lift(ctx, on) { if (on) { ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 4; } else { ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; } }
+  function lift(ctx, on) { if (on) { ctx.shadowColor = 'rgba(0,0,0,.30)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 2; } else { ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; } }
 
   // Map cards: a poster. The number in the sky, the playstyle under it, Leonida rising from the sea in front of the sun.
   // "GTA 6" in the sky, right-aligned above the sun: the game's name as plain words in the hub's own display type
   // (never a copy of Rockstar's logo), with a short sun-gold rule under it like a road sign's edge.
-  function gameMark(ctx, T, right, y, size) {
+  function gameMark(ctx, T, right, top, size) {
     ctx.font = '400 ' + size + 'px Anton, sans-serif';
+    var m = ctx.measureText('GTA 6'), y = Math.round(top + (m.actualBoundingBoxAscent || size * 0.86));
     ctx.textAlign = 'right'; ctx.fillStyle = T.ink;
-    ctx.fillText('GTA 6', right, y);
-    var w = ctx.measureText('GTA 6').width;
+    ctx.fillText('GTA 6', right + (m.actualBoundingBoxRight !== undefined ? m.actualBoundingBoxRight - m.width : 0), y);
     ctx.textAlign = 'left';
     lift(ctx, false);
-    ctx.fillStyle = T.sun[0]; ctx.fillRect(right - w, y + size * 0.14, w, Math.max(4, size * 0.05));
+    var w = m.actualBoundingBoxRight !== undefined ? m.actualBoundingBoxLeft + m.actualBoundingBoxRight : m.width;
+    ctx.fillStyle = T.sun[0]; ctx.fillRect(right - w, y + Math.round(size * 0.12), w, Math.max(4, Math.round(size * 0.045)));
     lift(ctx, true);
   }
   function drawSquare(ctx, T, W, H) {
@@ -1606,10 +1616,10 @@
     lift(ctx, true);
     ctx.fillStyle = T.ink; var nm = cardName();
     fitText(ctx, nm, 520, 46, '600 {s}px "DM Sans", sans-serif'); ctx.fillText(nm, 64, 200);
-    bigPct(ctx, T, p, 54, 506, 520, 280, p === 100 ? T.done : T.ink);
-    gameMark(ctx, T, W - 64, 330, 128);
+    var top = bigPct(ctx, T, p, 64, 506, 520, 280, p === 100 ? T.done : T.ink);
+    gameMark(ctx, T, W - 64, top, 120);
     ctx.fillStyle = T.ink2; ctx.font = '600 40px "DM Sans", sans-serif'; ctx.fillText(tr('of Leonida seen'), 64, 566);
-    ctx.fillStyle = T.sun[0]; fitText(ctx, playstyle(), 500, 76, '400 {s}px Anton, sans-serif'); ctx.fillText(playstyle(), 62, 664);
+    ctx.fillStyle = T.sun[0]; fitText(ctx, playstyle(), 500, 76, '400 {s}px Anton, sans-serif'); inkText(ctx, playstyle(), 64, 664);
     lift(ctx, false);
     drawMap(ctx, T, 592, 606, 0.7, null);
     ctx.fillStyle = T.ink; wrapFit(ctx, verdict(), 64, 800, 470, 42, 32, 3, '600');
@@ -1623,10 +1633,10 @@
     lift(ctx, true);
     ctx.fillStyle = T.ink; var nm = cardName();
     fitText(ctx, nm, W - 128, 54, '600 {s}px "DM Sans", sans-serif'); ctx.fillText(nm, 64, 408);
-    bigPct(ctx, T, p, 52, 770, 560, 340, p === 100 ? T.done : T.ink);
-    gameMark(ctx, T, W - 64, 640, 140);
+    var top = bigPct(ctx, T, p, 64, 770, 560, 340, p === 100 ? T.done : T.ink);
+    gameMark(ctx, T, W - 64, top, 132);
     ctx.fillStyle = T.ink2; ctx.font = '600 48px "DM Sans", sans-serif'; ctx.fillText(tr('of Leonida seen'), 64, 840);
-    ctx.fillStyle = T.sun[0]; fitText(ctx, playstyle(), 500, 88, '400 {s}px Anton, sans-serif'); ctx.fillText(playstyle(), 62, 950);
+    ctx.fillStyle = T.sun[0]; fitText(ctx, playstyle(), 500, 88, '400 {s}px Anton, sans-serif'); inkText(ctx, playstyle(), 64, 950);
     lift(ctx, false);
     drawMap(ctx, T, 572, 880, 0.74, null, { labels: true });
     ctx.fillStyle = T.ink; wrapFit(ctx, verdict(), 64, 1100, 460, 46, 34, 3, '600');
@@ -1789,9 +1799,9 @@
     lift(ctx, true);
     wrappedHead(ctx, T, 60, 236, 100);
     ctx.fillStyle = T.ink2; fitText(ctx, wrappedSub(), W - 128, 36, '600 {s}px "DM Sans", sans-serif'); ctx.fillText(wrappedSub(), 64, 296);
-    bigPct(ctx, T, p, 54, 530, 520, 220, p === 100 ? T.done : T.ink);
+    bigPct(ctx, T, p, 64, 530, 520, 220, p === 100 ? T.done : T.ink);
     ctx.fillStyle = T.ink2; ctx.font = '600 38px "DM Sans", sans-serif'; ctx.fillText(tr('of Leonida seen'), 64, 592);
-    ctx.fillStyle = T.sun[0]; fitText(ctx, rank(n), 500, 70, '400 {s}px Anton, sans-serif'); ctx.fillText(rank(n), 62, 680);
+    ctx.fillStyle = T.sun[0]; fitText(ctx, rank(n), 500, 70, '400 {s}px Anton, sans-serif'); inkText(ctx, rank(n), 64, 680);
     lift(ctx, false);
     drawMap(ctx, T, 592, 606, 0.7, null);
     wrappedGrid(ctx, T, st, 64, 812, 250, 160, 72, 30);
@@ -1805,9 +1815,9 @@
     lift(ctx, true);
     wrappedHead(ctx, T, 58, 450, 128);
     ctx.fillStyle = T.ink2; fitText(ctx, wrappedSub(), W - 128, 42, '600 {s}px "DM Sans", sans-serif'); ctx.fillText(wrappedSub(), 64, 522);
-    bigPct(ctx, T, p, 54, 800, 520, 280, p === 100 ? T.done : T.ink);
+    bigPct(ctx, T, p, 64, 800, 520, 280, p === 100 ? T.done : T.ink);
     ctx.fillStyle = T.ink2; ctx.font = '600 46px "DM Sans", sans-serif'; ctx.fillText(tr('of Leonida seen'), 64, 870);
-    ctx.fillStyle = T.sun[0]; fitText(ctx, rank(n), 500, 84, '400 {s}px Anton, sans-serif'); ctx.fillText(rank(n), 62, 966);
+    ctx.fillStyle = T.sun[0]; fitText(ctx, rank(n), 500, 84, '400 {s}px Anton, sans-serif'); inkText(ctx, rank(n), 64, 966);
     lift(ctx, false);
     drawMap(ctx, T, 572, 880, 0.74, null);
     wrappedGrid(ctx, T, st, 64, 1120, 250, 168, 84, 34);
@@ -1848,10 +1858,10 @@
     topRow(ctx, T, W, 64, 44);
     lift(ctx, true);
     blendHead(ctx, T, W, 236, 100, 40);
-    bigPct(ctx, T, st.cover, 54, 520, 500, 200, T.ink);
+    bigPct(ctx, T, st.cover, 64, 520, 500, 200, T.ink);
     ctx.fillStyle = T.ink2; fitText(ctx, tr('of Leonida covered together'), 500, 36, '600 {s}px "DM Sans", sans-serif');
     ctx.fillText(tr('of Leonida covered together'), 64, 580);
-    ctx.fillStyle = T.sun[0]; fitText(ctx, blendCarry(st), 500, 68, '400 {s}px Anton, sans-serif'); ctx.fillText(blendCarry(st), 62, 672);
+    ctx.fillStyle = T.sun[0]; fitText(ctx, blendCarry(st), 500, 68, '400 {s}px Anton, sans-serif'); inkText(ctx, blendCarry(st), 64, 672);
     lift(ctx, false);
     drawMap(ctx, T, 592, 606, 0.7, { mine: levels, theirs: rival.levels });
     statCell(ctx, T, [st.match + '%', tr('map match')], 64, 820, 480, 72, 32);
@@ -1865,10 +1875,10 @@
     topRow(ctx, T, W, 250, 52);
     lift(ctx, true);
     blendHead(ctx, T, W, 450, 128, 48);
-    bigPct(ctx, T, st.cover, 54, 800, 520, 280, T.ink);
+    bigPct(ctx, T, st.cover, 64, 800, 520, 280, T.ink);
     ctx.fillStyle = T.ink2; fitText(ctx, tr('of Leonida covered together'), 520, 44, '600 {s}px "DM Sans", sans-serif');
     ctx.fillText(tr('of Leonida covered together'), 64, 866);
-    ctx.fillStyle = T.sun[0]; fitText(ctx, blendCarry(st), 500, 84, '400 {s}px Anton, sans-serif'); ctx.fillText(blendCarry(st), 62, 962);
+    ctx.fillStyle = T.sun[0]; fitText(ctx, blendCarry(st), 500, 84, '400 {s}px Anton, sans-serif'); inkText(ctx, blendCarry(st), 64, 962);
     lift(ctx, false);
     drawMap(ctx, T, 572, 880, 0.74, { mine: levels, theirs: rival.levels }, { labels: true });
     statCell(ctx, T, [st.match + '%', tr('map match')], 64, 1110, 480, 84, 36);
@@ -2073,7 +2083,7 @@
   function boot() {
     if (LANG === 'en' || window.VCH_I18N) { start(); return; }
     var sc = document.createElement('script');
-    sc.src = '/hub/i18n.js?v=20261121a'; sc.onload = start; sc.onerror = start;
+    sc.src = '/hub/i18n.js?v=20261121d'; sc.onload = start; sc.onerror = start;
     document.head.appendChild(sc);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
