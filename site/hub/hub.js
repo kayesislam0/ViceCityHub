@@ -1587,6 +1587,18 @@
   function lift(ctx, on) { if (on) { ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 4; } else { ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; } }
 
   // Map cards: a poster. The number in the sky, the playstyle under it, Leonida rising from the sea in front of the sun.
+  // "GTA 6" in the sky, right-aligned above the sun: the game's name as plain words in the hub's own display type
+  // (never a copy of Rockstar's logo), with a short sun-gold rule under it like a road sign's edge.
+  function gameMark(ctx, T, right, y, size) {
+    ctx.font = '400 ' + size + 'px Anton, sans-serif';
+    ctx.textAlign = 'right'; ctx.fillStyle = T.ink;
+    ctx.fillText('GTA 6', right, y);
+    var w = ctx.measureText('GTA 6').width;
+    ctx.textAlign = 'left';
+    lift(ctx, false);
+    ctx.fillStyle = T.sun[0]; ctx.fillRect(right - w, y + size * 0.14, w, Math.max(4, size * 0.05));
+    lift(ctx, true);
+  }
   function drawSquare(ctx, T, W, H) {
     var n = steps(), p = pctOf(n);
     scene(ctx, T, W, H, 700, 806, 196);
@@ -1595,6 +1607,7 @@
     ctx.fillStyle = T.ink; var nm = cardName();
     fitText(ctx, nm, 520, 46, '600 {s}px "DM Sans", sans-serif'); ctx.fillText(nm, 64, 200);
     bigPct(ctx, T, p, 54, 506, 520, 280, p === 100 ? T.done : T.ink);
+    gameMark(ctx, T, W - 64, 330, 128);
     ctx.fillStyle = T.ink2; ctx.font = '600 40px "DM Sans", sans-serif'; ctx.fillText(tr('of Leonida seen'), 64, 566);
     ctx.fillStyle = T.sun[0]; fitText(ctx, playstyle(), 500, 76, '400 {s}px Anton, sans-serif'); ctx.fillText(playstyle(), 62, 664);
     lift(ctx, false);
@@ -1610,7 +1623,8 @@
     lift(ctx, true);
     ctx.fillStyle = T.ink; var nm = cardName();
     fitText(ctx, nm, W - 128, 54, '600 {s}px "DM Sans", sans-serif'); ctx.fillText(nm, 64, 408);
-    bigPct(ctx, T, p, 52, 770, W - 128, 340, p === 100 ? T.done : T.ink);
+    bigPct(ctx, T, p, 52, 770, 560, 340, p === 100 ? T.done : T.ink);
+    gameMark(ctx, T, W - 64, 640, 140);
     ctx.fillStyle = T.ink2; ctx.font = '600 48px "DM Sans", sans-serif'; ctx.fillText(tr('of Leonida seen'), 64, 840);
     ctx.fillStyle = T.sun[0]; fitText(ctx, playstyle(), 500, 88, '400 {s}px Anton, sans-serif'); ctx.fillText(playstyle(), 62, 950);
     lift(ctx, false);
@@ -2059,7 +2073,7 @@
   function boot() {
     if (LANG === 'en' || window.VCH_I18N) { start(); return; }
     var sc = document.createElement('script');
-    sc.src = '/hub/i18n.js?v=20261120i'; sc.onload = start; sc.onerror = start;
+    sc.src = '/hub/i18n.js?v=20261121a'; sc.onload = start; sc.onerror = start;
     document.head.appendChild(sc);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
